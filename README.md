@@ -1,10 +1,10 @@
 # Yii2 AdminLTE 3
 
-![License](https://img.shields.io/packagist/l/cinghie/yii2-admin-lte.svg)
-![Latest Stable Version](https://img.shields.io/github/release/cinghie/yii2-admin-lte.svg)
-![Latest Release Date](https://img.shields.io/github/release-date/cinghie/yii2-admin-lte.svg)
-![Latest Commit](https://img.shields.io/github/last-commit/cinghie/yii2-admin-lte.svg)
-[![Total Downloads](https://img.shields.io/packagist/dt/cinghie/yii2-admin-lte.svg)](https://packagist.org/packages/cinghie/yii2-admin-lte)
+![License](https://img.shields.io/packagist/l/cinghie/yii2-adminlte3.svg)
+![Latest Stable Version](https://img.shields.io/github/release/cinghie/yii2-adminlte3.svg)
+![Latest Release Date](https://img.shields.io/github/release-date/cinghie/yii2-adminlte3.svg)
+![Latest Commit](https://img.shields.io/github/last-commit/cinghie/yii2-adminlte3.svg)
+[![Total Downloads](https://img.shields.io/packagist/dt/cinghie/yii2-adminlte3.svg)](https://packagist.org/packages/cinghie/yii2-adminlte3)
 
 Asset Bundle to include AdminLTE 3 on your Yii 2 project: https://github.com/ColorlibHQ/AdminLTE/tree/v3/
 
