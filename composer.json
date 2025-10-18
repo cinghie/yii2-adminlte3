@@ -21,7 +21,7 @@
     ],
     "require": {
         "yiisoft/yii2": "~2.0.14",
-        "almasaeed2010/adminlte": "^3.0.0"
+        "almasaeed2010/adminlte": "^3.0.0",
         "cinghie/yii2-fontawesome": "^1.4.4",
         "cinghie/yii2-iconpicker": "@dev",
         "cinghie/yii2-ionicons": "@dev",
@@ -29,7 +29,7 @@
     },
     "autoload": {
         "psr-4": {
-            "cinghie\\adminlte\\": ""
+            "cinghie\\adminlte3\\": ""
         }
     }
 }
