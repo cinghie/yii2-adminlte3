@@ -1,0 +1,35 @@
+{
+    "name": "cinghie/yii2-adminlte3",
+    "description": "Asset Bundle to include AdminLTE 3 on your Yii 2 project",
+    "keywords": [
+        "yii2", 
+        "yii2 template", 
+        "yii2 AdminLTE", 
+        "AdminLTE 3", 
+        "adminlte 3", 
+        "admin lte 3"
+    ],
+    "homepage": "https://github.com/cinghie/yii2-adminlte3",
+    "type": "yii2-extension",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Gogodigital.it",
+            "email": "info@gogodigital.it",
+            "homepage": "http://www.gogodigital.it/"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "~2.0.14",
+        "almasaeed2010/adminlte": "^3.0.0"
+        "cinghie/yii2-fontawesome": "^1.4.4",
+        "cinghie/yii2-iconpicker": "@dev",
+        "cinghie/yii2-ionicons": "@dev",
+        "cinghie/yii2-traits": "@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "cinghie\\adminlte\\": ""
+        }
+    }
+}
