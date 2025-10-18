@@ -31,7 +31,7 @@ Configuration
 Add in the view for normal CSS and JS
 
 ```
-use cinghie\adminlte\AdminLTEAsset;
+use cinghie\adminlte3\AdminLTEAsset;
 
 AdminLTEAsset::register($this);
 ```
@@ -39,7 +39,7 @@ AdminLTEAsset::register($this);
 Add in the view for minify CSS and JS
 
 ```
-use cinghie\adminlte\AdminLTEMinifyAsset;
+use cinghie\adminlte3\AdminLTEMinifyAsset;
 
 AdminLTEMinifyAsset::register($this);
 ```
