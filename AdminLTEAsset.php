@@ -14,7 +14,8 @@ namespace cinghie\adminlte3;
 
 use cinghie\fontawesome\FontAwesomeAsset;
 use cinghie\ionicons\IoniconsAsset;
-use yii\base\Exception;
+use yii\bootstrap4\BootstrapAsset;
+use yii\bootstrap4\BootstrapPluginAsset;
 use yii\web\AssetBundle;
 use yii\web\YiiAsset;
 
@@ -47,31 +48,9 @@ class AdminLTEAsset extends AssetBundle
      */
 	public $depends = [
 		YiiAsset::class,
+        BootstrapAsset::class,
+        BootstrapPluginAsset::class,
 		FontAwesomeAsset::class,
 		IoniconsAsset::class
     ];
-
-	/**
-	 * @var string|bool Choose skin color, eg. `'skin-blue'` or set `false` to disable skin loading
-	 *
-	 * @see https://almsaeedstudio.com/themes/AdminLTE/documentation/index.html#layout
-	 */
-	public $skin = '_all-skins';
-
-	/**
-	 * Append skin color file if specified
-	 *
-	 * @throws Exception
-	 */
-	public function init()
-	{
-		if ($this->skin) {
-			if (('_all-skins' !== $this->skin) && (!str_starts_with($this->skin, 'skin-'))) {
-				throw new Exception('Invalid skin specified');
-			}
-			$this->css[] = sprintf('dist/css/skins/%s.min.css', $this->skin);
-		}
-
-		parent::init();
-	}
 }

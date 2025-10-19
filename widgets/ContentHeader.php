@@ -4,16 +4,16 @@
  * @copyright Copyright &copy; Gogodigital Srls
  * @company Gogodigital Srls - Wide ICT Solutions
  * @website http://www.gogodigital.it
- * @github https://github.com/cinghie/yii2-admin-lte
+ * @github https://github.com/cinghie/yii2-adminlte3
  * @license GNU GENERAL PUBLIC LICENSE VERSION 3
  * @package yii2-AdminLTE
- * @version 1.5.5
+ * @version 0.1.0
  */
 
 namespace cinghie\adminlte3\widgets;
 
 use Exception;
-use yii\bootstrap\Widget;
+use yii\bootstrap4\Widget;
 use yii\helpers\Html;
 use yii\widgets\Breadcrumbs;
 
