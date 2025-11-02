@@ -14,7 +14,6 @@ namespace cinghie\adminlte3\widgets;
 
 use Yii;
 use yii\bootstrap4\Widget;
-use yii\helpers\Html;
 
 /**
  * Class NavbarLogo
@@ -24,46 +23,23 @@ class NavbarLogo extends Widget
     /**
      * @var string
      */
-    public $logo_lg;
-
-    /**
-     * @var string
-     */
-    public $logo_mini;
-
-    /**
-     * @var string
-     */
     public $logo_url;
-
-	/**
-	 * @inheritdoc
-	 */
-    public function init()
-    {
-        if ($this->logo_lg === null) {
-            $this->logo_lg = '<b>Admin</b>LTE';
-        }
-
-        if ($this->logo_mini === null) {
-            $this->logo_mini = '<b>A</b>LT';
-        }
-
-        if ($this->logo_url === null) {
-            $this->logo_url = Yii::$app->homeUrl;
-        }
-
-        parent::init();
-    }
 
 	/**
 	 * @return string
 	 */
 	public function run()
     {
-        return '<a class="logo" href="'.Html::encode($this->logo_url).'">
-                  <span class="logo-mini">'.$this->logo_mini.'</span>
-                  <span class="logo-lg">'.$this->logo_lg.'</span>
-                </a>';
+        $html = '<a href="'.Yii::$app->homeUrl.'" class="brand-link text-center">';
+
+        if($this->logo_url) {
+            $html .= '<img src="'.$this->logo_url.'" alt="'.Yii::$app->name.' Logo" class="brand-image img-circle elevation-3" style="opacity: .8">';
+        }
+
+        $html .= '<span class="brand-text font-weight-light">';
+        $html .= Yii::$app->name;
+        $html .= '</span></a>';
+
+        return $html;
     }
 }

@@ -12,8 +12,8 @@
 
 namespace cinghie\adminlte3\widgets;
 
+use Yii;
 use yii\bootstrap4\Widget;
-use yii\helpers\Html;
 
 /**
  * Class SidebarSearch
@@ -42,15 +42,15 @@ class SidebarSearch extends Widget
 	 */
 	public function run()
     {
-        return '<form class="sidebar-form" method="get" action="#">
-            <div class="input-group">
-                <input type="text" placeholder="'.Html::encode($this->placeholder).'..." class="form-control" name="q">
-              <span class="input-group-btn">
-                <button class="btn btn-flat" id="search-btn" name="search" type="submit">
-                    <i class="fa fa-search"></i>
-                </button>
-              </span>
-            </div>
-        </form>';
+        return '<div class="form-inline">
+        <div class="input-group" data-widget="sidebar-search">
+          <input class="form-control form-control-sidebar" type="search" placeholder="'.$this->placeholder.'" aria-label="'.$this->placeholder.'">
+          <div class="input-group-append">
+            <button class="btn btn-sidebar">
+              <i class="fas fa-search fa-fw"></i>
+            </button>
+          </div>
+        </div>
+      </div>';
     }
 }

@@ -50,7 +50,7 @@ class NavbarButton extends Widget
         }
 
         if ($this->option === null) {
-            $this->option = [];
+            $this->option = ['class' => 'nav-link'];
         }
 
         if ($this->target === null) {
@@ -71,6 +71,6 @@ class NavbarButton extends Widget
 	 */
 	public function run()
     {
-        return '<li>'.Html::a($this->title, Html::encode($this->url), $this->option).'</li>';
+        return '<li class="nav-item">'.Html::a($this->title, Html::encode($this->url), $this->option).'</li>';
     }
 }

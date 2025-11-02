@@ -24,8 +24,6 @@ class SidebarToggle extends Widget
 	 */
 	public function run()
     {
-        return '<a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
-            <span class="sr-only">Toggle navigation</span>
-      	</a>';
+        return '<li class="nav-item"><a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a></li>';
     }
 }

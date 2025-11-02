@@ -26,7 +26,7 @@ class SidebarMenu extends Menu
 	/**
 	 * @var string
 	 **/
-	public $linkTemplate = '<a href="{url}">{icon} {label}</a>';
+	public $linkTemplate = '<a class="nav-link" href="{url}">{icon} {label}</a>';
 
 	/**
 	 * @var string
@@ -36,7 +36,7 @@ class SidebarMenu extends Menu
 	/**
 	 * @var string
 	 **/
-	public $submenuTemplate = "\n<ul class='treeview-menu' {show}>\n{items}\n</ul>\n";
+	public $submenuTemplate = "\n<ul class='nav nav-treeview' {show}>\n{items}\n</ul>\n";
 
 	/**
 	 * @var boolean
@@ -51,7 +51,7 @@ class SidebarMenu extends Menu
 	/**
 	 * @var array
 	 **/
-	public $options = ['class' => 'sidebar-menu', 'data-widget' => 'tree'];
+	public $options = ['class' => 'nav nav-pills nav-sidebar flex-column', 'data-accordion' => 'false','data-widget' => 'treeview', 'role' => 'menu'];
 
 	/**
 	 * @var string
@@ -180,9 +180,9 @@ class SidebarMenu extends Menu
 					'{items}' => $this->renderItems($item['items']),
 				]);
 				if (isset($options['class'])) {
-					$options['class'] .= ' treeview';
+					$options['class'] .= ' nav-item';
 				} else {
-					$options['class'] = 'treeview';
+					$options['class'] = 'nav-item';
 				}
 			}
 

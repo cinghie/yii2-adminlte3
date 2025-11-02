@@ -51,14 +51,13 @@ class SidebarUser extends Widget
 	 */
 	public function run()
     {
-        return '<div class="user-panel">
-            <div class="pull-left image">
-                <img alt="User Image" class="img-circle" src="'.$this->userimg.'">
-            </div>
-            <div class="pull-left info">
-                <p>'.Html::encode($this->username).'</p>
-                <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
-            </div>
-        </div>';
+        return '<div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+          <img src="'.$this->userimg.'" class="img-circle elevation-2" alt="'.Html::encode($this->username).' Image">
+        </div>
+        <div class="info">
+          <a href="#" class="d-block">'.Html::encode($this->username).'</a>
+        </div>
+      </div>';
     }
 }
