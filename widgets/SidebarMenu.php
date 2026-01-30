@@ -31,7 +31,7 @@ class SidebarMenu extends Menu
     /**
      * @var string Template for menu links (AdminLTE 3: icon + label in <p>)
      */
-    public $linkTemplate = '<a class="nav-link" href="{url}">{icon}<p>{label}{caret}{badge}</p></a>';
+    public $linkTemplate = '<a class="nav-link{activeClass}" href="{url}">{icon}<p>{label}{caret}{badge}</p></a>';
 
     /**
      * @var string Template for label-only items (e.g. headers). Use {label} for AdminLTE 3.
@@ -41,7 +41,7 @@ class SidebarMenu extends Menu
     /**
      * @var string Template for parent items with submenu (icon + label + angle icon)
      */
-    public $parentLinkTemplate = '<a class="nav-link" href="{url}">{icon}<p>{label}<i class="right fas fa-angle-left"></i>{badge}</p></a>';
+    public $parentLinkTemplate = '<a class="nav-link{activeClass}" href="{url}">{icon}<p>{label}<i class="right fas fa-angle-left"></i>{badge}</p></a>';
 
     /**
      * @var string Template for submenu container (AdminLTE 3 nav-treeview)
@@ -157,6 +157,7 @@ class SidebarMenu extends Menu
             : '<i class="' . static::$iconClassPrefix . $item['icon'] . '"></i> ';
         $url = isset($item['url']) ? Url::to($item['url']) : '#';
         $label = strtr($this->labelTemplate, ['{label}' => $item['label']]);
+        $activeClass = !empty($item['active']) ? ' active' : '';
 
         return strtr($template, [
             '{url}' => $url,
@@ -164,6 +165,7 @@ class SidebarMenu extends Menu
             '{icon}' => $icon,
             '{caret}' => $caret,
             '{badge}' => $badge,
+            '{activeClass}' => $activeClass,
         ]);
     }
 
@@ -300,7 +302,14 @@ class SidebarMenu extends Menu
 
             $route = ltrim($route, '/');
 
-            if ($route !== $this->route && $route !== $this->noDefaultRoute && $route !== $this->noDefaultAction) {
+            $routeMatches = ($route === $this->route)
+                || ($route === $this->noDefaultRoute)
+                || ($route === $this->noDefaultAction);
+            if ($this->noDefaultAction !== false && !$routeMatches) {
+                $routeWithDefaultAction = $this->noDefaultAction . '/' . Yii::$app->controller->defaultAction;
+                $routeMatches = ($route === $routeWithDefaultAction);
+            }
+            if (!$routeMatches) {
                 return false;
             }
 
