@@ -133,7 +133,7 @@ class SidebarMenu extends Menu
      */
     protected function renderItem($item)
     {
-        $isHeader = isset($item['options']['class']) && strpos($item['options']['class'], 'nav-header') !== false;
+        $isHeader = isset($item['options']['class']) && (strpos($item['options']['class'], 'nav-header') !== false || strpos($item['options']['class'], 'header') !== false);
         if ($isHeader) {
             return strtr($this->labelTemplate, ['{label}' => $item['label']]);
         }
@@ -182,8 +182,11 @@ class SidebarMenu extends Menu
             $options = array_merge($this->itemOptions, ArrayHelper::getValue($item, 'options', []));
             $tag = ArrayHelper::remove($options, 'tag', 'li');
 
-            $isHeader = isset($options['class']) && strpos($options['class'], 'nav-header') !== false;
+            $isHeader = isset($options['class']) && (strpos($options['class'], 'nav-header') !== false || strpos($options['class'], 'header') !== false);
             if ($isHeader) {
+                if (strpos($options['class'], 'nav-header') === false) {
+                    $options['class'] = trim(str_replace('header', 'nav-header', $options['class']));
+                }
                 $lines[] = Html::tag($tag, $this->renderItem($item), $options);
                 continue;
             }
@@ -251,7 +254,7 @@ class SidebarMenu extends Menu
 
             if (isset($item['items'])) {
                 $items[$i]['items'] = $this->normalizeItems($item['items'], $hasActiveChild);
-                $isHeader = isset($items[$i]['options']['class']) && strpos($items[$i]['options']['class'], 'nav-header') !== false;
+                $isHeader = isset($items[$i]['options']['class']) && (strpos($items[$i]['options']['class'], 'nav-header') !== false || strpos($items[$i]['options']['class'], 'header') !== false);
                 if (empty($items[$i]['items']) && $this->hideEmptyItems && !$isHeader) {
                     unset($items[$i]['items']);
                     if (!isset($item['url'])) {
