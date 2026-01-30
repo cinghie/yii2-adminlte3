@@ -14,6 +14,7 @@ namespace cinghie\adminlte3;
 
 use cinghie\fontawesome\FontAwesomeAsset;
 use cinghie\ionicons\IoniconsAsset;
+use yii\bootstrap4\BootstrapAsset;
 use yii\web\AssetBundle;
 use yii\web\YiiAsset;
 
@@ -52,6 +53,7 @@ class AdminLTEAsset extends AssetBundle
      */
 	public $depends = [
 		YiiAsset::class,
+		BootstrapAsset::class,
 		FontAwesomeAsset::class,
 		IoniconsAsset::class
     ];
