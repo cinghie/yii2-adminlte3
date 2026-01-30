@@ -1,105 +1,131 @@
 <?php
 
 /**
-* @copyright Copyright &copy; Gogodigital Srls
-* @company Gogodigital Srls - Wide ICT Solutions 
-* @website http://www.gogodigital.it
-* @github https://github.com/cinghie/yii2-adminlte3
-* @license GNU GENERAL PUBLIC LICENSE VERSION 3
-* @package yii2-AdminLTE
-* @version 0.1.0
-*/
+ * @copyright Copyright &copy; Gogodigital Srls
+ * @company Gogodigital Srls - Wide ICT Solutions
+ * @website http://www.gogodigital.it
+ * @github https://github.com/cinghie/yii2-adminlte3
+ * @license GNU GENERAL PUBLIC LICENSE VERSION 3
+ * @package yii2-AdminLTE
+ * @version 0.1.0
+ */
 
 namespace cinghie\adminlte3\widgets;
 
-use Exception;
 use Yii;
 use yii\bootstrap4\Alert as BootstrapAlert;
 use yii\bootstrap4\Widget;
+use yii\helpers\Html;
 
 /**
- * Class Alert
+ * Alert widget for AdminLTE 3 with Bootstrap 4.
+ *
+ * Renders flash messages as AdminLTE 3 alerts (with icon and optional close button).
+ * Supports: error, danger, success, info, warning.
+ *
+ * @see https://adminlte.io/docs/3.1/components/alerts.html
  */
 class Alert extends Widget
 {
     /**
-     * @var array the alert types configuration for the flash messages.
-     * This array is setup as $key => $value, where:
-     * - $key is the name of the session flash variable
-     * - $value is the array:
-     *       - class of alert type (i.e. danger, success, info, warning)
-     *       - icon for alert AdminLTE
+     * @var array alert type configuration. Key = flash key, value = ['class' => 'alert-*', 'icon' => 'fas fa-*']
      */
     public $alertTypes = [
         'error' => [
             'class' => 'alert-danger',
-            'icon' => '<i class="icon fas fa-ban"></i>',
+            'icon' => 'fas fa-ban',
         ],
         'danger' => [
             'class' => 'alert-danger',
-            'icon' => '<i class="icon fas fa-ban"></i>',
+            'icon' => 'fas fa-ban',
         ],
         'success' => [
             'class' => 'alert-success',
-            'icon' => '<i class="icon fas fa-check"></i>',
+            'icon' => 'fas fa-check',
         ],
         'info' => [
             'class' => 'alert-info',
-            'icon' => '<i class="icon fas fa-info"></i>',
+            'icon' => 'fas fa-info',
         ],
         'warning' => [
             'class' => 'alert-warning',
-            'icon' => '<i class="icon fas fa-exclamation-triangle"></i>',
+            'icon' => 'fas fa-exclamation-triangle',
         ],
     ];
 
     /**
-     * @var array the options for rendering the close button tag.
+     * @var array|false options for the close button. False to hide close button.
+     * Default includes AdminLTE 3 / Bootstrap 4 compatible markup.
      */
-    public $closeButton = [];
+    public $closeButton = [
+        'tag' => 'button',
+        'type' => 'button',
+        'class' => 'close',
+        'data-dismiss' => 'alert',
+        'aria-label' => 'Close',
+    ];
 
     /**
-     * @var boolean whether to removed flash messages during AJAX requests
+     * @var bool whether to HTML-encode flash messages (set false if messages contain HTML)
      */
-    public $isAjaxRemoveFlash = true;
+    public $encodeMessages = true;
 
     /**
-     * Initializes the widget.
-     * This method will register the bootstrap asset bundle. If you override this method,
-     * make sure you call the parent implementation first.
-     *
-     * @throws Exception
+     * @var bool whether to remove flash messages after displaying (when not AJAX)
+     */
+    public $removeFlashAfterDisplay = true;
+
+    /**
+     * @var array default HTML options for the alert container
+     */
+    public $options = [];
+
+    /**
+     * @inheritdoc
      */
     public function init()
     {
         parent::init();
+    }
 
+    /**
+     * @inheritdoc
+     */
+    public function run()
+    {
         $session = Yii::$app->getSession();
         $flashes = $session->getAllFlashes();
-        $appendCss = isset($this->options['class']) ? ' ' . $this->options['class'] : '';
+        $baseOptions = $this->options;
+        $index = 0;
 
-        foreach ($flashes as $type => $data)
-        {
-            if (isset($this->alertTypes[$type]))
-            {
-                $data = (array) $data;
+        foreach ($flashes as $type => $data) {
+            if (!isset($this->alertTypes[$type])) {
+                continue;
+            }
 
-                foreach ($data as $message)
-                {
+            $config = $this->alertTypes[$type];
+            $data = (array) $data;
+            $icon = isset($config['icon']) ? Html::tag('i', '', ['class' => 'icon ' . $config['icon']]) : '';
 
-                    $this->options['class'] = $this->alertTypes[$type]['class'] . $appendCss;
-                    $this->options['id'] = $this->getId() . '-' . $type;
+            foreach ($data as $message) {
+                $options = array_merge([], $baseOptions);
+                Html::addCssClass($options, $config['class']);
+                $options['id'] = $this->getId() . '-' . $type . '-' . $index;
+                $options['role'] = 'alert';
 
-                    echo BootstrapAlert::widget([
-                        'body' => $this->alertTypes[$type]['icon'] . $message,
-                        'closeButton' => $this->closeButton,
-                        'options' => $this->options,
-                    ]);
-                }
+                $body = $icon . ($this->encodeMessages ? Html::encode($message) : $message);
 
-                if ($this->isAjaxRemoveFlash && !Yii::$app->request->isAjax) {
-                    $session->removeFlash($type);
-                }
+                echo BootstrapAlert::widget([
+                    'body' => $body,
+                    'closeButton' => $this->closeButton,
+                    'options' => $options,
+                ]);
+
+                $index++;
+            }
+
+            if ($this->removeFlashAfterDisplay && !Yii::$app->request->isAjax) {
+                $session->removeFlash($type);
             }
         }
     }
