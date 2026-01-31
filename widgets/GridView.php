@@ -17,23 +17,28 @@ use kartik\grid\GridView as baseGrid;
 use yii\helpers\Html;
 
 /**
- * Class GridView
+ * GridView for AdminLTE 3 with Bootstrap 4.
+ *
+ * Wraps output in an AdminLTE 3 card (card-body, card-footer). Uses Bootstrap 4 table classes.
+ * Optional card header via $cardTitle (HTML-encoded). Backward compatible with $boxClass.
+ *
+ * @see https://adminlte.io/docs/3.1/components/cards.html
  */
 class GridView extends baseGrid
 {
-    /**
-     * @var string
-     */
+    /** @var string column class for data columns */
     public $dataColumnClass = DataColumn::class;
 
-    /**
-     * @var array
-     */
-    public $tableOptions = ['class' => 'table dataTable'];
+    /** @var array options for the table tag (Bootstrap 4) */
+    public $tableOptions = ['class' => 'table table-sm'];
 
-    /**
-     * @var string
-     */
+    /** @var string extra CSS class for the card wrapper (e.g. card-primary). */
+    public $cardClass = '';
+
+    /** @var string|null optional card header title (HTML-encoded when rendered). */
+    public $cardTitle;
+
+    /** @var string deprecated; use $cardClass. Kept for backward compatibility. */
     public $boxClass = '';
 
     /**
@@ -56,29 +61,8 @@ class GridView extends baseGrid
      */
     public $hover = true;
 
-    /**
-     * @var string the layout that determines how different sections of the list view should be organized.
-     * The layout template will be automatically set based on the [[panel]] setting. If [[panel]] is a valid
-     * array, then the [[layout]] will default to the [[panelTemplate]] property. If the [[panel]] property
-     * is set to `false`, then the [[layout]] will default to `{summary}\n{items}\n{pager}`.
-     *
-     * The following tokens will be replaced with the corresponding section contents:
-     *
-     * - `{summary}`: the summary section. See [[renderSummary()]].
-     * - `{errors}`: the filter model error summary. See [[renderErrors()]].
-     * - `{items}`: the list items. See [[renderItems()]].
-     * - `{sorter}`: the sorter. See [[renderSorter()]].
-     * - `{pager}`: the pager. See [[renderPager()]].
-     * - `{export}`: the grid export button menu. See [[renderExport()]].
-     * - `{toolbar}`: the grid panel toolbar. See [[renderToolbar()]].
-     * - `{toolbarContainer}`: the toolbar container. See [[renderToolbarContainer()]].
-     *
-     * In addition to the above tokens, refer the [[panelTemplate]] property for other tokens supported as
-     * part of the bootstrap styled panel.
-     *
-     */
-    //public $layout = "{summary}\n{items}\n{pager}";
-    public $layout = "<div class='box-body'>{items}</div>\n<div class='box-footer clearfix'>{summary}\n{pager}</div>";
+    /** @var string layout; if null, set in init() to card-body/card-footer (and optional card-header). */
+    public $layout;
 
     /**
      * @var boolean whether the grid will have a `responsive` style. Applicable only if `bootstrap` is `true`.
@@ -120,12 +104,20 @@ class GridView extends baseGrid
      */
     public function init()
     {
+        if ($this->layout === null) {
+            $header = '';
+            if ($this->cardTitle !== null && $this->cardTitle !== '') {
+                $header = Html::tag('div', Html::encode($this->cardTitle), ['class' => 'card-header']) . "\n";
+            }
+            $this->layout = $header . "<div class=\"card-body\">{items}</div>\n<div class=\"card-footer clearfix d-flex justify-content-between align-items-center flex-wrap\"><span>{summary}</span>{pager}</div>";
+        }
+
         if ($this->bordered) {
             Html::addCssClass($this->tableOptions, 'table-bordered');
         }
 
         if ($this->condensed) {
-            Html::addCssClass($this->tableOptions, 'table-condensed');
+            Html::addCssClass($this->tableOptions, 'table-sm');
         }
 
         if ($this->striped) {
@@ -145,9 +137,10 @@ class GridView extends baseGrid
      */
     public function run()
     {
-        echo '<div class="box '.$this->boxClass.'">';
+        $cardClass = trim('card ' . (string) $this->cardClass . ' ' . (string) $this->boxClass);
+        echo Html::beginTag('div', ['class' => $cardClass]);
         parent::run();
-        echo '</div>';
+        echo Html::endTag('div');
     }
 
     /**
@@ -155,6 +148,6 @@ class GridView extends baseGrid
      */
     public function renderPager()
     {
-        return Html::tag('div', parent::renderPager(), ['class' => 'dataTables_paginate paging_simple_numbers']);
+        return Html::tag('div', parent::renderPager(), ['class' => 'd-flex justify-content-end align-items-center']);
     }
 }
