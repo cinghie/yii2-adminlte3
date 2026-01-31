@@ -1,6 +1,7 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
 
 $this->title = $name;
 $this->params['breadcrumbs'][] = $this->title;
@@ -15,7 +16,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <div class="error-content">
 
-            <h3><?= $name ?></h3>
+            <h3><?= Html::encode($name) ?></h3>
 
             <p>
                 <?= nl2br(Html::encode($message)) ?>
@@ -24,7 +25,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <p>
                 The above error occurred while the Web server was processing your request.
                 Please contact us if you think this is a server error. Thank you.
-                Meanwhile, you may <a href='<?= Yii::$app->homeUrl ?>'>return to dashboard</a> or try using the search
+                Meanwhile, you may <a href='<?= Html::encode(is_array(Yii::$app->homeUrl) ? Url::to(Yii::$app->homeUrl) : Yii::$app->homeUrl) ?>'>return to dashboard</a> or try using the search
                 form.
             </p>
 
