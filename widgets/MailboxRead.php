@@ -16,245 +16,192 @@ use yii\bootstrap4\Widget;
 use yii\helpers\Html;
 
 /**
- * Class MailboxRead
+ * MailboxRead widget for AdminLTE 3 with Bootstrap 4.
+ *
+ * Renders a read-mail card: subject, sender, body, attachments.
+ * Markup: card > card-header (optional) > card-body (mailbox-read-info, mailbox-read-message) > card-footer (attachments).
+ * Attachment items: object with getAttachmentTypeIcon(), fileUrl, filename, formatSize() or array with url, filename, size, icon.
+ *
+ * @see https://adminlte.io/docs/3.1/pages/mailbox/read-mail.html
  */
 class MailboxRead extends Widget
 {
     /**
-     * @var array
+     * @var array Attachments: list of objects (fileUrl, filename, formatSize(), getAttachmentTypeIcon()) or arrays (url, filename, size, icon)
      */
-	public $mailAttachments;
+    public $mailAttachments = [];
 
     /**
-     * @var string
+     * @var string Mail body (HTML allowed; encode if user-generated)
      */
-	public $mailBody;
+    public $mailBody = '';
 
     /**
-     * @var string
+     * @var string Sender line (e.g. "Name &lt;email@example.com&gt;")
      */
-	public $mailSender;
+    public $mailSender = '';
 
     /**
-     * @var string
+     * @var string Mail subject
      */
-	public $mailSubject;
+    public $mailSubject = '';
 
     /**
-     * @var string
+     * @var string|null Optional timestamp/date (e.g. "15 Feb. 2015 11:03 PM")
      */
-	public $userName;
+    public $mailTime;
 
     /**
-     * @var string
+     * @var string Display name (e.g. for alt/title of user image)
      */
-	public $userImage;
+    public $userName = '';
 
-	/**
-	 * @inheritdoc
-	 */
-	public function init()
-	{
-		if($this->mailAttachments === null) {
-			$this->mailAttachments = [];
-		}
+    /**
+     * @var string|null URL of user/sender image. Empty = no image.
+     */
+    public $userImage;
 
-		if($this->mailBody === null) {
-			$this->mailBody = 'Set param mailBody';
-		}
+    /**
+     * @var string Card type: null, 'primary', 'success', etc. Adds card-{type} card-outline.
+     */
+    public $cardType = 'primary';
 
-		if($this->mailSender === null) {
-			$this->mailSender = 'Set param mailSender';
-		}
+    /**
+     * @var array HTML options for the card container
+     */
+    public $options = [];
 
-		if($this->mailSubject === null) {
-			$this->mailSubject = 'Set param mailSubject';
-		}
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        if (!is_array($this->mailAttachments)) {
+            $this->mailAttachments = [];
+        }
+        if ($this->mailBody === null) {
+            $this->mailBody = '';
+        }
+        if ($this->mailSender === null) {
+            $this->mailSender = '';
+        }
+        if ($this->mailSubject === null) {
+            $this->mailSubject = '';
+        }
+        if ($this->userName === null) {
+            $this->userName = '';
+        }
+        if ($this->userImage === null) {
+            $this->userImage = '';
+        }
 
-		if($this->userName === null) {
-			$this->userName = 'Set param userName';
-		}
-
-		if($this->userImage === null) {
-			$this->userImage = '';
-		}
-
+        Html::addCssClass($this->options, 'card');
+        if ($this->cardType) {
+            Html::addCssClass($this->options, 'card-' . $this->cardType);
+            Html::addCssClass($this->options, 'card-outline');
+        }
         parent::init();
-	}
+    }
 
-	/**
-	 * @return string
-	 */
-	public function run()
-	{
-		$html  = '<div class="box box-widget">';
+    /**
+     * @return string
+     */
+    public function run()
+    {
+        $bodyParts = [];
 
-		$html .= '<div class="box-header with-border">';
+        // mailbox-read-info: user-block (image + subject + description)
+        $userBlockContent = '';
+        if ($this->userImage !== null && $this->userImage !== '') {
+            $userBlockContent .= Html::img($this->userImage, [
+                'class' => 'img-circle',
+                'alt' => Html::encode($this->userName),
+                'title' => Html::encode($this->userName),
+            ]);
+        }
+        $userBlockContent .= Html::tag('span', Html::encode($this->mailSubject), ['class' => 'username']);
+        $userBlockContent .= Html::tag('span', Html::encode($this->mailSender), ['class' => 'description']);
+        $bodyParts[] = Html::tag('div', Html::tag('div', $userBlockContent, ['class' => 'user-block']), ['class' => 'mailbox-read-info']);
 
-		$html .= '<div class="mailbox-read-info">';
-		$html .= '<div class="user-block">';
-		if($this->userImage) {
-			$html .= '<img class="img-circle" src="'.$this->userImage.'" alt="'.$this->userName.'" title="'.$this->userName.'">';
-		}
-		$html .= '<span class="username">'.$this->mailSubject.'</span>';
-		$html .= '<span class="description">'.$this->mailSender.'</span>';
-		$html .= '</div>';
-		$html .= '</div>';
+        // mailbox-read-message
+        $bodyParts[] = Html::tag('div', $this->mailBody, ['class' => 'mailbox-read-message']);
 
-		$html .= '<div class="mailbox-read-message">'.$this->mailBody.'</div>';
-		
-		$html .= '</div>';
+        $cardBody = Html::tag('div', implode("\n", $bodyParts), ['class' => 'card-body p-0']);
 
-		$html .= '<div class="box-footer">'.$this->printAttachments().'</div>';
+        $attachmentsHtml = $this->renderAttachments();
+        $cardFooter = '';
+        if ($attachmentsHtml !== '') {
+            $cardFooter = Html::tag('div', $attachmentsHtml, ['class' => 'card-footer bg-white']);
+        }
 
-		$html .= '</div>';
+        return Html::tag('div', $cardBody . $cardFooter, $this->options);
+    }
 
-		return $html;
-	}
+    /**
+     * Renders attachments list.
+     * @return string
+     */
+    protected function renderAttachments()
+    {
+        if (empty($this->mailAttachments)) {
+            return '';
+        }
 
-	/**
-	 * @return string
-	 */
-	public function demo()
-	{
-		$html  = '<div class="box box-widget">';
+        $items = [];
+        foreach ($this->mailAttachments as $attachment) {
+            if (is_array($attachment)) {
+                $url = isset($attachment['url']) ? $attachment['url'] : '#';
+                $filename = isset($attachment['filename']) ? $attachment['filename'] : 'file';
+                $size = isset($attachment['size']) ? $attachment['size'] : '';
+                $icon = isset($attachment['icon']) ? $attachment['icon'] : '<i class="far fa-file"></i>';
+            } else {
+                $url = isset($attachment->fileUrl) ? $attachment->fileUrl : '#';
+                $filename = isset($attachment->filename) ? $attachment->filename : 'file';
+                $size = method_exists($attachment, 'formatSize') ? $attachment->formatSize() : '';
+                $icon = method_exists($attachment, 'getAttachmentTypeIcon') ? $attachment->getAttachmentTypeIcon() : '<i class="far fa-file"></i>';
+            }
 
-		$html .= '<div class="box-header with-border">';
+            $iconSpan = Html::tag('span', $icon, ['class' => 'mailbox-attachment-icon']);
+            $link = Html::a(
+                '<i class="fas fa-paperclip"></i> ' . Html::encode($filename),
+                $url,
+                ['class' => 'mailbox-attachment-name', 'style' => 'display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;']
+            );
+            $sizeSpan = $size !== '' ? Html::tag('span', $size, ['class' => 'mailbox-attachment-size']) : '';
+            $info = Html::tag('div', $link . $sizeSpan, ['class' => 'mailbox-attachment-info']);
+            $items[] = Html::tag('li', $iconSpan . $info);
+        }
 
-		$html .= '<div class="mailbox-read-info">';
+        return Html::tag('ul', implode("\n", $items), [
+            'class' => 'mailbox-attachments d-flex align-items-stretch clearfix',
+        ]);
+    }
 
-		$html .= '<div class="user-block">';
-		$html .= '<img class="img-circle" src="https://adminlte.io/themes/AdminLTE/dist/img/user2-160x160.jpg" alt="John Doe" title="John Doe">';
-		$html .= '<span class="username">Message Subject Is Placed Here</span>';
-		$html .= '<span class="description">John Doe < example@example.com ></span>';
-		$html .= '</div>';
+    /**
+     * Demo markup (AdminLTE 3 card + Font Awesome 5).
+     * @return string
+     */
+    public function demo()
+    {
+        $cardBody = Html::tag('div', implode("\n", [
+            Html::tag('div', Html::tag('div', implode('', [
+                Html::img('https://adminlte.io/themes/v3/dist/img/user2-160x160.jpg', ['class' => 'img-circle', 'alt' => 'John Doe', 'title' => 'John Doe']),
+                Html::tag('span', 'Message Subject Is Placed Here', ['class' => 'username']),
+                Html::tag('span', 'John Doe &lt;example@example.com&gt;', ['class' => 'description']),
+            ]), ['class' => 'user-block']), ['class' => 'mailbox-read-info']),
+            Html::tag('div', '<p>Hello John,</p><p>Keffiyeh blog actually fashion axe vegan...</p><p>Thanks,<br>Jane</p>', ['class' => 'mailbox-read-message']),
+        ]), ['class' => 'card-body p-0']);
 
-		$html .= '</div>';
+        $attachments = Html::tag('ul', implode('', [
+            Html::tag('li', Html::tag('span', '<i class="far fa-file-pdf"></i>', ['class' => 'mailbox-attachment-icon']) . Html::tag('div', Html::a('<i class="fas fa-paperclip"></i> Sep2014-report.pdf', '#', ['class' => 'mailbox-attachment-name']) . Html::tag('span', '1,245 KB', ['class' => 'mailbox-attachment-size']), ['class' => 'mailbox-attachment-info'])),
+            Html::tag('li', Html::tag('span', '<i class="far fa-file-word"></i>', ['class' => 'mailbox-attachment-icon']) . Html::tag('div', Html::a('<i class="fas fa-paperclip"></i> App Description.docx', '#', ['class' => 'mailbox-attachment-name']) . Html::tag('span', '1,245 KB', ['class' => 'mailbox-attachment-size']), ['class' => 'mailbox-attachment-info'])),
+        ]), ['class' => 'mailbox-attachments d-flex align-items-stretch clearfix']);
 
-		$html .= '<div class="mailbox-controls with-border text-center">';
-		$html .= '<div class="btn-group">
-                  <button type="button" class="btn btn-default btn-sm" data-toggle="tooltip" data-container="body" title="" data-original-title="Delete">
-                    <i class="fa fa-trash-o"></i></button>
-                  <button type="button" class="btn btn-default btn-sm" data-toggle="tooltip" data-container="body" title="" data-original-title="Reply">
-                    <i class="fa fa-reply"></i></button>
-                  <button type="button" class="btn btn-default btn-sm" data-toggle="tooltip" data-container="body" title="" data-original-title="Forward">
-                    <i class="fa fa-share"></i></button>
-                </div>
-                <!-- /.btn-group -->
-                <button type="button" class="btn btn-default btn-sm" data-toggle="tooltip" title="" data-original-title="Print">';
-		$html .= '</div>';
+        $footerAttachments = Html::tag('div', $attachments, ['class' => 'card-footer bg-white']);
+        $footerActions = Html::tag('div', Html::tag('div', '<button type="button" class="btn btn-default"><i class="fas fa-reply"></i> Reply</button> <button type="button" class="btn btn-default"><i class="fas fa-share"></i> Forward</button>', ['class' => 'float-right']) . '<button type="button" class="btn btn-default"><i class="fas fa-trash"></i> Delete</button> <button type="button" class="btn btn-default"><i class="fas fa-print"></i> Print</button>', ['class' => 'card-footer']);
 
-		$html .= '<div class="mailbox-read-message">
-                <p>Hello John,</p>
-
-                <p>Keffiyeh blog actually fashion axe vegan, irony biodiesel. Cold-pressed hoodie chillwave put a bird
-                  on it aesthetic, bitters brunch meggings vegan iPhone. Dreamcatcher vegan scenester mlkshk. Ethical
-                  master cleanse Bushwick, occupy Thundercats banjo cliche ennui farm-to-table mlkshk fanny pack
-                  gluten-free. Marfa butcher vegan quinoa, bicycle rights disrupt tofu scenester chillwave 3 wolf moon
-                  asymmetrical taxidermy pour-over. Quinoa tote bag fashion axe, Godard disrupt migas church-key tofu
-                  blog locavore. Thundercats cronut polaroid Neutra tousled, meh food truck selfies narwhal American
-                  Apparel.</p>
-
-                <p>Thanks,<br>Jane</p>
-              </div>';
-
-		$html .= '</div>';
-
-		$html .= '<div class="box-footer">';
-		$html .= '<ul class="mailbox-attachments clearfix">
-                <li>
-                  <span class="mailbox-attachment-icon"><i class="fa fa-file-pdf-o"></i></span>
-
-                  <div class="mailbox-attachment-info">
-                    <a href="#" class="mailbox-attachment-name"><i class="fa fa-paperclip"></i> Sep2014-report.pdf</a>
-                        <span class="mailbox-attachment-size">
-                          1,245 KB
-                          <a href="#" class="btn btn-default btn-xs pull-right"><i class="fa fa-cloud-download"></i></a>
-                        </span>
-                  </div>
-                </li>
-                <li>
-                  <span class="mailbox-attachment-icon"><i class="fa fa-file-word-o"></i></span>
-
-                  <div class="mailbox-attachment-info">
-                    <a href="#" class="mailbox-attachment-name"><i class="fa fa-paperclip"></i> App Description.docx</a>
-                        <span class="mailbox-attachment-size">
-                          1,245 KB
-                          <a href="#" class="btn btn-default btn-xs pull-right"><i class="fa fa-cloud-download"></i></a>
-                        </span>
-                  </div>
-                </li>
-                <li>
-                  <span class="mailbox-attachment-icon has-img"><img src="https://adminlte.io/themes/AdminLTE/dist/img/photo1.png" alt="Attachment"></span>
-
-                  <div class="mailbox-attachment-info">
-                    <a href="#" class="mailbox-attachment-name"><i class="fa fa-camera"></i> photo1.png</a>
-                        <span class="mailbox-attachment-size">
-                          2.67 MB
-                          <a href="#" class="btn btn-default btn-xs pull-right"><i class="fa fa-cloud-download"></i></a>
-                        </span>
-                  </div>
-                </li>
-                <li>
-                  <span class="mailbox-attachment-icon has-img"><img src="https://adminlte.io/themes/AdminLTE/dist/img/photo2.png" alt="Attachment"></span>
-
-                  <div class="mailbox-attachment-info">
-                    <a href="#" class="mailbox-attachment-name"><i class="fa fa-camera"></i> photo2.png</a>
-                        <span class="mailbox-attachment-size">
-                          1.9 MB
-                          <a href="#" class="btn btn-default btn-xs pull-right"><i class="fa fa-cloud-download"></i></a>
-                        </span>
-                  </div>
-                </li>
-              </ul>';
-		$html .= '</div>';
-
-		$html .= '<div class="box-footer">';
-		$html .= '<div class="pull-right">
-                <button type="button" class="btn btn-default"><i class="fa fa-reply"></i> Reply</button>
-                <button type="button" class="btn btn-default"><i class="fa fa-share"></i> Forward</button>
-              </div>
-              <button type="button" class="btn btn-default"><i class="fa fa-trash-o"></i> Delete</button>
-              <button type="button" class="btn btn-default"><i class="fa fa-print"></i> Print</button>';
-		$html .= '</div>';
-
-		$html .= '</div>';
-
-		return $html;
-	}
-
-	/**
-	 * @return string
-	 */
-	private function printAttachments()
-	{
-		$html = '';
-
-		if(!empty($this->mailAttachments))
-		{
-			$html .= '<ul class="mailbox-attachments clearfix">';
-
-			foreach ($this->mailAttachments as $attachment)
-			{
-				if(!empty($attachment))
-				{
-					$html .= '<li>
-				    	<span class="mailbox-attachment-icon">
-				    		'.$attachment->getAttachmentTypeIcon().'
-				    	</span>
-						<div class="mailbox-attachment-info">
-				        	<a href="'.$attachment->fileUrl.'" class="mailbox-attachment-name" style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-				            	<i class="fa fa-paperclip"></i> '.Html::encode($attachment->filename).'
-				            </a>
-				            <span class="mailbox-attachment-size">'.$attachment->formatSize().'</span>
-				        </div>
-				        </li>';
-				}
-			}
-
-			$html .= '</ul>';
-		}
-
-		return $html;
-	}
+        return Html::tag('div', $cardBody . $footerAttachments . $footerActions, [
+            'class' => 'card card-primary card-outline',
+        ]);
+    }
 }
