@@ -12,13 +12,16 @@
 
 namespace cinghie\adminlte3\widgets;
 
-use kartik\grid\DataColumn as baseDataColumn;
+use kartik\grid\DataColumn as KartikDataColumn;
 use yii\helpers\Html;
 
 /**
- * Class DataColumn
+ * DataColumn for AdminLTE 3 / Bootstrap 4 tables.
+ *
+ * Extends Kartik DataColumn: adds sorting classes to header without mutating
+ * the original headerOptions (uses merged options for output).
  */
-class DataColumn extends baseDataColumn
+class DataColumn extends KartikDataColumn
 {
     /**
      * @return string
@@ -26,16 +29,16 @@ class DataColumn extends baseDataColumn
     public function renderHeaderCell()
     {
         $provider = $this->grid->dataProvider;
+        $options = array_merge([], $this->headerOptions);
 
-        if ($this->attribute !== null && $this->enableSorting && ($sort = $provider->getSort()) !== false && $sort->hasAttribute($this->attribute))
-        {
-            if (($direction = $sort->getAttributeOrder($this->attribute)) !== null) {
-                Html::addCssClass($this->headerOptions, 'sorting_' . ($direction === SORT_DESC ? 'desc' : 'asc'));
-            } else {
-                Html::addCssClass($this->headerOptions, 'sorting');
-            }
+        if ($this->attribute !== null && $this->enableSorting && ($sort = $provider->getSort()) !== false && $sort->hasAttribute($this->attribute)) {
+            $direction = $sort->getAttributeOrder($this->attribute);
+            $sortClass = $direction !== null
+                ? 'sorting_' . ($direction === SORT_DESC ? 'desc' : 'asc')
+                : 'sorting';
+            Html::addCssClass($options, $sortClass);
         }
 
-        return Html::tag('th', $this->renderHeaderCellContent(), $this->headerOptions);
+        return Html::tag('th', $this->renderHeaderCellContent(), $options);
     }
 }
