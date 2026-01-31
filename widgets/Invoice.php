@@ -146,7 +146,8 @@ class Invoice extends Widget
 		}
 
 		if($this->invoiceFromEmail) {
-			$emailLink = Html::a($this->invoiceFromEmail, null, ['href' => 'mailto:'.$this->invoiceFromEmail]);
+			$emailEnc = Html::encode($this->invoiceFromEmail);
+			$emailLink = Html::a($emailEnc, null, ['href' => 'mailto:'.$emailEnc]);
 			$this->invoiceFromEmail = Yii::t('traits','Email').': '.$emailLink;
 		} else {
 			$this->invoiceFromEmail = '';
@@ -165,38 +166,39 @@ class Invoice extends Widget
 		}
 
 		if($this->invoiceToEmail) {
-			$emailLink = Html::a($this->invoiceToEmail, null, ['href' => 'mailto:'.$this->invoiceToEmail]);
+			$emailEnc = Html::encode($this->invoiceToEmail);
+			$emailLink = Html::a($emailEnc, null, ['href' => 'mailto:'.$emailEnc]);
 			$this->invoiceToEmail = Yii::t('traits','Email').': '.$emailLink;
 		} else {
 			$this->invoiceToEmail = '';
 		}
 
 		if($this->invoiceFromPhone) {
-			$this->invoiceFromPhone = Yii::t('traits','Phone').': '.$this->invoiceFromPhone;
+			$this->invoiceFromPhone = Yii::t('traits','Phone').': '.Html::encode($this->invoiceFromPhone);
 		}
 
 		if($this->invoiceNumber) {
-			$this->invoiceNumber = Yii::t('traits','Invoice').' #'.$this->invoiceNumber;
+			$this->invoiceNumber = Yii::t('traits','Invoice').' #'.Html::encode($this->invoiceNumber);
 		}
 
 		if($this->invoiceOrderID) {
-			$this->invoiceOrderID = '<b>'.Yii::t('traits','Order ID').':</b> '.$this->invoiceOrderID;
+			$this->invoiceOrderID = '<b>'.Yii::t('traits','Order ID').':</b> '.Html::encode($this->invoiceOrderID);
 		}
 
 		if($this->invoicePaymentDue) {
-			$this->invoiceAmountDue = Yii::t('traits','Amount Due').' '.$this->invoicePaymentDue;
+			$this->invoiceAmountDue = Yii::t('traits','Amount Due').' '.Html::encode($this->invoicePaymentDue);
 		}
 
 		if($this->invoicePaymentDue) {
-			$this->invoicePaymentDue = '<b>'.Yii::t('traits','Payment Due').':</b> '.$this->invoicePaymentDue;
+			$this->invoicePaymentDue = '<b>'.Yii::t('traits','Payment Due').':</b> '.Html::encode($this->invoicePaymentDue);
 		}
 
 		if($this->invoiceAccount) {
-			$this->invoiceAccount = '<b>Account:</b> '.$this->invoiceAccount;
+			$this->invoiceAccount = '<b>Account:</b> '.Html::encode($this->invoiceAccount);
 		}
 
 		if($this->invoiceToPhone) {
-			$this->invoiceToPhone = Yii::t('traits','Phone').': '.$this->invoiceToPhone;
+			$this->invoiceToPhone = Yii::t('traits','Phone').': '.Html::encode($this->invoiceToPhone);
 		}
 
 		if($this->invoiceItems === null)
@@ -219,12 +221,13 @@ class Invoice extends Widget
 	{
 		$html = '<section class="invoice">';
 
+		$companyLogoSafe = (is_string($this->companyLogo) && strpos($this->companyLogo, '<') !== false) ? $this->companyLogo : Html::encode($this->companyLogo ?? '');
 		$html.= '<!-- title row -->
 	      	<div class="row">
 		        <div class="col-xs-12">
 			    	<h2 class="page-header">
-			        	'.$this->companyLogo.$this->companyName.'
-			            <small class="pull-right">'.Yii::t('traits', 'Date').': '.$this->invoiceDate.'</small>
+			        	'.$companyLogoSafe.Html::encode($this->companyName).'
+			            <small class="pull-right">'.Yii::t('traits', 'Date').': '.Html::encode($this->invoiceDate).'</small>
 			        </h2>
 		        </div><!-- /.col -->
 	      	</div>';
@@ -234,20 +237,20 @@ class Invoice extends Widget
 		        <div class="col-sm-4 invoice-col">
 		        	'.Yii::t('traits','From').'
 		          	<address>
-			            <strong>'.$this->invoiceFromName.'</strong><br>
-			            '.$this->invoiceFromAddress.'<br>
-			            '.$this->invoiceFromAddressInfo.'<br>
-			            '.$this->invoiceFromPhone.'<br>
+			            <strong>'.Html::encode($this->invoiceFromName).'</strong><br>
+			            '.Html::encode($this->invoiceFromAddress).'<br>
+			            '.Html::encode($this->invoiceFromAddressInfo).'<br>
+			            '.Html::encode($this->invoiceFromPhone).'<br>
 			            '.$this->invoiceFromEmail.'
 		          	</address>
 		        </div><!-- /.col -->
 		        <div class="col-sm-4 invoice-col">
 		            '.Yii::t('traits','To').'
 			        <address>
-			            <strong>'.$this->invoiceToName.'</strong><br>
-			            '.$this->invoiceToAddress.'<br>
-			            '.$this->invoiceToAddressInfo.'<br>
-			            '.$this->invoiceToPhone.'<br>
+			            <strong>'.Html::encode($this->invoiceToName).'</strong><br>
+			            '.Html::encode($this->invoiceToAddress).'<br>
+			            '.Html::encode($this->invoiceToAddressInfo).'<br>
+			            '.Html::encode($this->invoiceToPhone).'<br>
 			            '.$this->invoiceToEmail.'
 			        </address>
 		        </div><!-- /.col -->
@@ -279,12 +282,12 @@ class Invoice extends Widget
 		foreach($this->invoiceItems as $item)
 		{
 			$html .= '<tr>
-				          <td class="text-center">'.$item['product'].'</td>
-				          <td class="text-center">'.$item['serial'].'</td>
-				          <td class="text-center">'.$item['description'].'</td>
-				          <td class="text-center">'.$item['product_price'].'</td>
-				          <td class="text-center">'.$item['quantity'].'</td>
-				          <td class="text-center">'.$item['subtotal'].'</td>
+				          <td class="text-center">'.Html::encode($item['product'] ?? '').'</td>
+				          <td class="text-center">'.Html::encode($item['serial'] ?? '').'</td>
+				          <td class="text-center">'.Html::encode($item['description'] ?? '').'</td>
+				          <td class="text-center">'.Html::encode($item['product_price'] ?? '').'</td>
+				          <td class="text-center">'.Html::encode($item['quantity'] ?? '').'</td>
+				          <td class="text-center">'.Html::encode($item['subtotal'] ?? '').'</td>
 			</tr>';
 		}
 

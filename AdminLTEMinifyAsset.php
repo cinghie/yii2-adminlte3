@@ -19,18 +19,18 @@ use yii\web\AssetBundle;
 use yii\web\YiiAsset;
 
 /**
- * Class AdminLTEMinifyAsset
+ * AdminLTE 3 minified asset bundle.
+ * appendTimestamp: cache busting when files change. In production, set forceCopy => false (default) for speed.
  */
 class AdminLTEMinifyAsset extends AssetBundle
 {
-    /**
-     * @inherit
-     */
+    /** @inheritdoc */
     public $sourcePath = '@vendor/almasaeed2010/adminlte/';
 
-    /**
-     * @inherit
-     */
+    /** @inheritdoc */
+    public $appendTimestamp = true;
+
+    /** @inheritdoc */
     public $css = [
         'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css',
         'plugins/icheck-bootstrap/icheck-bootstrap.min.css',

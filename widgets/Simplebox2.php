@@ -13,101 +13,76 @@
 namespace cinghie\adminlte3\widgets;
 
 use yii\bootstrap4\Widget;
+use yii\helpers\Html;
 
 /**
- * Class Simplebox2
+ * Simplebox2 widget for AdminLTE 3.
+ * All text is HTML-encoded; class/icon/bgclass are sanitized; progress is cast to int (0-100).
  */
 class Simplebox2 extends Widget
 {
-    /**
-     * @var string
-     */
     public $bgclass;
-
-    /**
-     * @var string
-     */
     public $class;
-
-    /**
-     * @var string
-     */
     public $description;
-
-    /**
-     * @var string
-     */
     public $icon;
-
-    /**
-     * @var string
-     */
     public $progress;
-
-    /**
-     * @var string
-     */
     public $title;
-
-    /**
-     * @var string
-     */
     public $subtitle;
 
-	/**
-	 * @inheritdoc
-	 */
-	public function init()
+    protected static function sanitizeClass($value, $default = '')
+    {
+        if ($value === null || $value === '') {
+            return $default;
+        }
+        $sanitized = preg_replace('/[^\w\s\-]/', '', $value);
+        return $sanitized !== '' ? $sanitized : $default;
+    }
+
+    public function init()
     {
         if ($this->bgclass === null) {
             $this->bgclass = 'bg-aqua';
         }
-
         if ($this->class === null) {
             $this->class = 'col-md-3 col-sm-6 col-xs-12';
         }
-
         if ($this->description === null) {
             $this->description = '70% Increase in 30 Days';
         }
-
         if ($this->icon === null) {
             $this->icon = 'fa fa-bookmark-o';
         }
-
         if ($this->progress === null) {
             $this->progress = '70';
         }
-
         if ($this->title === null) {
             $this->title = 'Messages';
         }
-
         if ($this->subtitle === null) {
             $this->subtitle = '1,410';
         }
-
         parent::init();
     }
 
-	/**
-	 * @return string
-	 */
-	public function run()
+    public function run()
     {
-        return '<div class="'.$this->class.'">
-            <div class="info-box '.$this->bgclass.'">
+        $class = self::sanitizeClass($this->class, 'col-md-3 col-sm-6 col-xs-12');
+        $bgclass = self::sanitizeClass($this->bgclass, 'bg-aqua');
+        $icon = self::sanitizeClass($this->icon, 'fa fa-bookmark-o');
+        $progress = max(0, min(100, (int) $this->progress));
+        return '<div class="'.Html::encode($class).'">
+            <div class="info-box '.Html::encode($bgclass).'">
                 <span class="info-box-icon">
-                    <i class="'.$this->icon.'"></i>
+                    <i class="'.Html::encode($icon).'"></i>
                 </span>
                 <div class="info-box-content">
-                    <span class="info-box-text">'.$this->title.'</span>
-                    <span class="info-box-number">'.$this->subtitle.'</span>
+                    <span class="info-box-text">'.Html::encode($this->title).'</span>
+                    <span class="info-box-number">'.Html::encode($this->subtitle).'</span>
                     <div class="progress">
-                        <div style="width: '.$this->progress.'%" class="progress-bar"></div>
+                        <div style="width: '.$progress.'%" class="progress-bar"></div>
                     </div>
                     <span class="progress-description">
-                        '.$this->description.'
+                        '.Html::encode($this->description).'
                     </span>
                 </div>
             </div>

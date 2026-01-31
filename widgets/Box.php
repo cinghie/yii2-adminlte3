@@ -68,8 +68,16 @@ class Box extends Widget
     /**
      * @var string|array|null body content. String = HTML/content. Array = render via GridView (dataProvider + columns).
      * Null = default placeholder content.
+     * When string and $encodeBody is true (default), body is HTML-encoded to prevent XSS.
+     * When $encodeBody is false, body is output as-is: use only trusted HTML (e.g. from app), never user input.
      */
     public $body;
+
+    /**
+     * @var bool whether to HTML-encode body when it is a string. Default true to prevent XSS.
+     * Set false only if body contains trusted HTML (e.g. server-generated); never for user-generated content.
+     */
+    public $encodeBody = true;
 
     /**
      * @var \yii\data\DataProviderInterface|null for GridView body (when $body is array config or body is null and these are set)
@@ -239,7 +247,7 @@ class Box extends Widget
 
         if ($this->body !== null) {
             if (is_string($this->body)) {
-                $content = $this->body;
+                $content = $this->encodeBody ? Html::encode($this->body) : $this->body;
             } elseif (is_array($this->body) && isset($this->body['dataProvider'], $this->body['columns'])) {
                 $content = GridView::widget([
                     'dataProvider' => $this->body['dataProvider'],

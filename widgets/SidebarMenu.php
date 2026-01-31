@@ -89,6 +89,20 @@ class SidebarMenu extends Menu
     private $noDefaultRoute;
 
     /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        parent::init();
+        if ($this->route === null && Yii::$app->controller !== null) {
+            $this->route = Yii::$app->controller->getRoute();
+        }
+        if ($this->params === null && Yii::$app->request !== null) {
+            $this->params = Yii::$app->request->getQueryParams();
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function run()
@@ -96,26 +110,29 @@ class SidebarMenu extends Menu
         if ($this->route === null && Yii::$app->controller !== null) {
             $this->route = Yii::$app->controller->getRoute();
         }
-
-        if ($this->params === null) {
+        if ($this->params === null && Yii::$app->request !== null) {
             $this->params = Yii::$app->request->getQueryParams();
         }
 
-        $posDefaultAction = strpos($this->route, Yii::$app->controller->defaultAction);
-        if ($posDefaultAction) {
-            $this->noDefaultAction = rtrim(substr($this->route, 0, $posDefaultAction), '/');
-        } else {
-            $this->noDefaultAction = false;
-        }
-
-        if (Yii::$app->controller->module !== null) {
-            $posDefaultRoute = strpos($this->route, Yii::$app->controller->module->defaultRoute);
-            if ($posDefaultRoute) {
-                $this->noDefaultRoute = rtrim(substr($this->route, 0, $posDefaultRoute), '/');
+        if (Yii::$app->controller !== null && $this->route !== null) {
+            $posDefaultAction = strpos($this->route, Yii::$app->controller->defaultAction);
+            if ($posDefaultAction !== false) {
+                $this->noDefaultAction = rtrim(substr($this->route, 0, $posDefaultAction), '/');
+            } else {
+                $this->noDefaultAction = false;
+            }
+            if (Yii::$app->controller->module !== null) {
+                $posDefaultRoute = strpos($this->route, Yii::$app->controller->module->defaultRoute);
+                if ($posDefaultRoute !== false) {
+                    $this->noDefaultRoute = rtrim(substr($this->route, 0, $posDefaultRoute), '/');
+                } else {
+                    $this->noDefaultRoute = false;
+                }
             } else {
                 $this->noDefaultRoute = false;
             }
         } else {
+            $this->noDefaultAction = false;
             $this->noDefaultRoute = false;
         }
 

@@ -20,12 +20,29 @@ use yii\helpers\Url;
  * NavbarButton widget for AdminLTE 3 with Bootstrap 4.
  *
  * Renders a single navbar link (nav-item > nav-link).
+ * URL is validated: javascript: and data: are replaced with '#' to prevent XSS/open redirect.
  * Use inside: <ul class="navbar-nav"> ... </ul>
  *
  * @see https://adminlte.io/docs/3.1/components/navbar.html
  */
 class NavbarButton extends Widget
 {
+    /**
+     * Validates URL for use in href: rejects javascript:, data: and other dangerous schemes. Returns '#' if unsafe.
+     * @param string $url
+     * @return string
+     */
+    protected static function safeLinkUrl($url)
+    {
+        if ($url === null || $url === '' || $url === '#') {
+            return '#';
+        }
+        $url = (string) $url;
+        if (preg_match('#^\s*javascript:#i', $url) || preg_match('#^\s*data:#i', $url) || preg_match('#^\s*vbscript:#i', $url)) {
+            return '#';
+        }
+        return $url;
+    }
     /**
      * @var string Link content (HTML allowed, e.g. icon + text). Default: icon only.
      */
@@ -71,6 +88,7 @@ class NavbarButton extends Widget
     public function run()
     {
         $url = is_array($this->url) ? Url::to($this->url) : $this->url;
+        $url = self::safeLinkUrl($url);
 
         $options = array_merge(['class' => 'nav-link'], $this->option);
         if ($this->target !== null && $this->target !== '') {

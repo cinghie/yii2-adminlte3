@@ -21,18 +21,21 @@ use yii\helpers\Html;
  * Renders a read-mail card: subject, sender, body, attachments.
  * Markup: card > card-header (optional) > card-body (mailbox-read-info, mailbox-read-message) > card-footer (attachments).
  * Attachment items: object with getAttachmentTypeIcon(), fileUrl, filename, formatSize() or array with url, filename, size, icon.
+ * Security: mailBody is output as-is (HTML). If user-generated, sanitize (e.g. HTML Purifier) before passing.
+ * Attachment url is validated (only http/https or relative); size is HTML-encoded. Icon: use only trusted HTML.
  *
  * @see https://adminlte.io/docs/3.1/pages/mailbox/read-mail.html
  */
 class MailboxRead extends Widget
 {
     /**
-     * @var array Attachments: list of objects (fileUrl, filename, formatSize(), getAttachmentTypeIcon()) or arrays (url, filename, size, icon)
+     * @var array Attachments: list of objects (fileUrl, filename, formatSize(), getAttachmentTypeIcon()) or arrays (url, filename, size, icon).
+     * url: only http/https or path starting with / are used; others become #. icon: use only trusted HTML (e.g. <i class="far fa-file"></i>).
      */
     public $mailAttachments = [];
 
     /**
-     * @var string Mail body (HTML allowed; encode if user-generated)
+     * @var string Mail body (HTML allowed). If user-generated, sanitize (e.g. HTML Purifier) before passing to prevent XSS.
      */
     public $mailBody = '';
 
@@ -138,7 +141,27 @@ class MailboxRead extends Widget
     }
 
     /**
-     * Renders attachments list.
+     * Validates URL for use in href: only http, https or relative path. Returns '#' for dangerous schemes.
+     * @param string $url
+     * @return string
+     */
+    protected static function safeAttachmentUrl($url)
+    {
+        if ($url === null || $url === '' || $url === '#') {
+            return '#';
+        }
+        $url = (string) $url;
+        if (preg_match('#^\s*javascript:#i', $url) || preg_match('#^\s*data:#i', $url)) {
+            return '#';
+        }
+        if (preg_match('#^https?://#i', $url) || preg_match('#^/#', $url) || !preg_match('#^[a-z][a-z0-9+.-]*:#i', $url)) {
+            return $url;
+        }
+        return '#';
+    }
+
+    /**
+     * Renders attachments list. Size is HTML-encoded; url is validated (safe schemes only).
      * @return string
      */
     protected function renderAttachments()
@@ -161,13 +184,14 @@ class MailboxRead extends Widget
                 $icon = method_exists($attachment, 'getAttachmentTypeIcon') ? $attachment->getAttachmentTypeIcon() : '<i class="far fa-file"></i>';
             }
 
+            $url = self::safeAttachmentUrl($url);
             $iconSpan = Html::tag('span', $icon, ['class' => 'mailbox-attachment-icon']);
             $link = Html::a(
                 '<i class="fas fa-paperclip"></i> ' . Html::encode($filename),
                 $url,
                 ['class' => 'mailbox-attachment-name', 'style' => 'display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;']
             );
-            $sizeSpan = $size !== '' ? Html::tag('span', $size, ['class' => 'mailbox-attachment-size']) : '';
+            $sizeSpan = $size !== '' ? Html::tag('span', Html::encode($size), ['class' => 'mailbox-attachment-size']) : '';
             $info = Html::tag('div', $link . $sizeSpan, ['class' => 'mailbox-attachment-info']);
             $items[] = Html::tag('li', $iconSpan . $info);
         }
