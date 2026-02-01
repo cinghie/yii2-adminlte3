@@ -2,7 +2,7 @@ Sidebar Menu Example
 =======================
 
 ```
-<?php use cinghie\adminlte\widgets\SidebarMenu; ?>
+<?php use cinghie\adminlte3\widgets\SidebarMenu; ?>
 
 <!-- sidebar menu -->
 <?= SidebarMenu::widget(

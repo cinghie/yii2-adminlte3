@@ -4,7 +4,7 @@ Content Header
 ## Default Value
 
 ```
-<?php use cinghie\adminlte\widgets\ContentHeader; ?>
+<?php use cinghie\adminlte3\widgets\ContentHeader; ?>
 
 <!-- content header -->
 <?= ContentHeader::widget() ?>
@@ -13,7 +13,7 @@ Content Header
 ## Custom Value
 
 ```
-<?php use cinghie\adminlte\widgets\ContentHeader; ?>
+<?php use cinghie\adminlte3\widgets\ContentHeader; ?>
 
 <!-- content header -->
 <?= ContentHeader::widget([

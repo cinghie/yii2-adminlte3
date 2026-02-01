@@ -4,7 +4,7 @@ Navbar User Example
 ## Default Value
 
 ```
-<?php use cinghie\adminlte\widgets\NavbarUser; ?>
+<?php use cinghie\adminlte3\widgets\NavbarUser; ?>
 
 <!-- navbar user -->
 <?= NavbarButton::widget() ?>
@@ -13,7 +13,7 @@ Navbar User Example
 ## Custom Value
 
 ```
-<?php use cinghie\adminlte\widgets\NavbarUser; ?>
+<?php use cinghie\adminlte3\widgets\NavbarUser; ?>
 
 <!-- navbar user -->
 <?= NavbarUser::widget([

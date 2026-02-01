@@ -47,15 +47,25 @@ AdminLTEMinifyAsset::register($this);
 Widgets Examples
 -----------------
 
-[Alert](docs/example_alert.md)  
-[Box](docs/example_box.md)  
-[Content Header](docs/example_contentheader.md)  
-[Footer](docs/example_footer.md)  
-[Navbar Button](docs/example_navbarbutton.md)  
-[Navbar Logo](docs/example_navbarlogo.md)  
-[Navbar User](docs/example_navbaruser.md)  
-[Sidebar Menu](docs/example_sidebarmenu.md)  
-[Sidebar Search](docs/example_sidebarsearch.md)  
-[Sidebar Toggle](docs/example_sidebartoggle.md)  
-[Sidebar User](docs/example_sidebaruser.md)  
-[Simplebox](docs/example_simplebox.md)  
+| Widget | Guide |
+|--------|--------|
+| [Alert](docs/example_alert.md) | Alert messages |
+| [Box](docs/example_box.md) | Card with header, body (content or GridView), footer |
+| [Breadcrumbs](docs/example_breadcrumbs.md) | Navigation breadcrumbs |
+| [Card](docs/example_card.md) | Simple card (header, body, footer) |
+| [Content Header](docs/example_contentheader.md) | Page title and breadcrumbs |
+| [DataColumn](docs/example_datacolumn.md) | GridView column class (sorting header) |
+| [Footer](docs/example_footer.md) | Layout footer |
+| [GridView](docs/example_gridview.md) | Data grid in AdminLTE 3 card |
+| [InfoBox](docs/example_infobox.md) | Info box (icon, text, number, optional progress) |
+| [Invoice](docs/example_invoice.md) | Invoice layout |
+| [MailboxRead](docs/example_mailboxread.md) | Read-mail card (subject, body, attachments) |
+| [Navbar Button](docs/example_navbarbutton.md) | Navbar link button |
+| [Navbar Logo](docs/example_navbarlogo.md) | Navbar brand/logo |
+| [Navbar User](docs/example_navbaruser.md) | Navbar user dropdown |
+| [Sidebar Menu](docs/example_sidebarmenu.md) | Sidebar navigation menu |
+| [Sidebar Search](docs/example_sidebarsearch.md) | Sidebar search form |
+| [Sidebar Toggle](docs/example_sidebartoggle.md) | Sidebar toggle button |
+| [Sidebar User](docs/example_sidebaruser.md) | Sidebar user panel |
+| [SmallBox](docs/example_smallbox.md) | Small stat box with optional footer link |
+| [Timeline](docs/example_timeline.md) | Timeline (days and items) |

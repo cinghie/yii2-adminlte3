@@ -4,7 +4,7 @@ Sidebar Search Example
 ## Default Value
 
 ```
-<?php use cinghie\adminlte\widgets\SidebarSearch; ?>
+<?php use cinghie\adminlte3\widgets\SidebarSearch; ?>
 
 <!-- sidebar search form -->
 <?= SidebarSearch::widget() ?>
@@ -13,7 +13,7 @@ Sidebar Search Example
 ## Custom Value
 
 ```
-<?php use cinghie\adminlte\widgets\SidebarSearch; ?>
+<?php use cinghie\adminlte3\widgets\SidebarSearch; ?>
 
 <!-- sidebar search form -->
 <?= SidebarSearch::widget([

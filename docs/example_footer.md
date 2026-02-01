@@ -4,7 +4,7 @@ Footer Example
 ## Default Value
 
 ```
-<?php use cinghie\adminlte\widgets\Footer; ?>
+<?php use cinghie\adminlte3\widgets\Footer; ?>
 
 <!-- sidebar user panel -->
 <?= Footer::widget() ?>
@@ -13,7 +13,7 @@ Footer Example
 ## Custom Value
 
 ```
-<?php use cinghie\adminlte\widgets\SidebarSearch; ?>
+<?php use cinghie\adminlte3\widgets\SidebarSearch; ?>
 
 <!-- sidebar user panel -->
 <?= Footer::widget([

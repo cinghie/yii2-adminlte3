@@ -4,7 +4,7 @@ Sidebar User Example
 ## Default Value
 
 ```
-<?php use cinghie\adminlte\widgets\SidebarUser; ?>
+<?php use cinghie\adminlte3\widgets\SidebarUser; ?>
 
 <!-- sidebar user panel -->
 <?= SidebarUser::widget() ?>
@@ -13,7 +13,7 @@ Sidebar User Example
 ## Custom Value
 
 ```
-<?php use cinghie\adminlte\widgets\SidebarSearch; ?>
+<?php use cinghie\adminlte3\widgets\SidebarSearch; ?>
 
 <!-- sidebar user panel -->
 <?= SidebarUser::widget([

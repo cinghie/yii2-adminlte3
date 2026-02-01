@@ -5,7 +5,7 @@ Box Examples
 
 Default Values:
 ```
-<?php use cinghie\adminlte\widgets\Box; ?>
+<?php use cinghie\adminlte3\widgets\Box; ?>
 
 <!-- Box -->
 <?= Box::widget() ?>
@@ -13,7 +13,7 @@ Default Values:
 
 Custom Values:
 ```
-<?php use cinghie\adminlte\widgets\Box; ?>
+<?php use cinghie\adminlte3\widgets\Box; ?>
 
 <!-- Box -->
 <?= Box::widget([

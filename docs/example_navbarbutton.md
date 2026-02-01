@@ -4,7 +4,7 @@ Navbar Button Example
 ## Default Value
 
 ```
-<?php use cinghie\adminlte\widgets\NavbarButton; ?>
+<?php use cinghie\adminlte3\widgets\NavbarButton; ?>
 
 <!-- logo -->
 <?= NavbarButton::widget() ?>
@@ -13,7 +13,7 @@ Navbar Button Example
 ## Custom Value to external link
 
 ```
-<?php use cinghie\adminlte\widgets\NavbarButton; ?>
+<?php use cinghie\adminlte3\widgets\NavbarButton; ?>
 
 <!-- navbar button to external link -->
 <?= NavbarButton::widget([
@@ -26,7 +26,7 @@ Navbar Button Example
 ## Custom Value to url with method post
 
 ```
-<?php use cinghie\adminlte\widgets\NavbarButton; ?>
+<?php use cinghie\adminlte3\widgets\NavbarButton; ?>
 
 <!-- navbar button to url with method post -->
 <?= NavbarButton::widget([

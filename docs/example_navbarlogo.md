@@ -4,7 +4,7 @@ Navbar Logo Example
 ## Default Value
 
 ```
-<?php use cinghie\adminlte\widgets\NavbarLogo; ?>
+<?php use cinghie\adminlte3\widgets\NavbarLogo; ?>
 
 <!-- logo -->
 <?= NavbarLogo::widget() ?>
@@ -13,7 +13,7 @@ Navbar Logo Example
 ## Custom Value
 
 ```
-<?php use cinghie\adminlte\widgets\NavbarLogo; ?>
+<?php use cinghie\adminlte3\widgets\NavbarLogo; ?>
 
 <!-- logo -->
 <?= NavbarLogo::widget([
