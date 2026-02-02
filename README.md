@@ -60,6 +60,7 @@ Widgets Examples
 | [InfoBox](docs/example_infobox.md) | Info box (icon, text, number, optional progress) |
 | [Invoice](docs/example_invoice.md) | Invoice layout |
 | [MailboxRead](docs/example_mailboxread.md) | Read-mail card (subject, body, attachments) |
+| [NavTabs](docs/example_navtabs.md) | Nav tabs with tab panes (Bootstrap 4) |
 | [Navbar Button](docs/example_navbarbutton.md) | Navbar link button |
 | [Navbar Logo](docs/example_navbarlogo.md) | Navbar brand/logo |
 | [Navbar User](docs/example_navbaruser.md) | Navbar user dropdown |
