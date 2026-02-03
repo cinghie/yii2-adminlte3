@@ -16,6 +16,7 @@ use cinghie\fontawesome\FontAwesomeAsset;
 use cinghie\ionicons\IoniconsAsset;
 use yii\bootstrap4\BootstrapAsset;
 use yii\web\AssetBundle;
+use yii\web\JqueryAsset;
 use yii\web\YiiAsset;
 
 /**
@@ -41,9 +42,9 @@ class AdminLTEAsset extends AssetBundle
 	 * @inherit
 	 */
 	public $js = [
-        'plugins/jquery/jquery.js',
         'plugins/jquery-ui/jquery-ui.js',
         'plugins/bootstrap/js/bootstrap.bundle.js',
+        'plugins/moment/moment.min.js',
         'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.js',
         'dist/js/adminlte.js',
 	];
@@ -53,6 +54,7 @@ class AdminLTEAsset extends AssetBundle
      */
 	public $depends = [
 		YiiAsset::class,
+		JqueryAsset::class,
 		BootstrapAsset::class,
 		FontAwesomeAsset::class,
 		IoniconsAsset::class

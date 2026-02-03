@@ -16,6 +16,7 @@ use cinghie\fontawesome\FontAwesomeMinifyAsset;
 use cinghie\ionicons\IoniconsMinifyAsset;
 use yii\bootstrap4\BootstrapAsset;
 use yii\web\AssetBundle;
+use yii\web\JqueryAsset;
 use yii\web\YiiAsset;
 
 /**
@@ -41,9 +42,9 @@ class AdminLTEMinifyAsset extends AssetBundle
      * @inherit
      */
     public $js = [
-        'plugins/jquery/jquery.min.js',
         'plugins/jquery-ui/jquery-ui.min.js',
         'plugins/bootstrap/js/bootstrap.bundle.min.js',
+        'plugins/moment/moment.min.js',
         'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js',
         'dist/js/adminlte.min.js',
     ];
@@ -53,6 +54,7 @@ class AdminLTEMinifyAsset extends AssetBundle
      */
     public $depends = [
         YiiAsset::class,
+        JqueryAsset::class,
         BootstrapAsset::class,
         FontAwesomeMinifyAsset::class,
         IoniconsMinifyAsset::class,
