@@ -13,89 +13,142 @@
 namespace cinghie\adminlte3\widgets;
 
 use yii\base\InvalidConfigException;
-use kartik\grid\GridView as baseGrid;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use kartik\grid\GridView as BaseGrid;
+use Yii;
 
 /**
  * GridView for AdminLTE 3 with Bootstrap 4.
  *
- * Wraps output in an AdminLTE 3 card (card-body, card-footer). Uses Bootstrap 4 table classes.
- * Optional card header via $cardTitle (HTML-encoded). Backward compatible with $boxClass.
+ * Styled like AdminLTE 3 "DataTable with default features":
+ * card → card-header (h3.card-title) → card-body → table.table-bordered.table-striped
  *
+ * @see https://adminlte.io/themes/v3/pages/tables/data.html
  * @see https://adminlte.io/docs/3.1/components/cards.html
  */
-class GridView extends baseGrid
+class GridView extends BaseGrid
 {
+    /** @var int|string Bootstrap version for Kartik (AdminLTE 3 = 4) */
+    public $bsVersion = 4;
+
     /** @var string column class for data columns */
     public $dataColumnClass = DataColumn::class;
 
-    /** @var array options for the table tag (Bootstrap 4) */
-    public $tableOptions = ['class' => 'table table-sm'];
+    /** @var array options for the table tag (Bootstrap 4 / AdminLTE 3 DataTables) */
+    public $tableOptions = ['class' => 'table'];
 
-    /** @var string extra CSS class for the card wrapper (e.g. card-primary). */
+    /**
+     * Extra CSS class for the outer card (e.g. card-outline card-primary).
+     * Applied when Kartik panel is used or when wrapping without panel.
+     *
+     * @var string
+     */
     public $cardClass = '';
 
-    /** @var string|null optional card header title (HTML-encoded when rendered). */
+    /**
+     * Optional card header title (HTML-encoded). Used when panel is empty.
+     *
+     * @var string|null
+     */
     public $cardTitle;
+
+    /**
+     * Raw HTML for card-header (overrides cardTitle). Used when panel is empty.
+     *
+     * @var string|null
+     */
+    public $cardHeaderHtml;
 
     /** @var string deprecated; use $cardClass. Kept for backward compatibility. */
     public $boxClass = '';
 
     /**
-     * @var bool is bordered
+     * Match AdminLTE DataTables default features: bordered + striped (no table-sm).
+     *
+     * @var bool
      */
     public $bordered = true;
 
-    /**
-     * @var bool is condensed
-     */
-    public $condensed = true;
+    /** @var bool */
+    public $condensed = false;
 
-    /**
-     * @var bool is striped
-     */
+    /** @var bool */
     public $striped = true;
 
-    /**
-     * @var bool is row have hover effect
-     */
-    public $hover = true;
+    /** @var bool hover is optional (minimal demo uses it; default features does not) */
+    public $hover = false;
 
-    /** @var string layout; if null, set in init() to card-body/card-footer (and optional card-header). */
+    /** @var string|null layout; if null and no panel, set in init() */
     public $layout;
 
-    /**
-     * @var boolean whether the grid will have a `responsive` style. Applicable only if `bootstrap` is `true`.
-     */
+    /** @var bool */
     public $responsive = true;
 
-    /**
-     * @var boolean whether the grid will automatically wrap to fit columns for smaller display sizes.
-     */
-    public $responsiveWrap = true;
+    /** @var bool */
+    public $responsiveWrap = false;
 
-    /**
-     * @var boolean whether the grid view will be rendered within a pjax container. Defaults to `false`. If set to
-     * `true`, the entire GridView widget will be parsed via Pjax and auto-rendered inside a yii\widgets\Pjax
-     * widget container. If set to `false` pjax will be disabled and none of the pjax settings will be applied.
-     */
+    /** @var bool */
     public $pjax = true;
 
-    /**
-     * @var array the pjax settings for the widget. This will be considered only when [[pjax]] is set to true. The
-     * following settings are recognized:
-     * - `neverTimeout`: `boolean`, whether the pjax request should never timeout. Defaults to `true`. The pjax:timeout
-     *   event will be configured to disable timing out of pjax requests for the pjax container.
-     * - `options`: _array_, the options for the [[\yii\widgets\Pjax]] widget.
-     * - `loadingCssClass`: boolean/string, the CSS class to be applied to the grid when loading via pjax. If set to
-     *   `false` - no css class will be applied. If it is empty, null, or set to `true`, will default to
-     *   `kv-grid-loading`.
-     * - `beforeGrid`: _string_, any content to be embedded within pjax container before the Grid widget.
-     * - `afterGrid`: _string_, any content to be embedded within pjax container after the Grid widget.
-     */
+    /** @var array */
     public $pjaxSettings = [
-        'neverTimeout'=>true,
+        'neverTimeout' => true,
     ];
+
+    /**
+     * Kartik export menu (needs kartik-v/yii2-bootstrap4-dropdown on BS4).
+     * Disabled by default — AdminLTE DataTables demo has no export toolbar.
+     *
+     * @var bool|array
+     */
+    public $export = false;
+
+    /**
+     * AdminLTE 3 card panel templates (DataTables-style).
+     *
+     * @var string
+     */
+    public $panelTemplate = <<< HTML
+{panelHeading}
+<div class="card-body">
+{items}
+</div>
+{panelAfter}
+{panelFooter}
+HTML;
+
+    /**
+     * @var string
+     */
+    public $panelHeadingTemplate = <<< HTML
+{title}
+<div class="card-tools">{toolbarContainer}</div>
+HTML;
+
+    /**
+     * Match AdminLTE DataTables Buttons container (dt-buttons).
+     * @see https://adminlte.io/themes/v3/pages/tables/data.html
+     *
+     * @var array
+     */
+    public $toolbarContainerOptions = ['class' => 'dt-buttons btn-group'];
+
+    /**
+     * @var string
+     */
+    public $panelFooterTemplate = <<< HTML
+<div class="d-flex justify-content-between align-items-center flex-wrap w-100">
+    <div>{summary}</div>
+    <div class="kv-panel-pager">{pager}</div>
+</div>
+{footer}
+HTML;
+
+    /**
+     * @var string|null original panel type mapped to card-outline
+     */
+    protected $cardOutlineType;
 
     /**
      * @inheritdoc
@@ -104,31 +157,292 @@ class GridView extends baseGrid
      */
     public function init()
     {
-        if ($this->layout === null) {
-            $header = '';
-            if ($this->cardTitle !== null && $this->cardTitle !== '') {
-                $header = Html::tag('div', Html::encode($this->cardTitle), ['class' => 'card-header']) . "\n";
-            }
-            $this->layout = $header . "<div class=\"card-body\">{items}</div>\n<div class=\"card-footer clearfix d-flex justify-content-between align-items-center flex-wrap\"><span>{summary}</span>{pager}</div>";
-        }
+        $this->bsVersion = 4;
+        $this->normalizePanelForAdminLte();
+        $this->ensureExportDependency();
+        $this->normalizeToolbarForAdminLte();
 
-        if ($this->bordered) {
-            Html::addCssClass($this->tableOptions, 'table-bordered');
-        }
-
-        if ($this->condensed) {
-            Html::addCssClass($this->tableOptions, 'table-sm');
-        }
-
-        if ($this->striped) {
-            Html::addCssClass($this->tableOptions, 'table-striped');
-        }
-
-        if ($this->hover) {
-            Html::addCssClass($this->tableOptions, 'table-hover');
+        if ($this->layout === null && (empty($this->panel) || !is_array($this->panel))) {
+            $header = $this->renderStandaloneCardHeader();
+            $this->layout = $header
+                . "<div class=\"card-body\">{items}</div>\n"
+                . '<div class="card-footer clearfix d-flex justify-content-between align-items-center flex-wrap">'
+                . '<span>{summary}</span>{pager}</div>';
         }
 
         parent::init();
+        $this->registerAdminLteGridCss();
+    }
+
+    /**
+     * Toolbar as AdminLTE DataTables dt-buttons (no Kartik float-right).
+     */
+    protected function normalizeToolbarForAdminLte()
+    {
+        $this->toolbarContainerOptions = ArrayHelper::merge(
+            ['class' => 'dt-buttons btn-group'],
+            $this->toolbarContainerOptions ?: []
+        );
+        Html::removeCssClass($this->toolbarContainerOptions, 'btn-toolbar');
+        Html::removeCssClass($this->toolbarContainerOptions, 'kv-grid-toolbar');
+        Html::removeCssClass($this->toolbarContainerOptions, 'toolbar-container');
+        Html::removeCssClass($this->toolbarContainerOptions, 'float-right');
+        Html::removeCssClass($this->toolbarContainerOptions, 'float-left');
+        Html::addCssClass($this->toolbarContainerOptions, 'dt-buttons btn-group');
+
+        // DataTables Buttons use solid secondary buttons
+        foreach (['all', 'page'] as $tag) {
+            if (!isset($this->toggleDataOptions[$tag]['class'])) {
+                $this->toggleDataOptions[$tag]['class'] = 'btn btn-secondary';
+            }
+        }
+    }
+
+    /**
+     * @inheritdoc
+     * Place toolbar in card-tools without float-right (flex aligns with card-title).
+     */
+    protected function renderToolbarContainer()
+    {
+        $options = $this->toolbarContainerOptions;
+        $tag = ArrayHelper::remove($options, 'tag', 'div');
+        Html::addCssClass($options, 'dt-buttons btn-group');
+        Html::removeCssClass($options, 'float-right');
+        Html::removeCssClass($options, 'float-left');
+
+        return Html::tag($tag, $this->renderToolbar(), $options);
+    }
+
+    /**
+     * BS4 export dropdown requires kartik-v/yii2-bootstrap4-dropdown; disable if missing.
+     */
+    protected function ensureExportDependency()
+    {
+        if ($this->export === false) {
+            return;
+        }
+        if (!class_exists(\kartik\bs4dropdown\ButtonDropdown::class)) {
+            $this->export = false;
+        }
+    }
+
+    /**
+     * Convert legacy BS3 panel config to AdminLTE 3 DataTables card look.
+     */
+    protected function normalizePanelForAdminLte()
+    {
+        if (!is_array($this->panel) || empty($this->panel)) {
+            return;
+        }
+
+        if (isset($this->panel['heading']) && is_string($this->panel['heading'])) {
+            $heading = $this->panel['heading'];
+            $heading = str_replace(['panel-title', 'fa fa-', 'glyphicon glyphicon-'], ['card-title', 'fas fa-', 'fas fa-'], $heading);
+            // Views often pass a full <h3>…</h3>; Kartik wraps {title} again — keep inner HTML only
+            if (preg_match('#<h[1-6][^>]*>(.*)</h[1-6]>#is', $heading, $m)) {
+                $heading = $m[1];
+            }
+            $this->panel['heading'] = $heading;
+        }
+
+        $type = ArrayHelper::getValue($this->panel, 'type', 'default');
+        // Colored panel headers diverge from AdminLTE DataTables demo → outline on card, light header
+        if (in_array($type, ['primary', 'secondary', 'success', 'info', 'warning', 'danger', 'dark'], true)) {
+            $this->cardOutlineType = $type;
+            $this->panel['type'] = 'default';
+        }
+
+        $this->panel = ArrayHelper::merge([
+            'headingOptions' => ['class' => 'card-header'],
+            'titleOptions' => [
+                'class' => 'card-title',
+                'tag' => 'h3',
+            ],
+            'footerOptions' => ['class' => 'card-footer'],
+            'summaryOptions' => ['class' => 'kv-panel-summary'],
+            'before' => false,
+        ], $this->panel);
+
+        // Always hide kv-panel-before (AdminLTE DataTables has no toolbar strip)
+        $this->panel['before'] = false;
+
+        // Ensure outline class lands on Kartik's card container
+        $outline = $this->resolveCardOutlineClass();
+        if ($outline !== '') {
+            $options = ArrayHelper::getValue($this->panel, 'options', []);
+            Html::addCssClass($options, $outline);
+            $this->panel['options'] = $options;
+        }
+    }
+
+    /**
+     * @return string
+     */
+    protected function resolveCardOutlineClass()
+    {
+        $parts = array_filter([
+            trim((string) $this->cardClass),
+            trim((string) $this->boxClass),
+        ]);
+        if ($this->cardOutlineType) {
+            $parts[] = 'card-outline';
+            $parts[] = 'card-' . $this->cardOutlineType;
+        }
+
+        return trim(implode(' ', $parts));
+    }
+
+    /**
+     * @return string
+     */
+    protected function renderStandaloneCardHeader()
+    {
+        if ($this->cardHeaderHtml !== null && $this->cardHeaderHtml !== '') {
+            return Html::tag('div', $this->cardHeaderHtml, ['class' => 'card-header']) . "\n";
+        }
+        if ($this->cardTitle !== null && $this->cardTitle !== '') {
+            $title = Html::tag('h3', Html::encode($this->cardTitle), ['class' => 'card-title']);
+
+            return Html::tag('div', $title, ['class' => 'card-header']) . "\n";
+        }
+
+        return '';
+    }
+
+    /**
+     * Header sort links must not use Bootstrap primary blue (AdminLTE/DataTables use body text color).
+     */
+    protected function registerAdminLteGridCss()
+    {
+        $css = <<< CSS
+/* AdminLTE 3 DataTables: thead sort links inherit table header color (not \$link-color) */
+.kv-grid-table thead th a,
+.kv-grid-table thead th a:hover,
+.kv-grid-table thead th a:focus,
+.kv-grid-table thead th a:active,
+.card .table thead th a,
+.card .table thead th a:hover,
+.card .table thead th a:focus,
+.card .table thead th a:active {
+    color: inherit !important;
+    text-decoration: none;
+}
+.kv-grid-table thead th a .fas,
+.kv-grid-table thead th a .fa,
+.kv-grid-table thead th a .glyphicon,
+.card .table thead th a .fas,
+.card .table thead th a .fa {
+    opacity: 0.55;
+    margin-left: 0.35rem;
+    font-size: 0.85em;
+}
+.kv-grid-panel > .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+.kv-grid-panel > .card-header::after {
+    display: none; /* AdminLTE clearfix conflicts with flex alignment */
+}
+.kv-grid-panel > .card-header .card-title {
+    display: inline-flex;
+    align-items: center;
+    float: none;
+    margin: 0;
+    line-height: 1.5;
+}
+.kv-grid-panel > .card-header .card-title > .fa,
+.kv-grid-panel > .card-header .card-title > .fas,
+.kv-grid-panel > .card-header .card-title > .far,
+.kv-grid-panel > .card-header .card-title > .fab,
+.kv-grid-panel > .card-header .card-title > .glyphicon {
+    line-height: 1;
+    vertical-align: middle;
+}
+/* AdminLTE card-tools + DataTables dt-buttons */
+.kv-grid-panel > .card-header .card-tools {
+    float: none;
+    margin: 0 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+}
+.kv-grid-panel > .card-header .card-tools .dt-buttons {
+    position: initial;
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .25rem;
+}
+.kv-grid-panel > .card-header .card-tools .dt-buttons > .btn-group {
+    margin: 0;
+}
+.kv-grid-panel > .card-header .card-tools .dt-buttons .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+}
+.kv-grid-panel .card-body {
+    padding: 1.25rem;
+}
+.kv-grid-panel .card-footer {
+    background-color: #fff !important;
+    background-image: none !important;
+    border-top: 1px solid rgba(0, 0, 0, .125);
+}
+.kv-grid-panel .card-footer .pagination {
+    margin-bottom: 0;
+}
+.kv-grid-panel .kv-table-footer,
+.kv-grid-panel .kv-grid-table > tfoot > tr > th,
+.kv-grid-panel .kv-grid-table > tfoot > tr > td {
+    background-color: #fff !important;
+    background-image: none !important;
+}
+/* AdminLTE DataTables: white thead, normal height, visible top border */
+.kv-grid-panel .kv-grid-table,
+.kv-grid-bs4 .card .kv-grid-table {
+    margin-bottom: 0;
+    border: 1px solid #dee2e6;
+}
+.kv-grid-panel .kv-grid-table > thead.kv-table-header > tr > th,
+.kv-grid-panel .kv-grid-table > thead.kv-table-header > tr > td,
+.kv-grid-panel .kv-table-header > tr > th,
+.kv-grid-panel .kv-table-header > tr > td,
+.kv-grid-panel .table-bordered > thead.kv-table-header > tr,
+.kv-grid-panel .table-bordered > thead.kv-table-header > tr > th,
+.kv-grid-panel .table-bordered > thead.kv-table-header > tr > td,
+.card .kv-grid-table > thead > tr > th,
+.card .table > thead > tr > th {
+    background-color: #fff !important;
+    background-image: none !important;
+    border-top: 1px solid #dee2e6 !important;
+    border-bottom: 1px solid #dee2e6 !important;
+    padding: 0.5rem 0.75rem;
+    vertical-align: middle;
+    line-height: 1.4;
+    font-weight: 600;
+}
+.kv-grid-panel .kv-grid-table > thead > tr.filters > td,
+.kv-grid-panel .table > thead > tr.filters > td {
+    background-color: #fff;
+    border-top: 0 !important;
+    padding: 0.4rem 0.75rem;
+    vertical-align: middle;
+}
+.kv-grid-panel .kv-grid-table > tbody > tr > td,
+.kv-grid-panel .kv-grid-table > tbody > tr > th {
+    padding: 0.5rem 0.75rem;
+    vertical-align: middle;
+}
+.kv-grid-panel .kv-sort-link .kv-sort-icon {
+    margin-left: 0.25rem;
+    font-size: 0.75em;
+    line-height: 1;
+}
+CSS;
+        Yii::$app->view->registerCss($css, [], 'cinghie-adminlte3-gridview');
     }
 
     /**
@@ -137,7 +451,14 @@ class GridView extends baseGrid
      */
     public function run()
     {
-        $cardClass = trim('card ' . (string) $this->cardClass . ' ' . (string) $this->boxClass);
+        // Kartik panel already renders the BS4 card — avoid a second wrapper
+        if (is_array($this->panel) && !empty($this->panel)) {
+            parent::run();
+
+            return;
+        }
+
+        $cardClass = trim('card ' . $this->resolveCardOutlineClass());
         echo Html::beginTag('div', ['class' => $cardClass]);
         parent::run();
         echo Html::endTag('div');

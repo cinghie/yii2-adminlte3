@@ -24,6 +24,16 @@ use yii\helpers\Html;
 class DataColumn extends KartikDataColumn
 {
     /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        parent::init();
+        // Avoid Bootstrap primary link color on sortable headers (AdminLTE / DataTables look)
+        Html::addCssClass($this->sortLinkOptions, 'text-dark');
+    }
+
+    /**
      * @return string
      */
     public function renderHeaderCell()
