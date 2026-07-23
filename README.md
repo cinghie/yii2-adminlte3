@@ -55,10 +55,11 @@ Widgets Examples
 | [Card](docs/example_card.md) | Simple card (header, body, footer) |
 | [Content Header](docs/example_contentheader.md) | Page title and breadcrumbs |
 | [DataColumn](docs/example_datacolumn.md) | GridView column class (sorting header) |
+| [DetailView](docs/example_detailview.md) | Kartik DetailView styled as AdminLTE 3 card |
 | [Footer](docs/example_footer.md) | Layout footer |
 | [GridView](docs/example_gridview.md) | Data grid in AdminLTE 3 card |
 | [InfoBox](docs/example_infobox.md) | Info box (icon, text, number, optional progress) |
-| [Invoice](docs/example_invoice.md) | Invoice layout |
+| [Invoice](docs/example_invoice.md) | Invoice layout (Bootstrap 4) |
 | [MailboxRead](docs/example_mailboxread.md) | Read-mail card (subject, body, attachments) |
 | [NavTabs](docs/example_navtabs.md) | Nav tabs with tab panes (Bootstrap 4) |
 | [Navbar Button](docs/example_navbarbutton.md) | Navbar link button |
