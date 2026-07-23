@@ -8,8 +8,7 @@
 
 Asset Bundle to include AdminLTE 3 on your Yii 2 project: https://github.com/ColorlibHQ/AdminLTE/tree/v3/
 
-Installation
------------------
+## Installation
 
 The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
 
@@ -25,8 +24,7 @@ or add this line to the require section of your `composer.json` file.
 "cinghie/yii2-adminlte3": "@dev"
 ```
 
-Configuration
------------------
+## Configuration
 
 Add in the view for normal CSS and JS
 
@@ -44,30 +42,29 @@ use cinghie\adminlte3\AdminLTEMinifyAsset;
 AdminLTEMinifyAsset::register($this);
 ```
 
-Widgets Examples
------------------
+## Widgets Examples
 
-| Widget | Guide |
-|--------|--------|
-| [Alert](docs/example_alert.md) | Alert messages |
-| [Box](docs/example_box.md) | Card with header, body (content or GridView), footer |
-| [Breadcrumbs](docs/example_breadcrumbs.md) | Navigation breadcrumbs |
-| [Card](docs/example_card.md) | Simple card (header, body, footer) |
-| [Content Header](docs/example_contentheader.md) | Page title and breadcrumbs |
-| [DataColumn](docs/example_datacolumn.md) | GridView column class (sorting header) |
-| [DetailView](docs/example_detailview.md) | Kartik DetailView styled as AdminLTE 3 card |
-| [Footer](docs/example_footer.md) | Layout footer |
-| [GridView](docs/example_gridview.md) | Data grid in AdminLTE 3 card |
-| [InfoBox](docs/example_infobox.md) | Info box (icon, text, number, optional progress) |
-| [Invoice](docs/example_invoice.md) | Invoice layout (Bootstrap 4) |
-| [MailboxRead](docs/example_mailboxread.md) | Read-mail card (subject, body, attachments) |
-| [NavTabs](docs/example_navtabs.md) | Nav tabs with tab panes (Bootstrap 4) |
-| [Navbar Button](docs/example_navbarbutton.md) | Navbar link button |
-| [Navbar Logo](docs/example_navbarlogo.md) | Navbar brand/logo |
-| [Navbar User](docs/example_navbaruser.md) | Navbar user dropdown |
-| [Sidebar Menu](docs/example_sidebarmenu.md) | Sidebar navigation menu |
-| [Sidebar Search](docs/example_sidebarsearch.md) | Sidebar search form |
-| [Sidebar Toggle](docs/example_sidebartoggle.md) | Sidebar toggle button |
-| [Sidebar User](docs/example_sidebaruser.md) | Sidebar user panel |
-| [SmallBox](docs/example_smallbox.md) | Small stat box with optional footer link |
-| [Timeline](docs/example_timeline.md) | Timeline (days and items) |
+| Widget                                          | Guide                                                |
+| ----------------------------------------------- | ---------------------------------------------------- |
+| [Alert](docs/example_alert.md)                  | Alert messages                                       |
+| [Box](docs/example_box.md)                      | Card with header, body (content or GridView), footer |
+| [Breadcrumbs](docs/example_breadcrumbs.md)      | Navigation breadcrumbs                               |
+| [Card](docs/example_card.md)                    | Card (header, tools, body, footer; begin/end)        |
+| [Content Header](docs/example_contentheader.md) | Page title and breadcrumbs                           |
+| [DataColumn](docs/example_datacolumn.md)        | GridView column class (sorting header)               |
+| [DetailView](docs/example_detailview.md)        | Kartik DetailView styled as AdminLTE 3 card          |
+| [Footer](docs/example_footer.md)                | Layout footer                                        |
+| [GridView](docs/example_gridview.md)            | Data grid in AdminLTE 3 card                         |
+| [InfoBox](docs/example_infobox.md)              | Info box (icon, text, number, optional progress)     |
+| [Invoice](docs/example_invoice.md)              | Invoice layout (Bootstrap 4)                         |
+| [MailboxRead](docs/example_mailboxread.md)      | Read-mail card (subject, body, attachments)          |
+| [NavTabs](docs/example_navtabs.md)              | Nav tabs with tab panes (Bootstrap 4)                |
+| [Navbar Button](docs/example_navbarbutton.md)   | Navbar link button                                   |
+| [Navbar Logo](docs/example_navbarlogo.md)       | Navbar brand/logo                                    |
+| [Navbar User](docs/example_navbaruser.md)       | Navbar user dropdown                                 |
+| [Sidebar Menu](docs/example_sidebarmenu.md)     | Sidebar navigation menu                              |
+| [Sidebar Search](docs/example_sidebarsearch.md) | Sidebar search form                                  |
+| [Sidebar Toggle](docs/example_sidebartoggle.md) | Sidebar toggle button                                |
+| [Sidebar User](docs/example_sidebaruser.md)     | Sidebar user panel                                   |
+| [SmallBox](docs/example_smallbox.md)            | Small stat box with optional footer link             |
+| [Timeline](docs/example_timeline.md)            | Timeline (days and items)                            |
