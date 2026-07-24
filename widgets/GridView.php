@@ -24,6 +24,8 @@ use Yii;
  * Styled like AdminLTE 3 "DataTable with default features":
  * card → card-header (h3.card-title) → card-body → table.table-bordered.table-striped
  *
+ * Empty cells render as '' — never "(not set)" / "(nessun valore)".
+ *
  * @see https://adminlte.io/themes/v3/pages/tables/data.html
  * @see https://adminlte.io/docs/3.1/components/cards.html
  */
@@ -171,6 +173,8 @@ HTML;
         }
 
         parent::init();
+        // Empty values: never Yii "(not set)" / "(nessun valore)".
+        $this->formatter->nullDisplay = '';
         $this->registerAdminLteGridCss();
     }
 

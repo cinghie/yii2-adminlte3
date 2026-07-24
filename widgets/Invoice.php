@@ -252,6 +252,10 @@ class Invoice extends Widget
 .cinghie-invoice .invoice-items .table {
     margin-bottom: 0;
 }
+.cinghie-invoice .invoice-items .table th,
+.cinghie-invoice .invoice-items .table td {
+    text-align: center;
+}
 .cinghie-invoice .table th,
 .cinghie-invoice .table td {
     padding: 0.75rem 1rem;
@@ -545,18 +549,13 @@ CSS;
             $lines[] = '<b>' . Html::encode(Yii::t('traits', 'Payment Due')) . ':</b> '
                 . Html::encode($this->invoicePaymentDue);
         }
-        if ($this->isFilled($this->invoiceSent)) {
-            $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice sent')) . ':</b> '
-                . Html::encode($this->invoiceSent);
-        }
-        if ($this->isFilled($this->invoicePaid)) {
-            $lines[] = '<b>' . Html::encode(Yii::t('traits', 'Paid')) . ':</b> '
-                . Html::encode($this->invoicePaid);
-        }
-        if ($this->isFilled($this->invoiceAccount)) {
-            $lines[] = '<b>' . Html::encode(Yii::t('traits', 'Account')) . ':</b> '
-                . Html::encode($this->invoiceAccount);
-        }
+        // Always show the three invoice dates (empty value when missing).
+        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice created')) . ':</b> '
+            . Html::encode($this->isFilled($this->invoiceDate) ? (string) $this->invoiceDate : '');
+        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice sent')) . ':</b> '
+            . Html::encode($this->isFilled($this->invoiceSent) ? (string) $this->invoiceSent : '');
+        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice paid')) . ':</b> '
+            . Html::encode($this->isFilled($this->invoicePaid) ? (string) $this->invoicePaid : '');
         if ($this->isFilled($this->invoicePaymentMethod)) {
             $method = $this->invoicePaymentMethod;
             if ($this->isFilled($this->invoicePaymentMethodCode)) {
@@ -576,47 +575,63 @@ CSS;
      * Normalize a line-item row to display columns.
      *
      * @param array $item
-     * @return array{product:string,serial:string,description:string,price:string,qty:string,subtotal:string}
+     * @return array{nr:string,name:string,description:string,qty:string,partial:string}
      */
     public static function normalizeItem(array $item): array
     {
-        $hasProduct = array_key_exists('product', $item) && $item['product'] !== '' && $item['product'] !== null;
-        $product = $hasProduct
-            ? (string) $item['product']
-            : (string) ($item['description'] ?? '');
+        $hasName = (array_key_exists('name', $item) && $item['name'] !== '' && $item['name'] !== null)
+            || (array_key_exists('product', $item) && $item['product'] !== '' && $item['product'] !== null);
+        $name = '';
+        if (array_key_exists('name', $item) && $item['name'] !== '' && $item['name'] !== null) {
+            $name = (string) $item['name'];
+        } elseif (array_key_exists('product', $item) && $item['product'] !== '' && $item['product'] !== null) {
+            $name = (string) $item['product'];
+        } else {
+            $name = (string) ($item['description'] ?? '');
+        }
+
         $description = '';
-        if ($hasProduct) {
+        if ($hasName) {
             $description = (string) ($item['detail'] ?? $item['description'] ?? '');
         } else {
             $description = (string) ($item['detail'] ?? '');
         }
 
+        $nr = '';
+        if (array_key_exists('sort', $item) && $item['sort'] !== '' && $item['sort'] !== null) {
+            $nr = (string) $item['sort'];
+        } elseif (array_key_exists('nr', $item) && $item['nr'] !== '' && $item['nr'] !== null) {
+            $nr = (string) $item['nr'];
+        } elseif (array_key_exists('serial', $item) && $item['serial'] !== '' && $item['serial'] !== null) {
+            $nr = (string) $item['serial'];
+        }
+
+        $partial = (string) ($item['subtotal'] ?? $item['amount'] ?? $item['product_price'] ?? $item['unit_price'] ?? $item['price'] ?? '');
+
         return [
-            'product' => $product,
-            'serial' => (string) ($item['serial'] ?? ''),
+            'nr' => $nr,
+            'name' => $name,
             'description' => $description,
-            'price' => (string) ($item['product_price'] ?? $item['unit_price'] ?? $item['price'] ?? ''),
             'qty' => (string) ($item['quantity'] ?? $item['qty'] ?? ''),
-            'subtotal' => (string) ($item['subtotal'] ?? $item['amount'] ?? ''),
+            'partial' => $partial,
         ];
     }
 
     /**
-     * AdminLTE demo columns: Qty | Product | Serial # | Description | Subtotal
+     * Columns: Nr. | Name | Description | Quantity | Partial price
      *
      * @return string
-     * @see https://adminlte.io/themes/v3/pages/examples/invoice.html
      */
     protected function renderItemsTable()
     {
         $html = '<div class="row"><div class="col-12 table-responsive invoice-items">'
             . '<table class="table table-striped">'
             . '<thead><tr>'
-            . '<th>' . Html::encode(Yii::t('traits', 'Qty')) . '</th>'
-            . '<th>' . Html::encode(Yii::t('traits', 'Product')) . '</th>'
-            . '<th>' . Html::encode(Yii::t('traits', 'Serial') . ' #') . '</th>'
-            . '<th>' . Html::encode(Yii::t('traits', 'Description')) . '</th>'
-            . '<th>' . Html::encode(Yii::t('traits', 'Subtotal')) . '</th>'
+            . '<th class="text-center">' . Html::encode(Yii::t('crm', 'Nr.')) . '</th>'
+            . '<th class="text-center">' . Html::encode(Yii::t('traits', 'Name')) . '</th>'
+            . '<th class="text-center">' . Html::encode(Yii::t('traits', 'Description')) . '</th>'
+            . '<th class="text-center">' . Html::encode(Yii::t('traits', 'Quantity')) . '</th>'
+            . '<th class="text-center">' . Html::encode(Yii::t('crm', 'Partial price')) . '</th>'
             . '</tr></thead><tbody>';
 
         $items = is_array($this->invoiceItems) ? $this->invoiceItems : [];
@@ -631,11 +646,11 @@ CSS;
                 }
                 $row = static::normalizeItem($item);
                 $html .= '<tr>'
-                    . '<td>' . Html::encode($row['qty']) . '</td>'
-                    . '<td>' . Html::encode($row['product']) . '</td>'
-                    . '<td>' . Html::encode($row['serial']) . '</td>'
-                    . '<td>' . Html::encode($row['description']) . '</td>'
-                    . '<td>' . Html::encode($row['subtotal'] !== '' ? $row['subtotal'] : $row['price']) . '</td>'
+                    . '<td class="text-center">' . Html::encode($row['nr']) . '</td>'
+                    . '<td class="text-center">' . Html::encode($row['name']) . '</td>'
+                    . '<td class="text-center">' . $this->formatItemDescription($row['description']) . '</td>'
+                    . '<td class="text-center">' . Html::encode($row['qty']) . '</td>'
+                    . '<td class="text-center">' . Html::encode($row['partial']) . '</td>'
                     . '</tr>';
             }
         }
@@ -643,6 +658,99 @@ CSS;
         $html .= '</tbody></table></div></div>';
 
         return $html;
+    }
+
+    /**
+     * Render description with http(s)/www/domain URLs turned into target=_blank links.
+     *
+     * @param string $description
+     * @return string HTML-safe
+     */
+    protected function formatItemDescription(string $description): string
+    {
+        $description = trim($description);
+        if ($description === '') {
+            return '';
+        }
+
+        // Capturing group so mixed text + URLs can be interleaved.
+        // Negative lookbehind avoids turning email domains into links.
+        $pattern = '#(https?://[^\s<>"\']+|www\.[^\s<>"\']+|(?<![\w.@+-])(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}(?:/[^\s<>"\']*)?)#iu';
+
+        if (!preg_match_all($pattern, $description, $matches, PREG_OFFSET_CAPTURE)) {
+            return Html::encode($description);
+        }
+
+        $html = '';
+        $offset = 0;
+        $length = strlen($description);
+
+        foreach ($matches[0] as $match) {
+            $raw = $match[0];
+            $pos = (int) $match[1];
+
+            if ($pos > $offset) {
+                $html .= Html::encode(substr($description, $offset, $pos - $offset));
+            }
+
+            $trailing = '';
+            if (preg_match('/[.,;:!?)\]]+$/u', $raw, $trailMatch)) {
+                $trailing = $trailMatch[0];
+                $raw = substr($raw, 0, -strlen($trailing));
+            }
+
+            if ($raw !== '' && $this->isSafeHttpUrlCandidate($raw)) {
+                $href = $this->normalizeWebsiteHref($raw);
+                if ($href !== null && preg_match('#^https?://#i', $href)) {
+                    $html .= Html::a(Html::encode($raw), $href, [
+                        'target' => '_blank',
+                        'rel' => 'noopener noreferrer',
+                    ]);
+                } else {
+                    $html .= Html::encode($raw);
+                }
+            } else {
+                $html .= Html::encode($raw);
+            }
+
+            if ($trailing !== '') {
+                $html .= Html::encode($trailing);
+            }
+
+            $offset = $pos + strlen($match[0]);
+        }
+
+        if ($offset < $length) {
+            $html .= Html::encode(substr($description, $offset));
+        }
+
+        return $html;
+    }
+
+    /**
+     * @param string $value raw matched URL candidate (no trailing punctuation)
+     * @return bool
+     */
+    protected function isSafeHttpUrlCandidate(string $value): bool
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return false;
+        }
+
+        // Reject non-http(s) schemes (javascript:, data:, …).
+        if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $value) && !preg_match('#^https?://#i', $value)) {
+            return false;
+        }
+
+        if (preg_match('#^https?://#i', $value) || preg_match('#^www\.#i', $value)) {
+            return true;
+        }
+
+        return (bool) preg_match(
+            '#^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}(?:/.*)?$#i',
+            $value
+        );
     }
 
     /**

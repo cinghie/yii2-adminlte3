@@ -23,6 +23,8 @@ use kartik\detail\DetailView as BaseDetailView;
  * Extends Kartik DetailView and normalizes the panel to an AdminLTE 3 card
  * (same approach as {@see GridView}).
  *
+ * Empty attributes render as '' — never "(not set)" / "(nessun valore)".
+ *
  * @see https://adminlte.io/docs/3.1/components/cards.html
  */
 class DetailView extends BaseDetailView
@@ -50,6 +52,8 @@ class DetailView extends BaseDetailView
         $this->bsVersion = 4;
         $this->normalizePanelForAdminLte();
         parent::init();
+        // Empty values: never Yii "(not set)" / "(nessun valore)".
+        $this->formatter->nullDisplay = '';
         $this->registerAdminLteDetailCss();
     }
 
