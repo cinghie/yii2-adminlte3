@@ -1,0 +1,426 @@
+/**
+ * cinghie/yii2-adminlte3 theme overrides.
+ * Loaded after AdminLTE core CSS so the shell (layout, cards, typography) works
+ * consistently in any Yii2 project that registers AdminLTEAsset / AdminLTEMinifyAsset.
+ */
+
+/* ===== Global font (AdminLTE 3: Source Sans Pro) ===== */
+body {
+  font-family:
+    "Source Sans Pro",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* ===== Content header & breadcrumbs ===== */
+.content-header {
+  font-family:
+    "Source Sans Pro",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+.content-header h1 {
+  font-size: 1.8rem;
+  font-weight: 400;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.content-header .breadcrumb {
+  background-color: transparent !important;
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.8rem;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  border-radius: 0;
+}
+
+.content-header .breadcrumb-item,
+.content-header .breadcrumb-item a,
+.content-header .breadcrumb-item.active {
+  font-size: inherit;
+  font-family: inherit;
+}
+
+/* ===== Sidebar ===== */
+.main-sidebar,
+.main-sidebar .sidebar {
+  font-family:
+    "Source Sans Pro",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+.main-sidebar .brand-link {
+  font-family: inherit;
+  font-size: 1.25rem;
+}
+
+.main-sidebar .user-panel,
+.main-sidebar .user-panel .info,
+.main-sidebar .user-panel .info a {
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.main-sidebar .sidebar-search-wrapper .form-control-sidebar,
+.main-sidebar .sidebar-search-wrapper .btn-sidebar {
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.main-sidebar .nav-sidebar .nav-link,
+.main-sidebar .nav-sidebar .nav-link p {
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.main-sidebar .nav-sidebar .nav-header {
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.main-sidebar .nav-sidebar .nav-treeview .nav-link,
+.main-sidebar .nav-sidebar .nav-treeview .nav-link p {
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.main-sidebar .nav-sidebar .nav-icon {
+  font-size: 1.2rem;
+}
+
+.main-sidebar .sidebar {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.main-sidebar .sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+body.sidebar-collapse .main-sidebar .sidebar-search-wrapper {
+  display: none !important;
+}
+
+body.sidebar-collapse .main-sidebar .user-panel > .info {
+  display: none !important;
+  visibility: hidden !important;
+  overflow: hidden !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  clip: rect(0, 0, 0, 0) !important;
+}
+
+body.sidebar-collapse .main-sidebar .user-panel {
+  justify-content: center;
+}
+
+body.sidebar-collapse .main-sidebar .user-panel .image {
+  float: none;
+}
+
+/* ===== Content area ===== */
+.content-wrapper,
+.content-wrapper .content,
+.content-wrapper .content .container-fluid {
+  font-family:
+    "Source Sans Pro",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+.content-wrapper {
+  min-height: calc(100vh - (3.5rem + 1px));
+}
+
+.content-wrapper .content {
+  padding: 1.5rem 0 1rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.content-wrapper .content .container-fluid {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  max-width: 100%;
+}
+
+.content-wrapper .content h1,
+.content-wrapper .content .h1 {
+  font-size: 1.75rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  font-family: inherit;
+}
+
+.content-wrapper .content h2,
+.content-wrapper .content .h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  font-family: inherit;
+}
+
+.content-wrapper .content h3,
+.content-wrapper .content .h3 {
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  font-family: inherit;
+}
+
+.content-wrapper .content h4,
+.content-wrapper .content h5,
+.content-wrapper .content h6,
+.content-wrapper .content .h4,
+.content-wrapper .content .h5,
+.content-wrapper .content .h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  font-family: inherit;
+}
+
+.content-wrapper .content p {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+/* ===== Cards: keep header title vertically aligned (no extra space under title) ===== */
+.content-wrapper .content .card,
+.content-wrapper .content .card-body,
+.content-wrapper .content .card-header,
+.content-wrapper .content .card-footer {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.content-wrapper .content .card-header {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.content-wrapper .content .card-header .card-title,
+.content-wrapper .content .card-header h3.card-title,
+.content-wrapper .content h3.card-title {
+  float: none;
+  margin-top: 0;
+  margin-bottom: 0;
+  line-height: 1.5;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.content-wrapper .content .card-header .card-tools {
+  margin-left: auto;
+}
+
+.content-wrapper .content .grid-view h3.card-title {
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.content-wrapper .content .panel-heading h3,
+.content-wrapper .content .panel-heading .h3 {
+  margin-bottom: 0;
+}
+
+/* ===== Tables / forms / buttons ===== */
+.content-wrapper .content .table,
+.content-wrapper .content .table th,
+.content-wrapper .content .table td {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.content-wrapper .content .form-control,
+.content-wrapper .content .form-group label,
+.content-wrapper .content .input-group-text {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.content-wrapper .content .btn,
+.content-wrapper .content .badge {
+  font-family: inherit;
+  font-size: 0.875rem;
+}
+
+/* ===== Top navbar / footer ===== */
+.main-header,
+.main-header .navbar,
+.main-header .nav-link,
+.main-header .dropdown-item {
+  font-family:
+    "Source Sans Pro",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-size: 1rem;
+}
+
+.main-footer {
+  font-family:
+    "Source Sans Pro",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-size: 0.875rem;
+}
+
+/* ===== Glyphicons (BS3) → Font Awesome (needed with AdminLTE 3 / FA) ===== */
+.glyphicon {
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: "Font Awesome 5 Free", "FontAwesome" !important;
+  font-weight: 900 !important;
+}
+
+.glyphicon::before {
+  font-family: "Font Awesome 5 Free", "FontAwesome" !important;
+  font-weight: 900 !important;
+  content: "" !important;
+}
+
+.glyphicon.glyphicon-pencil::before {
+  content: "\f303" !important;
+}
+
+.glyphicon.glyphicon-flag::before {
+  content: "\f024" !important;
+}
+
+.glyphicon.glyphicon-phone::before {
+  content: "\f095" !important;
+}
+
+.glyphicon.glyphicon-phone-alt::before {
+  content: "\f879" !important;
+}
+
+.glyphicon.glyphicon-map-marker::before {
+  content: "\f3c5" !important;
+}
+
+.glyphicon.glyphicon-check::before {
+  content: "\f00c" !important;
+}
+
+.glyphicon.glyphicon-barcode::before {
+  content: "\f02a" !important;
+}
+
+.glyphicon.glyphicon-ok::before {
+  content: "\f00c" !important;
+}
+
+.glyphicon.glyphicon-remove::before {
+  content: "\f00d" !important;
+}
+
+.glyphicon.glyphicon-minus-sign::before {
+  content: "\f056" !important;
+}
+
+.input-group .input-group-addon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  padding: 0.375rem 0.75rem;
+  white-space: nowrap;
+}
+
+.input-group .input-group-addon .glyphicon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+  width: 1em;
+  height: 1em;
+}
+
+.input-group .input-group-addon .glyphicon::before {
+  display: block;
+  line-height: 1;
+}
+
+.input-group.s2-input-group,
+.input-group.select2-bootstrap-prepend {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: nowrap;
+}
+
+.input-group.s2-input-group .input-group-addon,
+.input-group.select2-bootstrap-prepend .input-group-addon {
+  flex-shrink: 0;
+}
+
+.input-group.s2-input-group .select2-container,
+.input-group.select2-bootstrap-prepend .select2-container {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Bootstrap 3 float helpers still used by some widgets */
+.pull-left {
+  float: left !important;
+}
+
+.pull-right {
+  float: right !important;
+}

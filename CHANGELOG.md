@@ -1,5 +1,18 @@
 # Changelog — cinghie/yii2-adminlte3
 
+## 2026-07-25
+
+### Added
+
+- `assets/AdminLTEThemeAsset` + `assets/css/adminlte-theme.css` — shell theme overrides (typography, sidebar, content, cards, glyphicons→FA, BS3 float helpers). Registered automatically after `AdminLTEAsset` / `AdminLTEMinifyAsset` so the package is exportable without app-level AdminLTE CSS.
+- Card header vertical alignment: `.card-header` flex + `.card-title { margin: 0 }` so titles are not pushed down by generic `h3` margins.
+
+### Changed
+
+- `AdminLTEAsset` / `AdminLTEMinifyAsset` stay at module root (`cinghie\adminlte3`); only theme CSS bundle lives in `assets/` (`cinghie\adminlte3\assets\AdminLTEThemeAsset`).
+- `widgets/Card` — header gets `align-items-center` by default for title/tools alignment.
+
+
 ## 2026-07-23
 
 ### Added

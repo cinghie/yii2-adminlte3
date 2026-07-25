@@ -42,6 +42,8 @@ use cinghie\adminlte3\AdminLTEMinifyAsset;
 AdminLTEMinifyAsset::register($this);
 ```
 
+Both asset bundles also register `cinghie\adminlte3\assets\AdminLTEThemeAsset` (package theme CSS under `assets/css/`). Keep application-only CSS in your project `web/css` (do not duplicate AdminLTE shell styles there).
+
 ## Widgets Examples
 
 | Widget                                          | Guide                                                |

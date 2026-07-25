@@ -319,6 +319,10 @@ class Card extends Widget
 
         $headerOptions = $this->headerOptions;
         Html::addCssClass($headerOptions, 'card-header');
+        // Keep title / tools on one vertically centered row (AdminLTE card-header).
+        if (!isset($headerOptions['class']) || strpos((string) $headerOptions['class'], 'align-items-') === false) {
+            Html::addCssClass($headerOptions, 'align-items-center');
+        }
 
         return Html::tag('div', $titleHtml . $toolsHtml, $headerOptions);
     }
