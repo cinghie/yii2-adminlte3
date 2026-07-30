@@ -28,6 +28,13 @@ class AdminLTEThemeAsset extends AssetBundle
 	public $sourcePath = __DIR__;
 
 	/**
+	 * Bust browser cache when theme CSS changes (publish hash alone is path-based).
+	 *
+	 * @inheritdoc
+	 */
+	public $appendTimestamp = true;
+
+	/**
 	 * @inheritdoc
 	 */
 	public $css = [
@@ -49,4 +56,16 @@ class AdminLTEThemeAsset extends AssetBundle
 	 * @inheritdoc
 	 */
 	public $depends = [];
+
+	/**
+	 * @inheritdoc
+	 */
+	public function init()
+	{
+		parent::init();
+		// In debug, re-copy CSS when source changes (Yii publish hash is path-based).
+		if (defined('YII_DEBUG') && YII_DEBUG) {
+			$this->publishOptions['forceCopy'] = true;
+		}
+	}
 }

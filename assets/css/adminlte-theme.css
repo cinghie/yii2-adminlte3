@@ -374,7 +374,8 @@ body.sidebar-collapse .main-sidebar .user-panel .image {
   content: "\f056" !important;
 }
 
-.input-group .input-group-addon {
+.input-group .input-group-addon,
+.input-group .input-group-text {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -383,7 +384,14 @@ body.sidebar-collapse .main-sidebar .user-panel .image {
   white-space: nowrap;
 }
 
-.input-group .input-group-addon .glyphicon {
+/*
+ * Addon icons: keep .glyphicon (apps that still emit BS3 glyph classes) and
+ * cover Font Awesome 4/5 (.fa / .fas / .far) used by CRM and other packages.
+ */
+.input-group .input-group-addon .glyphicon,
+.input-group .input-group-addon > i,
+.input-group .input-group-text .glyphicon,
+.input-group .input-group-text > i {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -391,29 +399,15 @@ body.sidebar-collapse .main-sidebar .user-panel .image {
   vertical-align: middle;
   width: 1em;
   height: 1em;
+  font-size: 1rem;
 }
 
-.input-group .input-group-addon .glyphicon::before {
+.input-group .input-group-addon .glyphicon::before,
+.input-group .input-group-addon > i::before,
+.input-group .input-group-text .glyphicon::before,
+.input-group .input-group-text > i::before {
   display: block;
   line-height: 1;
-}
-
-.input-group.s2-input-group,
-.input-group.select2-bootstrap-prepend {
-  display: flex;
-  align-items: stretch;
-  flex-wrap: nowrap;
-}
-
-.input-group.s2-input-group .input-group-addon,
-.input-group.select2-bootstrap-prepend .input-group-addon {
-  flex-shrink: 0;
-}
-
-.input-group.s2-input-group .select2-container,
-.input-group.select2-bootstrap-prepend .select2-container {
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 /* Bootstrap 3 float helpers still used by some widgets */

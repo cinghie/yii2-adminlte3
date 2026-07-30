@@ -1,5 +1,14 @@
 # Changelog — cinghie/yii2-adminlte3
 
+## 2026-07-30
+
+### Fixed
+
+#### Forms — input-group icon layout (Font Awesome)
+- `adminlte-theme.css`: addon icon sizing covers Font Awesome (`.fa` / `.fas` / `.far`) and BS4 `.input-group-text`, not only `.glyphicon`.
+- Removed redundant Select2 flex helpers (`s2-input-group` / `width: 1%`); with correct Kartik `bsVersion` (CRM module `$bootstrap`), Krajee BS4 theme already handles Select2 input-groups.
+- `AdminLTEThemeAsset`: `appendTimestamp` + debug `forceCopy` so theme CSS changes are not stuck behind Yii’s path-based publish hash / browser cache.
+
 ## 2026-07-25
 
 ### Added
