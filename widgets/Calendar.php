@@ -13,6 +13,8 @@ use yii\helpers\Json;
  * The widget deliberately keeps server-side responsibilities bounded: it
  * serializes data and optionally registers the package's FullCalendar assets,
  * while browser interaction and rendering remain owned by FullCalendar.
+ * By default the container is wrapped in the same primary card / p-0 body
+ * structure used by the AdminLTE 3 Calendar example.
  */
 class Calendar extends Widget
 {
@@ -24,6 +26,15 @@ class Calendar extends Widget
 
     /** @var array HTML options for the calendar container. */
     public $options = [];
+
+    /** @var bool Whether to wrap the calendar in the AdminLTE example card. */
+    public $card = true;
+
+    /** @var string|null Contextual type for the optional card wrapper. */
+    public $cardType = Card::TYPE_PRIMARY;
+
+    /** @var array HTML options for the optional outer card. */
+    public $cardOptions = [];
 
     /** @var bool Whether to register optional FullCalendar assets automatically. */
     public $registerAssets = true;
@@ -44,6 +55,17 @@ class Calendar extends Widget
         $htmlOptions['data-cinghie-calendar-options'] = Json::encode($this->calendarOptions);
         Html::addCssClass($htmlOptions, 'cinghie-calendar');
 
-        return Html::tag('div', '', $htmlOptions);
+        $calendar = Html::tag('div', '', $htmlOptions);
+        if (!$this->card) {
+            return $calendar;
+        }
+
+        return Card::widget([
+            'type' => $this->cardType,
+            'body' => $calendar,
+            'encodeBody' => false,
+            'bodyOptions' => ['class' => 'p-0'],
+            'options' => $this->cardOptions,
+        ]);
     }
 }
