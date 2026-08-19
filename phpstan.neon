@@ -1,0 +1,13 @@
+parameters:
+    level: 5
+    paths:
+        - .
+    excludePaths:
+        analyseAndScan:
+            - vendor
+            - tests
+            - views
+            - messages
+            - runtime
+            - widgets/Timeline.php
+    tmpDir: runtime/phpstan
