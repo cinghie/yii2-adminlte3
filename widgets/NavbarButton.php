@@ -25,7 +25,13 @@ class NavbarButton extends Widget
     public $target;
 
     /** @var array HTML options merged into the anchor element. */
-    public $option = [];
+    public $options = [];
+
+    /**
+     * @var array|null Legacy anchor options.
+     * @deprecated Use {@see $options}.
+     */
+    public $option;
 
     /** @var bool Whether to wrap the anchor in `<li class="nav-item">`. */
     public $renderAsLi = true;
@@ -38,8 +44,12 @@ class NavbarButton extends Widget
         if ($this->title === null) {
             $this->title = '<i class="fas fa-external-link-alt"></i>';
         }
-        if ($this->option === null) {
-            $this->option = [];
+        if ($this->options === null) {
+            $this->options = [];
+        }
+        if (is_array($this->option) && $this->option !== []) {
+            // Canonical options win when both names configure the same key.
+            $this->options = array_merge($this->option, $this->options);
         }
 
         parent::init();
@@ -50,7 +60,7 @@ class NavbarButton extends Widget
      */
     public function run()
     {
-        $options = array_merge(['class' => 'nav-link'], $this->option);
+        $options = array_merge(['class' => 'nav-link'], $this->options);
         $options = array_merge($options, SafeHtml::externalLinkOptions($this->target));
 
         $link = Html::a($this->title, SafeHtml::linkUrl($this->url, '#'), $options);
