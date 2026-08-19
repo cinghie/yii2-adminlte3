@@ -200,7 +200,7 @@ class Card extends Widget
             $classes[] = 'card-' . $type;
         }
 
-        return array_values(array_unique(array_filter($classes)));
+        return array_values(array_unique($classes));
     }
 
     /**
@@ -243,77 +243,93 @@ class Card extends Widget
      */
     protected function renderHeader()
     {
-        $hasTitle = $this->title !== null && $this->title !== '';
-        $hasTools = $this->collapsible || $this->removable || $this->maximizable
-            || ($this->headerTools !== null && $this->headerTools !== '');
-
-        if (!$hasTitle && !$hasTools) {
+        $title = $this->renderTitle();
+        $tools = $this->renderTools();
+        if ($title === '' && $tools === '') {
             return '';
         }
 
-        $titleHtml = '';
-        if ($hasTitle) {
-            $titleContent = $this->encodeTitle ? Html::encode($this->title) : $this->title;
-            $icon = $this->icon !== null && $this->icon !== '' ? $this->icon : $this->titleIcon;
-            if ($icon !== null && $icon !== '') {
-                $iconClass = SafeHtml::iconClass($icon);
-                if ($iconClass !== '') {
-                    $titleContent = Html::tag('i', '', ['class' => $iconClass . ' mr-1']) . ' ' . $titleContent;
-                }
-            }
-            $titleHtml = Html::tag('h3', $titleContent, ['class' => 'card-title']);
-        }
-
-        $toolsHtml = '';
-        if ($hasTools) {
-            $tools = (string) $this->headerTools;
-            if ($this->collapsible) {
-                $icon = $this->collapsed ? 'fas fa-plus' : 'fas fa-minus';
-                $tools .= Html::button(Html::tag('i', '', ['class' => $icon]), [
-                    'type' => 'button',
-                    'class' => 'btn btn-tool',
-                    'data-card-widget' => 'collapse',
-                    'title' => Translation::t('Collapse'),
-                    'aria-label' => Translation::t('Collapse'),
-                ]);
-            }
-            if ($this->maximizable) {
-                $tools .= Html::button(Html::tag('i', '', ['class' => 'fas fa-expand']), [
-                    'type' => 'button',
-                    'class' => 'btn btn-tool',
-                    'data-card-widget' => 'maximize',
-                    'title' => Translation::t('Maximize'),
-                    'aria-label' => Translation::t('Maximize'),
-                ]);
-            }
-            if ($this->removable) {
-                $tools .= Html::button(Html::tag('i', '', ['class' => 'fas fa-times']), [
-                    'type' => 'button',
-                    'class' => 'btn btn-tool',
-                    'data-card-widget' => 'remove',
-                    'title' => Translation::t('Remove'),
-                    'aria-label' => Translation::t('Remove'),
-                ]);
-            }
-            $toolsHtml = Html::tag('div', $tools, ['class' => 'card-tools']);
-        }
-
         $headerOptions = $this->headerOptions;
-        Html::addCssClass($headerOptions, 'card-header');
-        if (!isset($headerOptions['class']) || strpos((string) $headerOptions['class'], 'align-items-') === false) {
-            Html::addCssClass($headerOptions, 'align-items-center');
+        Html::addCssClass($headerOptions, 'card-header d-flex align-items-center');
+
+        $content = $title;
+        if ($tools !== '') {
+            $content .= Html::tag('div', $tools, ['class' => 'card-tools ml-auto']);
         }
 
-        return Html::tag('div', $titleHtml . $toolsHtml, $headerOptions);
+        return Html::tag('div', $content, $headerOptions);
     }
 
     /**
-     * Renders body markup from already encoded or explicitly trusted HTML.
+     * Renders the card title and optional icon.
      *
-     * @param string $bodyHtml Body HTML.
      * @return string
      */
-    protected function renderBody(string $bodyHtml)
+    protected function renderTitle()
+    {
+        if ($this->title === null || $this->title === '') {
+            return '';
+        }
+
+        $title = $this->encodeTitle ? Html::encode((string) $this->title) : (string) $this->title;
+        $icon = $this->icon !== null && $this->icon !== '' ? $this->icon : $this->titleIcon;
+        if ($icon !== null && $icon !== '') {
+            $title = Html::tag('i', '', ['class' => self::sanitizeClass($icon)]) . ' ' . $title;
+        }
+
+        return Html::tag('h3', $title, ['class' => 'card-title']);
+    }
+
+    /**
+     * Renders standard AdminLTE card tools and trusted custom tools.
+     *
+     * @return string
+     */
+    protected function renderTools()
+    {
+        $tools = $this->headerTools;
+        if ($this->collapsible) {
+            $tools .= $this->renderToolButton('collapse', 'fas fa-minus', Translation::t('Collapse'));
+        }
+        if ($this->maximizable) {
+            $tools .= $this->renderToolButton('maximize', 'fas fa-expand', Translation::t('Maximize'));
+        }
+        if ($this->removable) {
+            $tools .= $this->renderToolButton('remove', 'fas fa-times', Translation::t('Remove'));
+        }
+
+        return $tools;
+    }
+
+    /**
+     * Renders one AdminLTE card tool button.
+     *
+     * @param string $action AdminLTE card action.
+     * @param string $icon Icon class list.
+     * @param string $label Accessible label.
+     * @return string
+     */
+    protected function renderToolButton($action, $icon, $label)
+    {
+        return Html::button(
+            Html::tag('i', '', ['class' => self::sanitizeClass($icon)]),
+            [
+                'type' => 'button',
+                'class' => 'btn btn-tool',
+                'data-card-widget' => $action,
+                'title' => $label,
+                'aria-label' => $label,
+            ]
+        );
+    }
+
+    /**
+     * Renders the card body wrapper around trusted prepared HTML.
+     *
+     * @param string $bodyHtml Prepared body HTML.
+     * @return string
+     */
+    protected function renderBody($bodyHtml)
     {
         $bodyOptions = $this->bodyOptions;
         Html::addCssClass($bodyOptions, 'card-body');
@@ -328,28 +344,25 @@ class Card extends Widget
      */
     protected function renderFooter()
     {
-        if ($this->footer === null || $this->footer === '') {
+        if ($this->footer === null) {
             return '';
         }
 
-        $footerContent = $this->encodeFooter ? Html::encode($this->footer) : $this->footer;
         $footerOptions = $this->footerOptions;
         Html::addCssClass($footerOptions, 'card-footer');
+        $footer = $this->encodeFooter ? Html::encode((string) $this->footer) : (string) $this->footer;
 
-        return Html::tag('div', $footerContent, $footerOptions);
+        return Html::tag('div', $footer, $footerOptions);
     }
 
     /**
-     * Normalizes a CSS class list through the package-wide internal policy.
+     * Sanitizes a CSS class list using the shared package policy.
      *
-     * Kept as a protected wrapper for backward compatibility with subclasses.
-     *
-     * @param mixed $value Candidate class list.
-     * @param string $default Fallback class list.
+     * @param string|null $value Class list.
      * @return string
      */
-    protected static function sanitizeClass($value, $default = '')
+    protected static function sanitizeClass($value): string
     {
-        return SafeHtml::cssClass($value, $default);
+        return SafeHtml::cssClass($value);
     }
 }
