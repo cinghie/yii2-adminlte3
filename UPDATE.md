@@ -18,7 +18,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 ## Priority list
 
-No open priority item is currently promoted above the detailed Low roadmap items below.
+No open priority item is currently promoted above the detailed roadmap notes below.
 
 ---
 
@@ -58,9 +58,7 @@ No open priority item is currently promoted above the detailed Low roadmap items
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| **Low** | Define a public deprecation policy | `Box` remains deprecated as a public compatibility facade and historical widget property aliases remain available. | Document how long deprecated classes/properties remain available and reserve removals for a major release. |
-| **Low** | Add release checklist | Asset packages are sensitive to dependency and browser regressions. | Document a release checklist: Composer validation, full CI, asset graph check, README/CHANGELOG/UPDATE sync, compatibility notes, and tagged release smoke install. |
-| **Low** | Clarify semantic-versioning expectations | Security-safe defaults and runtime baseline changes can be breaking even when APIs remain callable. | Document which changes require major/minor releases, especially runtime minimums, implicit asset removal, default encoding, and deprecated widget removal. |
+| — | No known open release-hygiene documentation item | Stable installation guidance, public SemVer/deprecation policy, and the release checklist are now documented for the 1.0.0 line. | Keep `README.md`, `CHANGELOG.md`, `UPDATE.md`, `docs/VERSIONING.md`, and `RELEASE_CHECKLIST.md` synchronized when public compatibility or release procedures change. |
 
 ---
 
@@ -130,6 +128,10 @@ No open priority item is currently promoted above the detailed Low roadmap items
 | Source-file metadata regression | `SourceMetadataTest` prevents obsolete `@package`, hardcoded version, historical company metadata, and GPL header text from being reintroduced. |
 | Ionicons dependency / compatibility | Ionicons has been removed from the package dependency and asset graph. AdminLTE3 uses its Font Awesome icon stack; no Ionicons compatibility layer is planned for this package. |
 | Additional widgets without new Composer packages | Calendar and ChartJS reuse the FullCalendar/Chart.js copies already shipped by the supported AdminLTE dependency; no extra runtime package is required. |
+| Public deprecation policy | `docs/VERSIONING.md` guarantees deprecated public APIs remain available throughout the current major release; `Box` and historical widget aliases stay supported for the complete 1.x line and may only be removed in 2.0.0 or later. |
+| Semantic-versioning policy | The public compatibility contract now defines major/minor/patch expectations for API removals, runtime baselines, implicit assets, security/encoding defaults, and backward-compatible additions/fixes. |
+| Release checklist | `RELEASE_CHECKLIST.md` documents scope review, Composer/CI/quality gates, asset/browser checks, clean smoke installation, tagging, Packagist verification, and post-release checks. |
+| Stable installation guidance | README now documents `composer require cinghie/yii2-adminlte3:^1.0` and discourages development branches for production deployments. |
 
 ### Tests, code comments & CI
 
@@ -239,4 +241,5 @@ These are **not current defects**. They are public-package evolution ideas that 
 - Added DOM/XPath structural assertions for complex widget markup, including link/security attributes and Card tool accessibility semantics.
 - Added a separate non-blocking PHP 8.1 prefer-lowest workflow path; minimum dependency resolution succeeds, while install/test remains observational until upstream legacy-package extraction behavior is stable enough to certify the full minimum set.
 - Added public coding/PHPDoc conventions, class-level documentation guards, source-level Yii/PSR best-practice tests, option-alias regression tests, translation-ownership guards, asset-graph regression tests, source-metadata guards, and structural DOM assertions.
-- Remaining roadmap work is intentionally low-risk: deprecation/release/semantic-versioning documentation and optional browser-level verification of the complete third-party CSP/interaction stack.
+- Added stable 1.x installation guidance, a public Semantic Versioning/deprecation policy, and a complete release checklist in preparation for the first 1.0.0 tag.
+- Remaining optional roadmap work is intentionally non-blocking for 1.0.0: browser-level verification of the complete third-party CSP/interaction stack and future release automation.
