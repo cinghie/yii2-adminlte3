@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace cinghie\adminlte3\tests;
 
 use cinghie\adminlte3\AdminLTEAsset;
+use cinghie\adminlte3\AdminLTECalendarAsset;
+use cinghie\adminlte3\AdminLTECalendarMinifyAsset;
+use cinghie\adminlte3\AdminLTEChartJSAsset;
+use cinghie\adminlte3\AdminLTEChartJSMinifyAsset;
 use cinghie\adminlte3\AdminLTECoreAsset;
 use cinghie\adminlte3\AdminLTECoreMinifyAsset;
 use cinghie\adminlte3\AdminLTEDateTimeAsset;
@@ -15,6 +19,8 @@ use cinghie\adminlte3\AdminLTEJqueryUiAsset;
 use cinghie\adminlte3\AdminLTEJqueryUiMinifyAsset;
 use cinghie\adminlte3\AdminLTEMinifyAsset;
 use cinghie\adminlte3\assets\AdminLTEThemeAsset;
+use cinghie\adminlte3\assets\CalendarWidgetAsset;
+use cinghie\adminlte3\assets\ChartJSWidgetAsset;
 use cinghie\fontawesome\FontAwesomeAsset;
 use cinghie\fontawesome\FontAwesomeMinifyAsset;
 use PHPUnit\Framework\TestCase;
@@ -67,6 +73,19 @@ final class AssetBundleTest extends TestCase
             AdminLTEIcheckMinifyAsset::class,
             AdminLTECoreMinifyAsset::class,
         ], (new AdminLTEMinifyAsset())->depends);
+
+        self::assertNotContains(AdminLTECalendarAsset::class, (new AdminLTEAsset())->depends);
+        self::assertNotContains(AdminLTEChartJSAsset::class, (new AdminLTEAsset())->depends);
+        self::assertNotContains(AdminLTECalendarMinifyAsset::class, (new AdminLTEMinifyAsset())->depends);
+        self::assertNotContains(AdminLTEChartJSMinifyAsset::class, (new AdminLTEMinifyAsset())->depends);
+    }
+
+    public function testAdditionalWidgetInitializersKeepHeavyPluginsOptional(): void
+    {
+        self::assertSame([AdminLTECalendarMinifyAsset::class], (new CalendarWidgetAsset())->depends);
+        self::assertSame([AdminLTEChartJSMinifyAsset::class], (new ChartJSWidgetAsset())->depends);
+        self::assertContains('js/calendar.js', (new CalendarWidgetAsset())->js);
+        self::assertContains('js/chartjs.js', (new ChartJSWidgetAsset())->js);
     }
 
     public function testAggregateKeepsHistoricalPluginOrderAndCoreIsSmaller(): void
@@ -99,6 +118,8 @@ final class AssetBundleTest extends TestCase
             'jquery-ui' => [new AdminLTEJqueryUiAsset(), new AdminLTEJqueryUiMinifyAsset()],
             'date-time' => [new AdminLTEDateTimeAsset(), new AdminLTEDateTimeMinifyAsset()],
             'icheck' => [new AdminLTEIcheckAsset(), new AdminLTEIcheckMinifyAsset()],
+            'calendar' => [new AdminLTECalendarAsset(), new AdminLTECalendarMinifyAsset()],
+            'chart-js' => [new AdminLTEChartJSAsset(), new AdminLTEChartJSMinifyAsset()],
         ];
     }
 
@@ -133,6 +154,10 @@ final class AssetBundleTest extends TestCase
             new AdminLTEDateTimeMinifyAsset(),
             new AdminLTEIcheckAsset(),
             new AdminLTEIcheckMinifyAsset(),
+            new AdminLTECalendarAsset(),
+            new AdminLTECalendarMinifyAsset(),
+            new AdminLTEChartJSAsset(),
+            new AdminLTEChartJSMinifyAsset(),
         ];
 
         $vendorRoot = dirname(__DIR__) . '/vendor/almasaeed2010/adminlte/';
@@ -202,6 +227,8 @@ final class AssetBundleTest extends TestCase
             AdminLTEJqueryUiMinifyAsset::class => AdminLTEJqueryUiAsset::class,
             AdminLTEDateTimeMinifyAsset::class => AdminLTEDateTimeAsset::class,
             AdminLTEIcheckMinifyAsset::class => AdminLTEIcheckAsset::class,
+            AdminLTECalendarMinifyAsset::class => AdminLTECalendarAsset::class,
+            AdminLTEChartJSMinifyAsset::class => AdminLTEChartJSAsset::class,
             FontAwesomeMinifyAsset::class => FontAwesomeAsset::class,
         ];
 
