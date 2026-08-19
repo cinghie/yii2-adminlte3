@@ -75,6 +75,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 #### Runtime requirements and package dependencies
 - Raised the supported runtime baseline to PHP 8.1+ and Yii 2.0.54+.
 - Declared `yiisoft/yii2-bootstrap4` and Kartik runtime packages used by public widgets explicitly.
+- Raised `cinghie/yii2-fontawesome` to `^1.5.0` for the 1.0.0 release line.
 - Removed broad development-only runtime constraints and unused runtime dependencies.
 - Removed `cinghie/yii2-ionicons`; AdminLTE3 relies on its Font Awesome icon stack.
 - Aligned Composer license metadata with the repository MIT license.
@@ -111,9 +112,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 #### Documentation
 - Updated README requirements, installation guidance, modular asset registration, script-loading policy, security defaults, test instructions, compatibility notes, and the public widget table.
-- Removed the recommendation to install the package with a broad `@dev` stability flag.
-- Streamlined `UPDATE.md` so the dated processed section does not repeat “Processed” in every subsection/result.
-- Closed the package-owned InfoBox CSP item, widget-option normalization, translation ownership, optional asset splitting, source/minified parity, `defer`/preload evaluation, source-metadata cleanup, static-analysis/coding-standard, DOM/XPath structural-test, lowest-dependency-validation, and additional-widget roadmap items.
+- Replaced pre-release `dev-main` installation guidance with the stable `composer require cinghie/yii2-adminlte3:^1.0` constraint for the 1.x release line.
+- Added `docs/VERSIONING.md` defining the public Semantic Versioning and deprecation contract; deprecated public APIs remain available for the complete current major series and `Box`/historical aliases cannot be removed before 2.0.0.
+- Added `RELEASE_CHECKLIST.md` covering compatibility review, Composer/CI/quality gates, asset/browser checks, clean smoke installation, tagging, Packagist verification, and post-release checks.
+- Streamlined `UPDATE.md` so the dated processed section does not repeat “Processed” in every subsection/result and moved release-hygiene documentation items out of Open after implementation.
+- Closed the package-owned InfoBox CSP item, widget-option normalization, translation ownership, optional asset splitting, source/minified parity, `defer`/preload evaluation, source-metadata cleanup, static-analysis/coding-standard, DOM/XPath structural-test, lowest-dependency-validation, additional-widget, deprecation-policy, release-checklist, and semantic-versioning roadmap items.
 - Documented that lowest-dependency CI remains observational/non-blocking until the complete minimum set installs and executes reliably; successful dependency resolution alone is not presented as runtime compatibility certification.
 - Promoted Calendar, ChartJS, Error404, and Error500 from future candidates to documented/tested public widgets and removed them from the future-expansion list.
 
