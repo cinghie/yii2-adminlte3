@@ -43,10 +43,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| — | No known open medium-or-higher performance issue from the 2026-08-19 pass | Duplicate Bootstrap JS and redundant asset dependencies were removed, stable widget CSS moved to cacheable assets, and Box now reuses Card rendering. | Keep bundle-size and asset-order checks in CI when dependencies change. |
-| **Low** | Split optional plugin assets from the core bundle | The main AdminLTE bundle still carries plugins that not every page uses. | Consider small optional AssetBundles for plugin families so applications can register only what a page requires. Preserve a convenience aggregate bundle for backward compatibility. |
-| **Low** | Minified/non-minified asset parity tests | Current bundles are aligned, but future edits can accidentally change dependencies or plugin ordering between debug and production variants. | Add a test asserting equivalent dependency graphs and corresponding source/minified files. |
-| **Low** | Evaluate preloading/defer strategy for non-critical JS | AdminLTE/plugin scripts can delay parsing on large admin pages. | Benchmark before changing defaults. If useful, expose opt-in script-position/defer guidance rather than introducing a breaking global behaviour change. |
+| — | No known open medium-or-higher performance issue from the 2026-08-19 pass | Duplicate Bootstrap JS and redundant asset dependencies were removed, stable widget CSS moved to cacheable assets, Box reuses Card rendering, and optional AdminLTE plugin families can now be loaded independently from the core shell. | Keep bundle-size, dependency-order, source/minified parity, and declared-file checks mandatory when asset definitions change. |
 
 ---
 
@@ -65,7 +62,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
 | **Low** | Normalize source-file headers | Several untouched files still contain historical package names, hardcoded versions, outdated license labels, or duplicated metadata despite Composer and the repository license being aligned to MIT. | Remove hardcoded version tags and obsolete package/license metadata from source headers, or replace them with a minimal consistent copyright/license notice. Keep versioning in Git tags / Composer metadata. |
-| **Low** | Define a public deprecation policy | `Box` remains deprecated as a public compatibility facade and future normalization may need additional aliases/deprecations. | Document how long deprecated classes/properties remain available and reserve removals for a major release. |
+| **Low** | Define a public deprecation policy | `Box` remains deprecated as a public compatibility facade and historical widget property aliases remain available. | Document how long deprecated classes/properties remain available and reserve removals for a major release. |
 | **Low** | Add release checklist | Asset packages are sensitive to dependency and browser regressions. | Document a release checklist: Composer validation, full CI, asset graph check, README/CHANGELOG/UPDATE sync, compatibility notes, and tagged release smoke install. |
 | **Low** | Clarify semantic-versioning expectations | Security-safe defaults and runtime baseline changes can be breaking even when APIs remain callable. | Document which changes require major/minor releases, especially runtime minimums, implicit asset removal, default encoding, and deprecated widget removal. |
 
@@ -114,6 +111,10 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Static/deterministic widget presentation embedded in HTML `style` attributes | NavbarLogo, NavbarUser, MailboxRead, Invoice, and bounded InfoBox progress presentation now use package CSS/Bootstrap utility classes instead of package-owned inline styles. |
 | Package-owned behavior needed inline JS | `AdminLTEThemeAsset` publishes `assets/js/widgets.js`, allowing behavior such as browser printing to be bound from a data attribute instead of an inline handler. |
 | InfoBox progress width asset | Added `assets/css/progress-widths.css` with the exact 0–100 integer width classes required by the existing InfoBox normalization contract; the bundle is cacheable and avoids per-widget generated CSS/JS. |
+| Optional plugin assets were coupled to the core shell | Added `AdminLTECoreAsset` / `AdminLTECoreMinifyAsset` containing only AdminLTE core plus Yii/Bootstrap/Font Awesome dependencies. jQuery UI, Moment + Tempus Dominus, and iCheck Bootstrap now have dedicated source/minified AssetBundles. Existing `AdminLTEAsset` / `AdminLTEMinifyAsset` remain backward-compatible convenience aggregates with the historical plugin set and ordering. |
+| Minified/non-minified asset parity was implicit | Asset regression tests compare semantic file lists, dependency graphs, timestamp policy, and existence of every declared AdminLTE source/minified file. |
+| Bundle size and plugin order were not guarded | Tests assert that the core graph contains only one AdminLTE CSS and one AdminLTE JS file, while the aggregate retains the historical CSS order `Tempus Dominus → iCheck → AdminLTE` and JS order `jQuery UI → Moment → Tempus Dominus → AdminLTE`. |
+| Preload/defer strategy | No global `defer`, preload hint, or script-position change is introduced. Yii already exposes `jsOptions` and dependency ordering; AdminLTE assets are normally registered near the end of the document, so global `defer` has little default benefit. Applications may opt in when moving scripts earlier, but should apply the policy coherently to the full dependency chain and validate third-party plugins. Preload remains application-level and measurement-driven because published URLs and critical resources vary by deployment. |
 
 ### Packaging
 
@@ -137,6 +138,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Comment/PHPDoc conventions were implicit | `docs/CODING_STYLE.md` records Yii-oriented output encoding/trust-boundary rules, useful PHPDoc expectations, PSR-12 formatting, CSP conventions, and public-package documentation restrictions. A regression test requires every public widget class to retain class-level PHPDoc. |
 | Source-level Yii/PSR hygiene was implicit | `Yii2BestPracticesTest` guards valid/used `Yii` imports and the normative PSR-12 ordering of class/function/constant import groups without inventing an alphabetical requirement that PSR-12 does not define. Broad formatting enforcement remains part of the separate coding-standard roadmap item. |
 | Option alias and translation ownership regressions | Dedicated tests cover canonical-vs-legacy option precedence, legacy-only rendering, lazy package translation registration, application overrides, and accidental reintroduction of legacy UI translation categories. |
+| Asset graph regressions | Dedicated tests now cover core-vs-aggregate payload, plugin ordering, source/minified parity, dependency equivalence, timestamp parity, and declared vendor-file existence. |
 
 ---
 
@@ -151,11 +153,11 @@ These are **not current defects**. They are public-package evolution ideas that 
 - Prefer a major-version migration with clear compatibility boundaries rather than feature-detecting both Bootstrap 4 and 5 throughout every widget.
 - Provide migration documentation for renamed utility classes, JS APIs, data attributes, and Kartik dependencies.
 
-### 2. Modular plugin AssetBundles
+### 2. Additional modular plugin AssetBundles
 
-- Split optional AdminLTE plugins (date/time, charts, advanced inputs, etc.) into dedicated bundles.
-- Keep the current aggregate bundle available for ease of adoption while allowing performance-sensitive applications to opt into smaller bundles.
-- Add dependency-graph tests so optional bundles never register duplicate jQuery/Bootstrap copies.
+- The initial split covers jQuery UI, date/time, and iCheck while preserving the historical aggregate bundle.
+- Add new optional families only when a public widget or documented integration needs them, for example Calendar or ChartJS.
+- Keep every new source/minified pair under the same dependency/parity/file-existence tests so optional bundles never reintroduce duplicate jQuery or Bootstrap copies.
 
 ### 3. Shared widget rendering utilities beyond safety policy
 
@@ -214,5 +216,7 @@ These are **not current defects**. They are public-package evolution ideas that 
 - Completed the package-owned CSP pass: Invoice print behavior moved to an external asset script, SidebarMenu active state no longer requires inline display styles, static Navbar/Mailbox/Invoice styles moved into package CSS/utility classes, and InfoBox progress widths now use bounded package CSS classes instead of inline styles.
 - Normalized genuinely shared widget options around canonical `icon`, `url`, and `options` names while keeping deprecated aliases backward compatible and covered by tests.
 - Moved static package-owned widget strings to the internal `adminlte3` translation category with application override support; retained only Timeline's dynamic domain-action translation as an explicit legacy fallback.
-- Added public coding/PHPDoc conventions, class-level documentation guards, source-level Yii/PSR best-practice tests, option-alias regression tests, and translation-ownership guards.
+- Split optional AdminLTE plugin assets from a new core-only bundle while preserving the historical aggregate bundle, and added source/minified parity, vendor-file existence, bundle-size, and asset-order regression coverage.
+- Evaluated script preloading/defer and kept it opt-in/application-owned rather than changing package defaults without measured benefit.
+- Added public coding/PHPDoc conventions, class-level documentation guards, source-level Yii/PSR best-practice tests, option-alias regression tests, translation-ownership guards, and asset-graph regression tests.
 - Remaining roadmap work is intentionally low-risk: source metadata/header cleanup, static analysis/coding standards, incremental release/documentation hygiene, and optional browser-level verification of the complete third-party CSP stack.
