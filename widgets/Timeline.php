@@ -1,15 +1,5 @@
 <?php
 
-/**
- * @copyright Copyright &copy; Gogodigital Srls
- * @company Gogodigital Srls - Wide ICT Solutions
- * @website http://www.gogodigital.it
- * @github https://github.com/cinghie/yii2-adminlte3
- * @license GNU GENERAL PUBLIC LICENSE VERSION 3
- * @package yii2-AdminLTE
- * @version 0.1.0
- */
-
 namespace cinghie\adminlte3\widgets;
 
 use Yii;
@@ -309,20 +299,20 @@ class Timeline extends Widget
 
                         break;
 
-	                case 'Quote':
+                    case 'Quote':
 
-		                $elementModel = new Quote();
-		                $element = $elementModel::findOne($item->entity_id);
-		                $url = Html::encode(Url::toRoute([$item->entity_url, 'id' => $item->entity_id]));
+                        $elementModel = new Quote();
+                        $element = $elementModel::findOne($item->entity_id);
+                        $url = Html::encode(Url::toRoute([$item->entity_url, 'id' => $item->entity_id]));
 
-		                if($element) {
-			                $enc = Html::encode($element->reference);
-			                $html .= '<a href="'.$url.'" title="'.$enc.'">'.$enc.'</a>';
-		                } else {
-			                $html .= Html::encode($item->data ?? '');
-		                }
+                        if($element) {
+                            $enc = Html::encode($element->reference);
+                            $html .= '<a href="'.$url.'" title="'.$enc.'">'.$enc.'</a>';
+                        } else {
+                            $html .= Html::encode($item->data ?? '');
+                        }
 
-		                break;
+                        break;
 
                     case 'Shop':
 
