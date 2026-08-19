@@ -20,6 +20,10 @@ if (Yii::$app === null) {
         'basePath' => $basePath,
         'runtimePath' => $runtimePath,
         'vendorPath' => $basePath . '/vendor',
+        'aliases' => [
+            '@bower' => $basePath . '/vendor/bower-asset',
+            '@npm' => $basePath . '/vendor/npm-asset',
+        ],
         'params' => [
             'bsVersion' => '4.x',
         ],
