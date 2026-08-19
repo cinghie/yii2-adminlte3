@@ -118,10 +118,15 @@ class MailboxRead extends Widget
         if ($icon === null || $icon === '') {
             return $default;
         }
-        $icon = (string) $icon;
-        if (preg_match('/<i\s+class=["\']([^"\']+)["\']\s*><\/i>/i', trim($icon), $matches)) {
+
+        $icon = trim((string) $icon);
+        if (strpos($icon, '<') !== false || strpos($icon, '>') !== false) {
+            if (!preg_match('/^<i\s+class=["\']([^"\']+)["\']\s*>\s*<\/i>$/i', $icon, $matches)) {
+                return $default;
+            }
             $icon = $matches[1];
         }
+
         return self::sanitizeClass($icon, $default);
     }
 
