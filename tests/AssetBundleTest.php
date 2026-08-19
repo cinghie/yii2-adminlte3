@@ -83,7 +83,10 @@ final class AssetBundleTest extends TestCase
     public function testAdditionalWidgetInitializersKeepHeavyPluginsOptional(): void
     {
         self::assertSame([AdminLTECalendarMinifyAsset::class], (new CalendarWidgetAsset())->depends);
-        self::assertSame([AdminLTEChartJSMinifyAsset::class], (new ChartJSWidgetAsset())->depends);
+        self::assertSame([
+            AdminLTEChartJSMinifyAsset::class,
+            AdminLTEThemeAsset::class,
+        ], (new ChartJSWidgetAsset())->depends);
         self::assertContains('js/calendar.js', (new CalendarWidgetAsset())->js);
         self::assertContains('js/chartjs.js', (new ChartJSWidgetAsset())->js);
     }
