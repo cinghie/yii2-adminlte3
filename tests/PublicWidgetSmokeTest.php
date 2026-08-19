@@ -31,6 +31,9 @@ use Yii;
 use yii\base\Module;
 use yii\web\Controller;
 
+/**
+ * Smoke and compatibility coverage across the package's public widget surface.
+ */
 final class PublicWidgetSmokeTest extends TestCase
 {
     public function testSimplePublicWidgetsRender(): void
@@ -55,15 +58,15 @@ final class PublicWidgetSmokeTest extends TestCase
         ];
 
         foreach ($renders as $html) {
-            $this->assertIsString($html);
+            self::assertIsString($html);
         }
 
-        $this->assertStringContainsString('card', $renders[0]);
-        $this->assertStringContainsString('card', $renders[1]);
-        $this->assertStringContainsString('content-header', $renders[3]);
-        $this->assertStringContainsString('main-footer', $renders[4]);
-        $this->assertStringContainsString('info-box', $renders[5]);
-        $this->assertStringContainsString('small-box', $renders[14]);
+        self::assertStringContainsString('card', $renders[0]);
+        self::assertStringContainsString('card', $renders[1]);
+        self::assertStringContainsString('content-header', $renders[3]);
+        self::assertStringContainsString('main-footer', $renders[4]);
+        self::assertStringContainsString('info-box', $renders[5]);
+        self::assertStringContainsString('small-box', $renders[14]);
     }
 
     public function testAlertRendersKnownFlashType(): void
@@ -71,32 +74,38 @@ final class PublicWidgetSmokeTest extends TestCase
         Yii::$app->session->setFlash('success', 'Saved');
         $html = Alert::widget(['removeFlashAfterDisplay' => false]);
 
-        $this->assertStringContainsString('alert-success', $html);
-        $this->assertStringContainsString('Saved', $html);
+        self::assertStringContainsString('alert-success', $html);
+        self::assertStringContainsString('Saved', $html);
     }
 
     public function testComplexPublicClassesAreLoadable(): void
     {
         foreach ([DataColumn::class, DetailView::class, GridView::class, Invoice::class, MailboxRead::class] as $class) {
-            $this->assertTrue(class_exists($class), $class . ' must remain autoloadable');
+            self::assertTrue(class_exists($class), $class . ' must remain autoloadable');
         }
     }
 
     public function testBoxRemainsACardCompatibilityFacade(): void
     {
-        $this->assertTrue(is_subclass_of(Box::class, Card::class));
+        self::assertTrue(is_subclass_of(Box::class, Card::class));
+
+        // `class` is a historical constructor alias; Widget::widget() reserves
+        // the `class` configuration key for Yii object creation, so rendering
+        // callers should use the public `wrapperClass` property.
+        $legacy = new Box(['class' => 'col-12']);
+        self::assertSame('col-12', $legacy->wrapperClass);
 
         $html = Box::widget([
-            'class' => 'col-12',
+            'wrapperClass' => 'col-12',
             'buttonLeftTitle' => 'Back',
             'buttonLeftLink' => ['/site/index'],
             'buttonLeftType' => 'btn-warning',
             'body' => 'Legacy body',
         ]);
 
-        $this->assertStringContainsString('col-12', $html);
-        $this->assertStringContainsString('btn-warning', $html);
-        $this->assertStringContainsString('Legacy body', $html);
+        self::assertStringContainsString('col-12', $html);
+        self::assertStringContainsString('btn-warning', $html);
+        self::assertStringContainsString('Legacy body', $html);
     }
 
     public function testSidebarDefaultActionMatchesOnlyTrailingSegment(): void
@@ -118,8 +127,15 @@ final class PublicWidgetSmokeTest extends TestCase
             Yii::$app->controller = $oldController;
         }
 
-        $this->assertMatchesRegularExpression('/href="\/site"[^>]*>.*?<p>Site/s', $html);
-        $this->assertSame(1, substr_count($html, 'nav-link active'));
+        self::assertMatchesRegularExpression(
+            '/<li class="nav-item active">.*?<p>Site<\/p>.*?<\/li>/s',
+            $html
+        );
+        self::assertDoesNotMatchRegularExpression(
+            '/<li class="nav-item active">.*?<p>False positive<\/p>.*?<\/li>/s',
+            $html
+        );
+        self::assertSame(1, substr_count($html, 'nav-link active'));
     }
 
     public function testSidebarModuleDefaultRouteAndQueryParameters(): void
@@ -144,9 +160,9 @@ final class PublicWidgetSmokeTest extends TestCase
             Yii::$app->controller = $oldController;
         }
 
-        $this->assertSame(1, substr_count($html, 'nav-link active'));
-        $this->assertStringContainsString('Admin', $html);
-        $this->assertStringContainsString('Scoped', $html);
+        self::assertSame(1, substr_count($html, 'nav-link active'));
+        self::assertStringContainsString('Admin', $html);
+        self::assertStringContainsString('Scoped', $html);
     }
 
     public function testSidebarParentActivationInvisibleItemsAndHeaders(): void
@@ -166,9 +182,9 @@ final class PublicWidgetSmokeTest extends TestCase
             ],
         ]);
 
-        $this->assertStringContainsString('nav-header', $html);
-        $this->assertStringContainsString('menu-open', $html);
-        $this->assertStringContainsString('Current', $html);
-        $this->assertStringNotContainsString('Hidden', $html);
+        self::assertStringContainsString('nav-header', $html);
+        self::assertStringContainsString('menu-open', $html);
+        self::assertStringContainsString('Current', $html);
+        self::assertStringNotContainsString('Hidden', $html);
     }
 }
