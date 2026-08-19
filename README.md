@@ -136,3 +136,38 @@ composer quality
 `composer analyse` runs PHPStan at level 5 over the supported package surface. `composer cs` runs PHP_CodeSniffer with the project PSR-12 ruleset. GitHub Actions runs both checks in a dedicated blocking quality job on PHP 8.3.
 
 The package also carries regression tests for rendering security, shared URL/class normalization, strict-CSP-compatible package markup, formatter isolation, asset dependency/order/source-minified parity, package translation ownership, canonical-vs-legacy widget option semantics, and public widget smoke coverage. Complex widget markup is additionally checked through DOM/XPath structural assertions for classes, links, `rel`, `target`, `data-method`, ARIA attributes, and encoded text. Calendar/ChartJS/Error404/Error500 add dedicated smoke, JSON round-trip, security/disclosure, accessibility, and optional-asset isolation checks. Source-level guards cover public class PHPDoc, Yii/PSR import hygiene, and obsolete package/license/version metadata.
+
+## Contributing
+
+Contributor-facing PHPDoc, Yii security, CSP, and PSR-12 conventions are documented in [`docs/CODING_STYLE.md`](docs/CODING_STYLE.md). Comments should explain public contracts, compatibility constraints, trust boundaries, and non-obvious behavior rather than restating straightforward code.
+
+## Widget examples
+
+| Widget                                          | Guide                                                |
+| ----------------------------------------------- | ---------------------------------------------------- |
+| [Alert](docs/example_alert.md)                  | Alert messages                                       |
+| [Box](docs/example_box.md)                      | Legacy card with GridView/footer helpers             |
+| [Breadcrumbs](docs/example_breadcrumbs.md)      | Navigation breadcrumbs                               |
+| [Calendar](docs/example_calendar.md)            | Optional FullCalendar integration                    |
+| [Card](docs/example_card.md)                    | Card (header, tools, body, footer; begin/end)        |
+| [ChartJS](docs/example_chartjs.md)              | Optional Chart.js canvas integration                 |
+| [Content Header](docs/example_contentheader.md) | Page title and breadcrumbs                           |
+| [DataColumn](docs/example_datacolumn.md)        | GridView column class (sorting header)               |
+| [DetailView](docs/example_detailview.md)        | Kartik DetailView styled as AdminLTE 3 card          |
+| [Error404](docs/example_error404.md)            | Safe AdminLTE 404 page                               |
+| [Error500](docs/example_error500.md)            | Safe AdminLTE 500 page                               |
+| [Footer](docs/example_footer.md)                | Layout footer                                        |
+| [GridView](docs/example_gridview.md)            | Data grid in AdminLTE 3 card                         |
+| [InfoBox](docs/example_infobox.md)              | Info box (icon, text, number, optional progress)     |
+| [Invoice](docs/example_invoice.md)              | Invoice layout (Bootstrap 4)                         |
+| [MailboxRead](docs/example_mailboxread.md)      | Read-mail card (subject, body, attachments)          |
+| [NavTabs](docs/example_navtabs.md)              | Nav tabs with tab panes (Bootstrap 4)                |
+| [Navbar Button](docs/example_navbarbutton.md)   | Navbar link button                                   |
+| [Navbar Logo](docs/example_navbarlogo.md)       | Navbar brand/logo                                    |
+| [Navbar User](docs/example_navbaruser.md)       | Navbar user dropdown                                 |
+| [Sidebar Menu](docs/example_sidebarmenu.md)     | Sidebar navigation menu                              |
+| [Sidebar Search](docs/example_sidebarsearch.md) | Sidebar search form                                  |
+| [Sidebar Toggle](docs/example_sidebartoggle.md) | Sidebar toggle button                                |
+| [Sidebar User](docs/example_sidebaruser.md)     | Sidebar user panel                                   |
+| [SmallBox](docs/example_smallbox.md)            | Small stat box with optional footer link             |
+| [Timeline](docs/example_timeline.md)            | Timeline (days and items)                            |
