@@ -10,7 +10,7 @@ Asset bundle and widgets for AdminLTE 3 on Yii 2.
 
 ## Requirements
 
-- PHP 7.4 or later
+- PHP 8.1 or later
 - Yii 2.0.54 or later
 - Yii Bootstrap 4
 - Composer configured to resolve `bower-asset/*` packages, for example through Asset Packagist
@@ -45,6 +45,8 @@ AdminLTEMinifyAsset::register($this);
 
 Both bundles register `cinghie\adminlte3\assets\AdminLTEThemeAsset`. Static GridView, DetailView and Invoice styles are shipped by the package under `assets/css/`, so they can be cached by the browser rather than emitted inline by each widget.
 
+Ionicons are not registered by the core AdminLTE asset bundle. The last published `cinghie/yii2-ionicons` release depends on Yii Bootstrap 3, so applications that need Ionicons should register a Bootstrap-4-compatible Ionicons asset separately rather than mixing Bootstrap generations.
+
 ## Security defaults
 
 `MailboxRead` HTML-encodes message bodies by default. To render an HTML email explicitly, set `encodeMailBody` to `false`; `purifyMailBody` remains enabled by default and passes the content through Yii's HTML purifier.
@@ -59,7 +61,7 @@ Attachment icons are treated as CSS classes rather than arbitrary HTML, and dang
 
 ## Tests
 
-The repository includes PHPUnit tests and a GitHub Actions matrix covering supported PHP versions. Locally:
+The repository includes PHPUnit tests and a GitHub Actions matrix for PHP 8.1, 8.3 and 8.5. Locally:
 
 ```bash
 composer install
