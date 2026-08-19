@@ -43,6 +43,10 @@ if (Yii::$app === null) {
                 'scriptFile' => __FILE__,
                 'scriptUrl' => '/index.php',
             ],
+            'session' => [
+                'class' => yii\web\Session::class,
+                'useCookies' => false,
+            ],
             'assetManager' => [
                 'basePath' => $assetPath,
                 'baseUrl' => '/assets',
