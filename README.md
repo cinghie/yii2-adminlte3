@@ -114,7 +114,9 @@ composer cs
 composer quality
 ```
 
-CI also runs strict Composer validation and PHP syntax checks. Security/CSP, Yii/PSR source-hygiene, asset parity/order, source-metadata, and public-widget documentation guards are part of the normal regression suite. A separate blocking PHP 8.3 quality workflow runs PHPStan level 5 and PHP_CodeSniffer with PSR-12.
+CI also runs strict Composer validation and PHP syntax checks. Security/CSP, Yii/PSR source-hygiene, asset parity/order, source-metadata, and public-widget documentation guards are part of the normal regression suite. Complex rendering tests use `DOMDocument`/`DOMXPath` for structural assertions around classes, links, `rel`, `target`, `data-method`, ARIA attributes, and encoded text instead of relying only on serialized attribute ordering. A separate blocking PHP 8.3 quality workflow runs PHPStan level 5 and PHP_CodeSniffer with PSR-12.
+
+A separate PHP 8.1 `prefer-lowest` job resolves the minimum dependency set with `composer update --prefer-lowest --prefer-stable` and then attempts a clean install and test run. It is intentionally non-blocking while legacy lowest-version package combinations exhibit upstream Composer/package extraction noise; a successful resolution alone is not treated as proof that the complete minimum dependency set is runtime-compatible.
 
 `Timeline` is intentionally outside the initial PHPStan/PHPCS scope because it integrates optional external domain model packages that are not runtime dependencies of this package. The exclusion is explicit and should be removed only when that legacy integration boundary is redesigned or its optional dependencies can be modelled safely.
 
