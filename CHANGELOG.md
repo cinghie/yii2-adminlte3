@@ -21,6 +21,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 #### Tests and continuous integration
 - Added PHPUnit configuration and a headless Yii web-application bootstrap for package tests.
 - Added regression coverage for `MailboxRead` HTML/XSS handling, attachment icon normalization, widget rendering hardening, `Invoice` URL policy, formatter isolation, and AdminLTE asset dependencies.
+- Added public-widget smoke coverage across the package and explicit backward-compatibility coverage for the legacy `Box` API.
+- Expanded `SidebarMenu` regression coverage for trailing default actions, module default routes, query-parameter matching, active parents, invisible items, headers, and similarly named non-matching routes.
 - Added GitHub Actions validation across PHP 8.1, 8.3, and 8.5 with strict Composer validation, clean dependency resolution, PHP syntax linting, and PHPUnit execution.
 - Added test-only Asset Packagist aliases, runtime asset directories, request context, GridView module configuration, Bootstrap 4 configuration, and local translation sources required by Kartik widgets under CLI.
 
@@ -31,7 +33,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Declared `yiisoft/yii2-bootstrap4` explicitly.
 - Declared the Kartik runtime packages used by public widgets (`yii2-grid`, `yii2-detail-view`, and Bootstrap 4 dropdown support).
 - Removed broad development-only runtime constraints and unused runtime dependencies.
-- Removed the implicit `cinghie/yii2-ionicons` dependency from the core AdminLTE asset graph because the latest published package release pulls Yii Bootstrap 3, which conflicts with this Bootstrap 4 package. Applications requiring Ionicons can register a compatible asset explicitly.
+- Removed `cinghie/yii2-ionicons` from the package dependency and asset graph. AdminLTE3 now relies on its Font Awesome icon stack and does not provide implicit Ionicons loading.
 - Aligned Composer license metadata with the repository `LICENSE` file (MIT).
 
 #### Asset graph and browser caching
@@ -41,14 +43,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Moved stable GridView, DetailView, and Invoice styles into `assets/css/widgets.css` and publish them through `AdminLTEThemeAsset` instead of emitting large inline CSS blocks from each widget.
 
 #### Widget architecture and behaviour
-- Marked legacy `Box` as deprecated for new code in favour of `Card`, while keeping it available for backward compatibility.
-- Updated `Box` to use the package-local AdminLTE `GridView` implementation and aligned its class/type normalization with newer widget conventions.
+- Converted legacy `Box` into a backward-compatible facade/subclass over `Card`, so card class resolution, header rendering, body markup, tool buttons, and class sanitization now have a single implementation path.
+- Preserved `Box` defaults, GridView body support, footer action buttons, and historical property aliases while keeping the class deprecated for new code.
 - Removed redundant no-op `init()` implementations from simple widgets.
 - Simplified `NavTabs` link generation by removing duplicate `href` handling and the ineffective `encode` HTML option.
 
 #### Documentation
 - Updated README requirements, installation guidance, security defaults, asset behaviour, test instructions, and compatibility notes.
 - Removed the recommendation to install the package with a broad `@dev` stability flag.
+- Updated `UPDATE.md` to mark `Box`/`Card` consolidation, broader widget regression coverage, and permanent Ionicons removal as processed work.
 
 ### Fixed
 
@@ -81,11 +84,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Reduced duplicated front-end payload by removing the second Bootstrap JS copy.
 - Reduced repeated inline CSS output by moving stable widget styles into cacheable package assets.
 - Reduced redundant asset dependencies in the main AdminLTE bundles.
+- Reduced maintenance duplication by routing legacy `Box` card rendering through `Card`.
 
 ### Validation
 
-- Final CI matrix passes on PHP 8.1, 8.3, and 8.5.
-- Every CI job performs strict Composer validation, clean dependency installation, syntax linting, and all 19 PHPUnit regression tests successfully.
+- CI targets PHP 8.1, 8.3, and 8.5.
+- Every CI job performs strict Composer validation, clean dependency installation, syntax linting, and PHPUnit regression tests.
 
 ## 2026-07-30
 
