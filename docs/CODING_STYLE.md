@@ -41,6 +41,9 @@ Third-party AdminLTE/Kartik assets may have their own CSP requirements; applicat
 
 - Use PSR-12-compatible formatting for new and modified PHP code.
 - Use four spaces, not tabs, in new and modified code.
+- Keep imports in the PSR-12 block order: class imports, then `use function`, then `use const`, with one blank line between different import groups where those groups are present.
+- PSR-12 does **not** require alphabetical sorting within an import group. Alphabetical sorting may be used for readability, but it is a package convention rather than a Yii/PSR requirement and must not be described as normative.
+- `use Yii;` is valid in namespaced code that calls `Yii::`; it should not appear in non-namespaced views/migrations and should be removed when unused.
 - Prefer early returns and small normalization helpers over repeated validation branches.
 - Prefer Yii HTML helpers over manual HTML concatenation when attributes contain dynamic values.
 - Keep backward-compatibility adapters small and explicit; do not duplicate primary implementations.
