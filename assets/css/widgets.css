@@ -5,6 +5,18 @@
   opacity: 0.8;
 }
 
+.cinghie-navbar-user-avatar {
+  width: 2rem;
+  height: 2rem;
+  object-fit: cover;
+}
+
+.cinghie-navbar-user-header-avatar {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+}
+
 /* GridView */
 .kv-grid-table thead th a,
 .kv-grid-table thead th a:hover,
