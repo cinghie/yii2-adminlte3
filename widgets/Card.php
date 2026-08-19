@@ -1,25 +1,16 @@
 <?php
 
-/**
- * @copyright Copyright &copy; Gogodigital Srls
- * @company Gogodigital Srls - Wide ICT Solutions
- * @website http://www.gogodigital.it
- * @github https://github.com/cinghie/yii2-adminlte3
- * @license GNU GENERAL PUBLIC LICENSE VERSION 3
- * @package yii2-AdminLTE
- * @version 0.1.0
- */
-
 namespace cinghie\adminlte3\widgets;
 
+use cinghie\adminlte3\widgets\support\SafeHtml;
 use Yii;
 use yii\bootstrap4\Widget;
 use yii\helpers\Html;
 
 /**
- * AdminLTE 3 Card widget (Bootstrap 4).
+ * Renders an AdminLTE 3 / Bootstrap 4 card.
  *
- * Supports both styles:
+ * Supports both direct widget rendering and Yii's begin()/end() pattern:
  *
  * ```php
  * echo Card::widget([
@@ -33,9 +24,8 @@ use yii\helpers\Html;
  * Card::end();
  * ```
  *
- * For GridView-in-body + footer action buttons, prefer {@see Box}.
- *
- * @see https://adminlte.io/docs/3.1/components/cards.html
+ * For GridView-in-body and legacy footer action buttons, {@see Box} remains a
+ * backward-compatible facade over this widget.
  */
 class Card extends Widget
 {
@@ -48,16 +38,19 @@ class Card extends Widget
     public const TYPE_DARK = 'dark';
     public const TYPE_LIGHT = 'light';
 
-    /** @deprecated Use TYPE_INFO — kept for BC with older Card API */
+    /** @deprecated Use {@see TYPE_INFO}. */
     public const COLOR_INFO = 'card-info';
-    /** @deprecated Use TYPE_SUCCESS */
+
+    /** @deprecated Use {@see TYPE_SUCCESS}. */
     public const COLOR_SUCCESS = 'card-success';
-    /** @deprecated Use TYPE_WARNING */
+
+    /** @deprecated Use {@see TYPE_WARNING}. */
     public const COLOR_WARNING = 'card-warning';
-    /** @deprecated Use TYPE_DANGER */
+
+    /** @deprecated Use {@see TYPE_DANGER}. */
     public const COLOR_DANGER = 'card-danger';
 
-    /** @deprecated Use type constants — kept for BC */
+    /** @deprecated Use the `TYPE_*` constants. */
     public const COLORS = [
         'info' => self::COLOR_INFO,
         'success' => self::COLOR_SUCCESS,
@@ -65,85 +58,67 @@ class Card extends Widget
         'danger' => self::COLOR_DANGER,
     ];
 
-    /** @var string|null Wrapper column class (e.g. col-md-6). Null = no wrapper. */
+    /** @var string|null Wrapper grid classes; null renders the card without a wrapper. */
     public $wrapperClass;
 
-    /**
-     * Card color type: primary|secondary|success|info|warning|danger|dark|light.
-     * Also accepts legacy full class strings such as `card-info` or `card-outline card-info`
-     * (via {@see $cardClass} or this property).
-     *
-     * @var string|null
-     */
+    /** @var string|null Contextual card type. */
     public $type;
 
-    /** @var bool Use outline style (`card-outline card-{type}`) */
+    /** @var bool Whether to render the contextual card as an outline. */
     public $outline = false;
 
     /**
-     * Legacy full card class string (e.g. `card-info`, `card-outline card-success`).
-     * Prefer {@see $type} + {@see $outline}. Merged after base `card` class.
-     *
-     * @var string|null
+     * @var string|null Legacy full card modifier class string.
+     * @deprecated Prefer {@see $type} and {@see $outline}.
      */
     public $cardClass;
 
-    /** @var string|null Header title. Null/empty = no header unless tools are enabled. */
+    /** @var string|null Header title. */
     public $title;
 
-    /** @var string|null Header icon class (e.g. fas fa-chart-pie) */
+    /** @var string|null Header icon class list. */
     public $titleIcon;
 
-    /** @var bool Encode title (XSS). Set false only for trusted HTML. */
+    /** @var bool Whether to HTML-encode the title. */
     public $encodeTitle = true;
 
-    /** @var bool Show collapse tool (`data-card-widget="collapse"`) */
+    /** @var bool Whether to show the AdminLTE collapse tool. */
     public $collapsible = false;
 
-    /** @var bool Show remove tool (`data-card-widget="remove"`) */
+    /** @var bool Whether to show the AdminLTE remove tool. */
     public $removable = false;
 
-    /** @var bool Show maximize tool (`data-card-widget="maximize"`) */
+    /** @var bool Whether to show the AdminLTE maximize tool. */
     public $maximizable = false;
 
-    /**
-     * Extra header tools HTML (already trusted / encoded by caller).
-     * Rendered inside `.card-tools` before collapse/remove/maximize buttons.
-     *
-     * @var string
-     */
+    /** @var string Trusted additional HTML rendered before standard card tools. */
     public $headerTools = '';
 
-    /** @var bool Start collapsed (adds `collapsed-card` + collapsed icon state) */
+    /** @var bool Whether the card starts in the collapsed state. */
     public $collapsed = false;
 
-    /**
-     * Body content when using `Card::widget([...])`.
-     * Ignored when using `Card::begin()` / `Card::end()` (captured buffer wins if non-empty).
-     *
-     * @var string
-     */
+    /** @var string Body content used by direct widget rendering. */
     public $body = '';
 
-    /** @var bool Encode body string. Set false only for trusted HTML. */
+    /** @var bool Whether to HTML-encode direct body content. */
     public $encodeBody = true;
 
-    /** @var string|null Footer content. Null/empty = no footer. */
+    /** @var string|null Footer content. */
     public $footer;
 
-    /** @var bool Encode footer. Set false only for trusted HTML. */
+    /** @var bool Whether to HTML-encode footer content. */
     public $encodeFooter = true;
 
-    /** @var array HTML options for the outer `.card` element */
+    /** @var array HTML options for the outer `.card` element. */
     public $options = [];
 
-    /** @var array HTML options for `.card-header` */
+    /** @var array HTML options for `.card-header`. */
     public $headerOptions = [];
 
-    /** @var array HTML options for `.card-body` */
+    /** @var array HTML options for `.card-body`. */
     public $bodyOptions = [];
 
-    /** @var array HTML options for `.card-footer` */
+    /** @var array HTML options for `.card-footer`. */
     public $footerOptions = [];
 
     /**
@@ -163,7 +138,7 @@ class Card extends Widget
     {
         $captured = ob_get_clean();
         if ($captured !== false && trim((string) $captured) !== '') {
-            // begin/end content is trusted view output
+            // Output captured from the caller's view is intentionally trusted.
             $bodyHtml = (string) $captured;
         } else {
             $bodyHtml = $this->encodeBody ? Html::encode((string) $this->body) : (string) $this->body;
@@ -176,10 +151,9 @@ class Card extends Widget
         $html .= $this->renderFooter();
 
         $card = Html::tag('div', $html, $this->options);
-
         if ($this->wrapperClass !== null && $this->wrapperClass !== '') {
             return Html::tag('div', $card, [
-                'class' => self::sanitizeClass($this->wrapperClass, ''),
+                'class' => self::sanitizeClass($this->wrapperClass),
             ]);
         }
 
@@ -187,20 +161,26 @@ class Card extends Widget
     }
 
     /**
+     * Resolves the final card class list, including legacy modifiers.
+     *
      * @return string[]
      */
     protected function resolveCardCssClasses(): array
     {
         $classes = ['card'];
-
         if ($this->collapsed) {
             $classes[] = 'collapsed-card';
         }
 
-        // Legacy cardClass wins as explicit full modifier when set
         if ($this->cardClass !== null && $this->cardClass !== '') {
-            foreach (preg_split('/\s+/', self::sanitizeClass($this->cardClass, ''), -1, PREG_SPLIT_NO_EMPTY) as $c) {
-                $classes[] = $c;
+            $legacyClasses = preg_split(
+                '/\s+/',
+                self::sanitizeClass($this->cardClass),
+                -1,
+                PREG_SPLIT_NO_EMPTY
+            );
+            foreach ($legacyClasses ?: [] as $class) {
+                $classes[] = $class;
             }
 
             return array_values(array_unique($classes));
@@ -218,7 +198,9 @@ class Card extends Widget
     }
 
     /**
-     * @param string|null $type
+     * Normalizes a contextual card type.
+     *
+     * @param string|null $type Candidate type or legacy `card-*`/`box-*` value.
      * @return string|null
      */
     protected function normalizeType($type)
@@ -228,7 +210,6 @@ class Card extends Widget
         }
 
         $type = strtolower(trim((string) $type));
-        // Accept legacy "card-info" / "box-info"
         if (strpos($type, 'card-') === 0) {
             $type = substr($type, 5);
         } elseif (strpos($type, 'box-') === 0) {
@@ -250,6 +231,8 @@ class Card extends Widget
     }
 
     /**
+     * Renders the optional header and AdminLTE card tools.
+     *
      * @return string
      */
     protected function renderHeader()
@@ -266,7 +249,7 @@ class Card extends Widget
         if ($hasTitle) {
             $titleContent = $this->encodeTitle ? Html::encode($this->title) : $this->title;
             if ($this->titleIcon !== null && $this->titleIcon !== '') {
-                $iconClass = self::sanitizeClass($this->titleIcon, '');
+                $iconClass = SafeHtml::iconClass($this->titleIcon);
                 if ($iconClass !== '') {
                     $titleContent = Html::tag('i', '', ['class' => $iconClass . ' mr-1']) . ' ' . $titleContent;
                 }
@@ -279,47 +262,37 @@ class Card extends Widget
             $tools = (string) $this->headerTools;
             if ($this->collapsible) {
                 $icon = $this->collapsed ? 'fas fa-plus' : 'fas fa-minus';
-                $tools .= Html::button(
-                    Html::tag('i', '', ['class' => $icon]),
-                    [
-                        'type' => 'button',
-                        'class' => 'btn btn-tool',
-                        'data-card-widget' => 'collapse',
-                        'title' => Yii::t('traits', 'Collapse'),
-                        'aria-label' => Yii::t('traits', 'Collapse'),
-                    ]
-                );
+                $tools .= Html::button(Html::tag('i', '', ['class' => $icon]), [
+                    'type' => 'button',
+                    'class' => 'btn btn-tool',
+                    'data-card-widget' => 'collapse',
+                    'title' => Yii::t('traits', 'Collapse'),
+                    'aria-label' => Yii::t('traits', 'Collapse'),
+                ]);
             }
             if ($this->maximizable) {
-                $tools .= Html::button(
-                    Html::tag('i', '', ['class' => 'fas fa-expand']),
-                    [
-                        'type' => 'button',
-                        'class' => 'btn btn-tool',
-                        'data-card-widget' => 'maximize',
-                        'title' => Yii::t('traits', 'Maximize'),
-                        'aria-label' => Yii::t('traits', 'Maximize'),
-                    ]
-                );
+                $tools .= Html::button(Html::tag('i', '', ['class' => 'fas fa-expand']), [
+                    'type' => 'button',
+                    'class' => 'btn btn-tool',
+                    'data-card-widget' => 'maximize',
+                    'title' => Yii::t('traits', 'Maximize'),
+                    'aria-label' => Yii::t('traits', 'Maximize'),
+                ]);
             }
             if ($this->removable) {
-                $tools .= Html::button(
-                    Html::tag('i', '', ['class' => 'fas fa-times']),
-                    [
-                        'type' => 'button',
-                        'class' => 'btn btn-tool',
-                        'data-card-widget' => 'remove',
-                        'title' => Yii::t('traits', 'Remove'),
-                        'aria-label' => Yii::t('traits', 'Remove'),
-                    ]
-                );
+                $tools .= Html::button(Html::tag('i', '', ['class' => 'fas fa-times']), [
+                    'type' => 'button',
+                    'class' => 'btn btn-tool',
+                    'data-card-widget' => 'remove',
+                    'title' => Yii::t('traits', 'Remove'),
+                    'aria-label' => Yii::t('traits', 'Remove'),
+                ]);
             }
             $toolsHtml = Html::tag('div', $tools, ['class' => 'card-tools']);
         }
 
         $headerOptions = $this->headerOptions;
         Html::addCssClass($headerOptions, 'card-header');
-        // Keep title / tools on one vertically centered row (AdminLTE card-header).
         if (!isset($headerOptions['class']) || strpos((string) $headerOptions['class'], 'align-items-') === false) {
             Html::addCssClass($headerOptions, 'align-items-center');
         }
@@ -328,7 +301,9 @@ class Card extends Widget
     }
 
     /**
-     * @param string $bodyHtml already encoded or trusted
+     * Renders body markup from already encoded or explicitly trusted HTML.
+     *
+     * @param string $bodyHtml Body HTML.
      * @return string
      */
     protected function renderBody(string $bodyHtml)
@@ -340,6 +315,8 @@ class Card extends Widget
     }
 
     /**
+     * Renders the optional footer.
+     *
      * @return string
      */
     protected function renderFooter()
@@ -356,19 +333,16 @@ class Card extends Widget
     }
 
     /**
-     * Sanitize string for use in class attribute (alphanumeric, space, hyphen only).
+     * Normalizes a CSS class list through the package-wide internal policy.
      *
-     * @param string|null $value
-     * @param string $default
+     * Kept as a protected wrapper for backward compatibility with subclasses.
+     *
+     * @param mixed $value Candidate class list.
+     * @param string $default Fallback class list.
      * @return string
      */
     protected static function sanitizeClass($value, $default = '')
     {
-        if ($value === null || $value === '') {
-            return $default;
-        }
-        $sanitized = preg_replace('/[^\w\s\-]/', '', (string) $value);
-
-        return $sanitized !== '' ? $sanitized : $default;
+        return SafeHtml::cssClass($value, $default);
     }
 }
