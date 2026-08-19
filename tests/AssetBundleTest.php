@@ -69,6 +69,28 @@ final class AssetBundleTest extends TestCase
         ], (new AdminLTEMinifyAsset())->depends);
     }
 
+    public function testAggregateKeepsHistoricalPluginOrderAndCoreIsSmaller(): void
+    {
+        $aggregate = $this->collectAdminlteFiles(AdminLTEAsset::class);
+        $core = $this->collectAdminlteFiles(AdminLTECoreAsset::class);
+
+        self::assertSame([
+            'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.css',
+            'plugins/icheck-bootstrap/icheck-bootstrap.css',
+            'dist/css/adminlte.css',
+        ], $aggregate['css']);
+        self::assertSame([
+            'plugins/jquery-ui/jquery-ui.js',
+            'plugins/moment/moment.min.js',
+            'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.js',
+            'dist/js/adminlte.js',
+        ], $aggregate['js']);
+
+        self::assertSame(['dist/css/adminlte.css'], $core['css']);
+        self::assertSame(['dist/js/adminlte.js'], $core['js']);
+        self::assertLessThan(count($aggregate['css']) + count($aggregate['js']), count($core['css']) + count($core['js']));
+    }
+
     public function parityProvider(): array
     {
         return [
@@ -132,6 +154,39 @@ final class AssetBundleTest extends TestCase
         self::assertStringContainsString('.cinghie-progress-width-0 { width: 0%; }', $css);
         self::assertStringContainsString('.cinghie-progress-width-37 { width: 37%; }', $css);
         self::assertStringContainsString('.cinghie-progress-width-100 { width: 100%; }', $css);
+    }
+
+    /**
+     * Collects AdminLTE-owned files in dependency order, excluding Yii/vendor dependencies.
+     *
+     * @param class-string<AssetBundle> $class Bundle class.
+     * @param array<class-string<AssetBundle>,bool> $visited Already traversed bundles.
+     * @return array{css:string[],js:string[]}
+     */
+    private function collectAdminlteFiles(string $class, array &$visited = []): array
+    {
+        if (isset($visited[$class])) {
+            return ['css' => [], 'js' => []];
+        }
+        $visited[$class] = true;
+
+        /** @var AssetBundle $bundle */
+        $bundle = new $class();
+        $css = [];
+        $js = [];
+        foreach ($bundle->depends as $dependency) {
+            if (strpos($dependency, 'cinghie\\adminlte3\\') !== 0) {
+                continue;
+            }
+            $files = $this->collectAdminlteFiles($dependency, $visited);
+            $css = array_merge($css, $files['css']);
+            $js = array_merge($js, $files['js']);
+        }
+
+        return [
+            'css' => array_merge($css, $bundle->css),
+            'js' => array_merge($js, $bundle->js),
+        ];
     }
 
     private function normalizeAssetPath(string $path): string
