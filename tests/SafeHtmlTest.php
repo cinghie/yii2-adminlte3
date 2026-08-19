@@ -18,11 +18,13 @@ final class SafeHtmlTest extends TestCase
         self::assertSame('fallback', SafeHtml::cssClass('<>"\'', 'fallback'));
     }
 
-    public function testDangerousAndUnknownUrlSchemesAreRejected(): void
+    public function testDangerousUnknownAndMalformedUrlSchemesAreRejected(): void
     {
         self::assertSame('#', SafeHtml::linkUrl('javascript:alert(1)'));
         self::assertSame('#', SafeHtml::linkUrl('data:text/html,test'));
         self::assertSame('#', SafeHtml::linkUrl('ftp://example.com/file'));
+        self::assertSame('#', SafeHtml::linkUrl('https:///missing-host'));
+        self::assertSame('#', SafeHtml::linkUrl('//example.com/path'));
         self::assertSame('https://example.com/path', SafeHtml::linkUrl('https://example.com/path'));
         self::assertSame('/site/index', SafeHtml::linkUrl('/site/index'));
     }
