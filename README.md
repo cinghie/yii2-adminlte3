@@ -62,6 +62,8 @@ The minified equivalent is `AdminLTECoreMinifyAsset`. The core bundle contains o
 Optional plugin families can be registered independently when a page needs them:
 
 ```php
+use cinghie\adminlte3\AdminLTECalendarAsset;
+use cinghie\adminlte3\AdminLTEChartJSAsset;
 use cinghie\adminlte3\AdminLTEDateTimeAsset;
 use cinghie\adminlte3\AdminLTEIcheckAsset;
 use cinghie\adminlte3\AdminLTEJqueryUiAsset;
@@ -69,9 +71,13 @@ use cinghie\adminlte3\AdminLTEJqueryUiAsset;
 AdminLTEJqueryUiAsset::register($this);
 AdminLTEDateTimeAsset::register($this);
 AdminLTEIcheckAsset::register($this);
+AdminLTECalendarAsset::register($this);
+AdminLTEChartJSAsset::register($this);
 ```
 
-Minified equivalents are `AdminLTEJqueryUiMinifyAsset`, `AdminLTEDateTimeMinifyAsset`, and `AdminLTEIcheckMinifyAsset`. Normal/minified bundle pairs are regression-tested for equivalent dependency graphs and corresponding source files.
+Minified equivalents are `AdminLTEJqueryUiMinifyAsset`, `AdminLTEDateTimeMinifyAsset`, `AdminLTEIcheckMinifyAsset`, `AdminLTECalendarMinifyAsset`, and `AdminLTEChartJSMinifyAsset`. Normal/minified bundle pairs are regression-tested for equivalent dependency graphs and corresponding source files.
+
+`Calendar` and `ChartJS` register their own minified plugin + initializer bundles by default only when those widgets are rendered. Set `registerAssets` to `false` if the application owns plugin registration. Neither FullCalendar nor Chart.js is added to the historical aggregate or core bundles.
 
 Both core variants register `cinghie\adminlte3\assets\AdminLTEThemeAsset`. Stable widget styles and package-owned behavior are shipped under `assets/css/` and `assets/js/`, allowing browsers to cache them rather than requiring repeated inline CSS/JavaScript from each widget.
 
@@ -89,6 +95,8 @@ Attachment icons are treated as CSS classes rather than arbitrary HTML, and dang
 
 `NavbarUser` renders the right footer action (normally logout) with `data-method="post"` by default. This preserves Yii's POST/CSRF logout semantics when Yii JavaScript is active; override `footerRightOptions` if the action is not a logout.
 
+`Calendar` and `ChartJS` serialize PHP arrays/scalars as JSON data attributes and initialize from package-owned external JavaScript. Their server-side APIs intentionally do not accept executable JavaScript callbacks. Dedicated `Error404` and `Error500` widgets HTML-encode user-facing text; `Error500` uses a generic default message and exposes no exception object, stack trace, path, or debug context.
+
 Security-sensitive URL, HTTP(S), email, CSS-class, icon-class and external-link normalization is centralized in the package-internal `widgets/support/SafeHtml` helper. It is intentionally not a public extension API.
 
 ## Content Security Policy
@@ -96,6 +104,8 @@ Security-sensitive URL, HTTP(S), email, CSS-class, icon-class and external-link 
 Package-owned markup avoids inline JavaScript and inline style attributes where package assets can express the same behavior safely. The default Invoice print action uses `data-cinghie-action="print"` and is handled by the published `assets/js/widgets.js` file; active SidebarMenu state uses AdminLTE classes instead of an inline display style. Static Navbar and Mailbox presentation is kept in package CSS/Bootstrap utility classes.
 
 `InfoBox::$progress` keeps the existing integer 0–100 behavior without inline styles: normalized values map to package-owned `cinghie-progress-width-*` classes published through `AdminLTEThemeAsset`. This allows package-owned InfoBox markup to work with strict `style-src-attr 'none'` policies while preserving backward-compatible percentage semantics.
+
+`Calendar` and `ChartJS` avoid inline initializer scripts by publishing dedicated `assets/js/calendar.js` and `assets/js/chartjs.js` files. Runtime configuration is read from HTML-encoded JSON data attributes.
 
 Third-party AdminLTE/Kartik plugins may have additional CSP requirements and should be tested as part of the complete application asset stack.
 
@@ -131,10 +141,14 @@ Contributor-facing PHPDoc, Yii security, CSP, and PSR-12 conventions are documen
 | [Alert](docs/example_alert.md)                  | Alert messages                                       |
 | [Box](docs/example_box.md)                      | Legacy card with GridView/footer helpers             |
 | [Breadcrumbs](docs/example_breadcrumbs.md)      | Navigation breadcrumbs                               |
+| [Calendar](docs/example_calendar.md)            | Optional FullCalendar integration                    |
 | [Card](docs/example_card.md)                    | Card (header, tools, body, footer; begin/end)        |
+| [ChartJS](docs/example_chartjs.md)              | Optional Chart.js canvas integration                 |
 | [Content Header](docs/example_contentheader.md) | Page title and breadcrumbs                           |
 | [DataColumn](docs/example_datacolumn.md)        | GridView column class (sorting header)               |
 | [DetailView](docs/example_detailview.md)        | Kartik DetailView styled as AdminLTE 3 card          |
+| [Error404](docs/example_error404.md)            | Safe AdminLTE 404 page                               |
+| [Error500](docs/example_error500.md)            | Safe AdminLTE 500 page                               |
 | [Footer](docs/example_footer.md)                | Layout footer                                        |
 | [GridView](docs/example_gridview.md)            | Data grid in AdminLTE 3 card                         |
 | [InfoBox](docs/example_infobox.md)              | Info box (icon, text, number, optional progress)     |
