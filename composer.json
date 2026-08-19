@@ -16,7 +16,7 @@
         {
             "name": "Gogodigital.it",
             "email": "info@gogodigital.it",
-            "homepage": "http://www.gogodigital.it/"
+            "homepage": "https://www.gogodigital.it/"
         }
     ],
     "require": {
@@ -30,7 +30,9 @@
         "yiisoft/yii2-bootstrap4": "^2.0.12"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.6"
+        "phpstan/phpstan": "^2.2",
+        "phpunit/phpunit": "^9.6",
+        "squizlabs/php_codesniffer": "^4.0"
     },
     "autoload": {
         "psr-4": {
@@ -43,7 +45,13 @@
         }
     },
     "scripts": {
-        "test": "phpunit -c phpunit.xml --fail-on-warning"
+        "test": "phpunit -c phpunit.xml --fail-on-warning",
+        "analyse": "phpstan analyse -c phpstan.neon --no-progress",
+        "cs": "phpcs --standard=phpcs.xml.dist",
+        "quality": [
+            "@analyse",
+            "@cs"
+        ]
     },
     "config": {
         "allow-plugins": {
