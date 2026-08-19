@@ -27,7 +27,9 @@ class AdminLTEThemeAsset extends AssetBundle
         'js/widgets.js',
     ];
 
-    /** @var array Asset publication filter. */
+    /**
+     * @var array{only?: array<string>, except?: array<string>, caseSensitive?: bool, beforeCopy?: callable(): mixed, afterCopy?: callable(): mixed, forceCopy?: bool}
+     */
     public $publishOptions = [
         'only' => [
             'css/*',
@@ -35,7 +37,7 @@ class AdminLTEThemeAsset extends AssetBundle
         ],
     ];
 
-    /** @var string[] No additional Yii AssetBundle dependencies. */
+    /** @var array<class-string> No additional Yii AssetBundle dependencies. */
     public $depends = [];
 
     /**
