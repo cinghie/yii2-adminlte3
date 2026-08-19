@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'Card' => 'Card',
     'Collapse' => 'Collapse',
     'Dashboard' => 'Dashboard',
     'Date' => 'Date',
@@ -14,6 +15,8 @@ return [
     'Invoice sent' => 'Invoice sent',
     'Maximize' => 'Maximize',
     'Mobile' => 'Mobile',
+    'More info' => 'More info',
+    'No content.' => 'No content.',
     'Order ID' => 'Order ID',
     'Payment Due' => 'Payment Due',
     'Payment Method' => 'Payment Method',
@@ -26,6 +29,7 @@ return [
     'To' => 'To',
     'Toggle navigation' => 'Toggle navigation',
     'Type' => 'Type',
+    'User' => 'User',
     'Vat Code' => 'Vat Code',
     'Website' => 'Website',
 ];
