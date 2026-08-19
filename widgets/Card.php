@@ -3,7 +3,7 @@
 namespace cinghie\adminlte3\widgets;
 
 use cinghie\adminlte3\widgets\support\SafeHtml;
-use Yii;
+use cinghie\adminlte3\widgets\support\Translation;
 use yii\bootstrap4\Widget;
 use yii\helpers\Html;
 
@@ -77,6 +77,12 @@ class Card extends Widget
     public $title;
 
     /** @var string|null Header icon class list. */
+    public $icon;
+
+    /**
+     * @var string|null Legacy header icon class list.
+     * @deprecated Use {@see $icon}. The canonical `icon` name is shared by widgets.
+     */
     public $titleIcon;
 
     /** @var bool Whether to HTML-encode the title. */
@@ -248,8 +254,9 @@ class Card extends Widget
         $titleHtml = '';
         if ($hasTitle) {
             $titleContent = $this->encodeTitle ? Html::encode($this->title) : $this->title;
-            if ($this->titleIcon !== null && $this->titleIcon !== '') {
-                $iconClass = SafeHtml::iconClass($this->titleIcon);
+            $icon = $this->icon !== null && $this->icon !== '' ? $this->icon : $this->titleIcon;
+            if ($icon !== null && $icon !== '') {
+                $iconClass = SafeHtml::iconClass($icon);
                 if ($iconClass !== '') {
                     $titleContent = Html::tag('i', '', ['class' => $iconClass . ' mr-1']) . ' ' . $titleContent;
                 }
@@ -266,8 +273,8 @@ class Card extends Widget
                     'type' => 'button',
                     'class' => 'btn btn-tool',
                     'data-card-widget' => 'collapse',
-                    'title' => Yii::t('traits', 'Collapse'),
-                    'aria-label' => Yii::t('traits', 'Collapse'),
+                    'title' => Translation::t('Collapse'),
+                    'aria-label' => Translation::t('Collapse'),
                 ]);
             }
             if ($this->maximizable) {
@@ -275,8 +282,8 @@ class Card extends Widget
                     'type' => 'button',
                     'class' => 'btn btn-tool',
                     'data-card-widget' => 'maximize',
-                    'title' => Yii::t('traits', 'Maximize'),
-                    'aria-label' => Yii::t('traits', 'Maximize'),
+                    'title' => Translation::t('Maximize'),
+                    'aria-label' => Translation::t('Maximize'),
                 ]);
             }
             if ($this->removable) {
@@ -284,8 +291,8 @@ class Card extends Widget
                     'type' => 'button',
                     'class' => 'btn btn-tool',
                     'data-card-widget' => 'remove',
-                    'title' => Yii::t('traits', 'Remove'),
-                    'aria-label' => Yii::t('traits', 'Remove'),
+                    'title' => Translation::t('Remove'),
+                    'aria-label' => Translation::t('Remove'),
                 ]);
             }
             $toolsHtml = Html::tag('div', $tools, ['class' => 'card-tools']);
