@@ -21,7 +21,7 @@ abstract class ErrorPage extends Widget
     public $homeUrl = ['/'];
 
     /** @var string Accessible label for the navigation action. */
-    public $homeLabel = 'Return to dashboard';
+    public $homeLabel = 'return to dashboard';
 
     /** @var array HTML options for the outer error-page element. */
     public $options = [];
