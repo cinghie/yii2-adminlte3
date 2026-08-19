@@ -14,6 +14,11 @@ foreach ([$runtimePath, $assetPath] as $directory) {
     }
 }
 
+$_SERVER['REQUEST_URI'] = $_SERVER['REQUEST_URI'] ?? '/';
+$_SERVER['SCRIPT_NAME'] = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
+$_SERVER['PHP_SELF'] = $_SERVER['PHP_SELF'] ?? '/index.php';
+$_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
 if (Yii::$app === null) {
     new yii\web\Application([
         'id' => 'yii2-adminlte3-tests',
