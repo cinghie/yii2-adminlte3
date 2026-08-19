@@ -19,6 +19,7 @@ class AdminLTEThemeAsset extends AssetBundle
     public $css = [
         'css/adminlte-theme.css',
         'css/widgets.css',
+        'css/progress-widths.css',
     ];
 
     /** @var string[] Package JavaScript files. */
