@@ -123,7 +123,7 @@ composer validate --strict
 vendor/bin/phpunit
 ```
 
-CI runs Composer validation, clean dependency installation, PHP lint, and PHPUnit on PHP 8.1, 8.2, 8.3, 8.4, and 8.5. It also runs a separate PHP 8.1 `prefer-lowest` job that resolves the minimum declared dependency graph before attempting lint/tests; this job is intentionally non-blocking while legacy minimum-version package combinations continue to expose upstream Composer extraction instability. A successful lowest-version resolution is therefore not advertised as full minimum-runtime certification.
+CI runs Composer validation, clean dependency installation, PHP lint, and PHPUnit on PHP 8.1, 8.2, 8.3, 8.4, and 8.5. A separate PHP 8.1 `prefer-lowest` job resolves the minimum declared dependency graph, installs the locked set from source to avoid archive-extraction instability in legacy packages, verifies the critical autoload surface, runs PHP lint, and executes the full PHPUnit suite. The declared dependency floor is therefore exercised as a runtime compatibility gate rather than resolution-only telemetry.
 
 Static quality checks are available through:
 
