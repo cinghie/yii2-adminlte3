@@ -1,22 +1,23 @@
 Sidebar Search Example
-=======================
+======================
 
-## Default Value
+## Default value
 
-```
+```php
 <?php use cinghie\adminlte3\widgets\SidebarSearch; ?>
 
-<!-- sidebar search form -->
 <?= SidebarSearch::widget() ?>
 ```
 
-## Custom Value
+The default placeholder is translated through the package-owned `adminlte3` category.
 
-```
-<?php use cinghie\adminlte3\widgets\SidebarSearch; ?>
+## Custom value
 
-<!-- sidebar search form -->
+```php
 <?= SidebarSearch::widget([
-    'placeholder' => Yii::t('app', 'Search')
+    'placeholder' => 'Find…',
+    'icon' => 'fas fa-search',
 ]) ?>
 ```
+
+`searchIconClass` remains available as a deprecated alias for `icon`. When both are configured, `icon` wins.
