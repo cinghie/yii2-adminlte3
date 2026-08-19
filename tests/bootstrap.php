@@ -66,3 +66,7 @@ if (Yii::$app === null) {
         ],
     ]);
 }
+
+// Initialize the session before PHPUnit writes progress output. This keeps the
+// web-session-dependent Alert smoke test deterministic in a CLI test process.
+Yii::$app->session->open();
