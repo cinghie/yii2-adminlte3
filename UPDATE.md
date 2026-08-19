@@ -20,6 +20,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 1. Normalize source-file metadata and license headers across the package — **Low**.
 2. Add static analysis and coding-standard automation after the current runtime baseline is stable — **Low**.
+3. Decide whether arbitrary `InfoBox` progress percentages need a CSP `style-src-attr 'none'` alternative — **Low**.
 
 ---
 
@@ -27,9 +28,8 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| — | No known open medium-or-higher security issue from the 2026-08-19 hardening pass | Mail body rendering, dynamic icon classes, SidebarMenu output, external Invoice links, logout semantics, and dangerous URL schemes were hardened and covered by regression tests. | Keep security regression tests mandatory in CI and review every future raw-HTML or dynamic-URL API as an explicit trust boundary. |
-| **Low** | Centralize safe URL / CSS-class normalization helpers | Similar validation logic exists in multiple widgets (`Invoice`, `MailboxRead`, `SidebarMenu`, `Box`, `SmallBox`, navbar widgets). Independent copies can drift over time. | Introduce a small internal helper/trait for URL schemes, HTTP(S) validation, icon/CSS-class normalization, and external-link options. Keep the helper internal unless a stable public API is intentionally designed. |
-| **Low** | Content Security Policy compatibility review | Inline handlers/patterns may be acceptable today but stronger CSP deployments can require nonce-based or external JavaScript handling. | Audit widgets for inline event handlers/scripts and prefer Yii-registered JavaScript or data attributes where practical. Document CSP expectations without weakening current defaults. |
+| — | No known open medium-or-higher security issue from the 2026-08-19 hardening pass | Mail body rendering, dynamic icon classes, SidebarMenu output, external Invoice links, logout semantics, dangerous URL schemes, and package-owned inline-script patterns have been hardened and covered by regression tests. | Keep security regression tests mandatory in CI and review every future raw-HTML, URL, CSS-class, image-source, or external-link API as an explicit trust boundary. |
+| **Low** | `InfoBox` arbitrary progress width under a strict `style-src-attr 'none'` CSP | `InfoBox::$progress` supports any percentage from 0–100 and therefore currently renders a numeric inline width. Static package styles and inline JavaScript were removed where practical, but Bootstrap 4 does not provide a utility class for every percentage. | Keep the current precise API for compatibility. If strict style-attribute CSP becomes a supported target, evaluate stepped CSS classes, a package script that applies widths from validated data attributes, or a documented opt-out of the progress indicator. |
 
 ---
 
@@ -37,7 +37,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| **Low** | Normalize shared widget option semantics | Similar concepts (`type`, `icon`, `url`, link options, outline, encode flags) are not always named or normalized identically across widgets. | Gradually align property names/defaults in backward-compatible releases; use deprecation aliases before removals in a major release. |
+| **Low** | Normalize shared widget option semantics | Similar concepts (`type`, `icon`, `url`, link options, outline, encode flags) are not always named identically across historical widgets. | Gradually align property names/defaults in backward-compatible releases; use deprecation aliases before removals in a major release. |
 | **Low** | Review translation categories owned by external/legacy packages | Some widgets still reference translation categories historically supplied by other modules/packages. That makes standalone rendering less predictable. | Move package-owned user-facing strings to an `adminlte3` translation category, leaving compatibility fallbacks only where needed. |
 
 ---
@@ -59,7 +59,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 |---------|------|-----|--------------------|
 | **Low** | Add DOM/XPath assertions for complex widgets | String assertions are useful but can become brittle when harmless markup ordering changes. | Use `DOMDocument`/XPath for structural assertions around classes, links, `rel`, `data-method`, ARIA attributes, and encoded text. |
 | **Low** | Add Composer lowest-dependency validation | CI validates supported PHP versions against normal dependency resolution, but minimum declared dependency versions are not independently exercised. | Add a separate `composer update --prefer-lowest --prefer-stable` job where dependency ecosystems permit it; keep it non-blocking initially if upstream constraints are noisy. |
-| **Low** | Add static analysis and coding standards | Runtime tests catch behaviour but not all dead imports, type mismatches, duplicated branches, or style drift. | Introduce PHPStan/Psalm at a realistic initial level and a coding-standard tool in separate CI jobs; ratchet strictness gradually. |
+| **Low** | Add static analysis and coding standards | Runtime tests catch behaviour but not all dead imports, type mismatches, duplicated branches, or style drift. | Introduce PHPStan/Psalm at a realistic initial level and a PSR-12-compatible coding-standard tool in separate CI jobs; ratchet strictness gradually. |
 
 ---
 
@@ -67,7 +67,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| **Low** | Normalize source-file headers | Several files still contain historical package names, hardcoded versions, outdated license labels, or duplicated metadata despite Composer and the repository license being aligned to MIT. | Remove hardcoded version tags and obsolete package/license metadata from source headers, or replace them with a minimal consistent copyright/license notice. |
+| **Low** | Normalize source-file headers | Several untouched files still contain historical package names, hardcoded versions, outdated license labels, or duplicated metadata despite Composer and the repository license being aligned to MIT. | Remove hardcoded version tags and obsolete package/license metadata from source headers, or replace them with a minimal consistent copyright/license notice. Keep versioning in Git tags / Composer metadata. |
 | **Low** | Define a public deprecation policy | `Box` remains deprecated as a public compatibility facade and future normalization may need additional aliases/deprecations. | Document how long deprecated classes/properties remain available and reserve removals for a major release. |
 | **Low** | Add release checklist | Asset packages are sensitive to dependency and browser regressions. | Document a release checklist: Composer validation, full CI, asset graph check, README/CHANGELOG/UPDATE sync, compatibility notes, and tagged release smoke install. |
 | **Low** | Clarify semantic-versioning expectations | Security-safe defaults and runtime baseline changes can be breaking even when APIs remain callable. | Document which changes require major/minor releases, especially runtime minimums, implicit asset removal, default encoding, and deprecated widget removal. |
@@ -82,19 +82,22 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 |------|--------|
 | `MailboxRead` body rendered as raw HTML by default | **Processed.** Body is encoded by default; explicit HTML mode remains purified by default. |
 | `MailboxRead` attachment icon accepted arbitrary HTML | **Processed.** Icons are normalized to safe CSS classes instead of emitted as arbitrary markup. |
-| SidebarMenu dynamic icon/badge/template output | **Processed.** Icon/badge classes are sanitized, badges are encoded by default, and dynamic rendering relies more heavily on Yii HTML helpers. |
-| Dangerous external URL schemes in widgets | **Processed.** Mailbox/Invoice/navbar/small-box style link surfaces reject unsafe schemes as applicable. |
+| SidebarMenu dynamic icon/badge/template output | **Processed.** Icon/badge classes are normalized, badges are encoded by default, and dynamic rendering relies more heavily on Yii HTML helpers. |
+| Dangerous external URL schemes in widgets | **Processed.** Mailbox/Invoice/navbar/small-box style link surfaces reject unsafe or unsupported explicit schemes as applicable. |
 | Invoice external link hardening | **Processed.** HTTP(S) and email values are validated; external new-tab links receive `noopener noreferrer`; remote logos require explicit opt-in. |
 | Logout rendered as an ordinary GET link | **Processed.** `NavbarUser` right-footer action uses Yii POST semantics by default. |
+| Repeated URL / CSS-class / icon-class normalization | **Processed.** Internal `widgets/support/SafeHtml` is now the shared policy for safe link schemes, HTTP(S), email links, CSS/icon classes, route arrays, and external-link options. The helper is marked internal rather than becoming a public extension API. |
+| CSP compatibility review | **Processed.** Invoice browser printing moved from inline `onclick` to package JS + `data-cinghie-action`; SidebarMenu no longer writes inline submenu display state; static Navbar/Mailbox styles moved to package CSS/utility classes. The one documented residual is arbitrary `InfoBox` progress width (Open Low). |
+| Security policy regression coverage | **Processed.** Dedicated tests cover shared normalization and avoidable package-owned inline JS/style patterns; these tests remain part of the normal PHPUnit CI matrix. |
 
 ### Processed — Correctness & architecture
 
 | Item | Result |
 |------|--------|
-| SidebarMenu default action/default route matched via substring logic | **Processed.** Route matching now works on route path segments. |
+| SidebarMenu default action/default route matched via substring logic | **Processed.** Route matching works on route path segments. |
 | `Box` unsafe type/class normalization | **Processed.** Legacy widget input normalization was aligned with safer Card-style conventions. |
 | `Box` used Kartik GridView directly | **Processed.** It uses the package-local AdminLTE GridView implementation. |
-| `Box` and `Card` duplicated card rendering | **Processed.** `Box` is now a deprecated compatibility facade/subclass over `Card`; shared card classes, header, body markup, tools, and sanitization use the Card implementation while Box retains its GridView/footer-button API and legacy aliases. |
+| `Box` and `Card` duplicated card rendering | **Processed.** `Box` is a deprecated compatibility facade/subclass over `Card`; shared card classes, header, body markup, tools, and sanitization use the Card implementation while Box retains its GridView/footer-button API and legacy aliases. |
 | `GridView` / `DetailView` changed the application formatter | **Processed.** Shared formatter state is no longer mutated when changing `nullDisplay`. |
 | Grid export dependency failure was silently hidden | **Processed.** Explicit export configuration now fails fast with `InvalidConfigException` when the required dropdown package is unavailable. |
 | Redundant empty `init()` overrides | **Processed.** Removed from simple widgets where they added no behaviour. |
@@ -108,6 +111,8 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Redundant direct jQuery dependency | **Processed.** Removed where Yii already provides the dependency chain. |
 | Inconsistent `appendTimestamp` behaviour | **Processed.** Minified and non-minified bundles are aligned. |
 | Large stable widget CSS blocks emitted inline | **Processed.** GridView, DetailView, and Invoice stable styles moved to `assets/css/widgets.css` through `AdminLTEThemeAsset`. |
+| Static widget presentation embedded in HTML `style` attributes | **Processed where practical.** NavbarLogo, NavbarUser, MailboxRead, and Invoice static presentation moved to package CSS/Bootstrap utility classes. Dynamic InfoBox progress width remains documented separately. |
+| Package-owned behavior needed inline JS | **Processed.** `AdminLTEThemeAsset` publishes `assets/js/widgets.js`, allowing behavior such as browser printing to be bound from a data attribute instead of an inline handler. |
 
 ### Processed — Packaging
 
@@ -119,15 +124,16 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | License metadata mismatch | **Processed.** Composer metadata matches the repository MIT license. Source header cleanup remains an open documentation task. |
 | Ionicons dependency / compatibility | **Processed.** Ionicons has been removed from the package dependency and asset graph. AdminLTE3 uses its Font Awesome icon stack; no Ionicons compatibility layer is planned for this package. |
 
-### Processed — Tests & CI
+### Processed — Tests, code comments & CI
 
 | Item | Result |
 |------|--------|
 | No automated test suite | **Processed.** PHPUnit configuration and regression tests were added. |
 | No GitHub Actions validation | **Processed.** CI runs Composer validation, clean dependency resolution, PHP lint, and PHPUnit on PHP 8.1, 8.3, and 8.5. |
 | Headless Kartik/Yii test environment incomplete | **Processed.** Test bootstrap configures Asset Packagist aliases, assets/runtime directories, request context, Bootstrap 4, GridView module, and local translation sources. |
-| Public widgets lacked broad smoke coverage | **Processed.** Public widget classes now have package-level smoke/load coverage, with dedicated behavioural/security tests retained for complex widgets. |
-| SidebarMenu route matrix was narrow | **Processed.** Regression coverage now includes trailing default actions, module default routes, query parameters, active parents, invisible items, headers, and similarly named non-matching routes. |
+| Public widgets lacked broad smoke coverage | **Processed.** Public widget classes have package-level smoke/load coverage, with dedicated behavioural/security tests retained for complex widgets. |
+| SidebarMenu route matrix was narrow | **Processed.** Regression coverage includes trailing default actions, module default routes, query parameters, active parents, invisible items, headers, and similarly named non-matching routes. |
+| Comment/PHPDoc conventions were implicit | **Processed.** `docs/CODING_STYLE.md` records Yii-oriented output encoding/trust-boundary rules, useful PHPDoc expectations, PSR-12 formatting, CSP conventions, and public-package documentation restrictions. A regression test requires every public widget class to retain class-level PHPDoc. |
 
 ---
 
@@ -148,11 +154,11 @@ These are **not current defects**. They are public-package evolution ideas that 
 - Keep the current aggregate bundle available for ease of adoption while allowing performance-sensitive applications to opt into smaller bundles.
 - Add dependency-graph tests so optional bundles never register duplicate jQuery/Bootstrap copies.
 
-### 3. Unified widget rendering utilities
+### 3. Shared widget rendering utilities beyond safety policy
 
-- Introduce internal utilities for card types, icon classes, safe URLs, external-link attributes, tool buttons, and common AdminLTE markup.
-- Use them to reduce repeated security-sensitive string manipulation and make widget behaviour more consistent.
-- Keep the first iteration internal to avoid prematurely expanding the public API surface.
+- `SafeHtml` now centralizes security-sensitive URL/class/icon normalization.
+- Future internal utilities could consolidate repeated AdminLTE tool-button markup, contextual types, and common container structures without broadening the public API prematurely.
+- Preserve deprecated adapters as thin layers over the primary implementation.
 
 ### 4. Accessibility improvements
 
@@ -160,11 +166,11 @@ These are **not current defects**. They are public-package evolution ideas that 
 - Add semantic labels to icon-only buttons.
 - Add automated structural accessibility assertions where feasible; consider browser-level testing only if it provides stable value.
 
-### 5. Stronger CSP-friendly integration
+### 5. Stronger end-to-end CSP verification
 
-- Reduce inline event handlers where possible.
-- Register JavaScript through Yii View APIs and data attributes.
-- Document CSP requirements for AdminLTE and third-party plugins and avoid recommending permissive `unsafe-inline` defaults.
+- The package-owned CSP pass removed avoidable inline JavaScript and most static style attributes.
+- Evaluate the remaining dynamic `InfoBox` width if `style-src-attr 'none'` becomes a supported target.
+- Add a small browser fixture with a restrictive CSP to validate the complete AdminLTE/Kartik/third-party asset stack, because upstream plugins can have requirements outside this package's generated markup.
 
 ### 6. Visual regression / browser smoke testing
 
@@ -195,4 +201,7 @@ These are **not current defects**. They are public-package evolution ideas that 
 - Consolidated legacy `Box` rendering onto `Card` while preserving Box defaults, aliases, GridView support, and footer actions.
 - Expanded regression coverage across the public widget surface and deeper SidebarMenu route/parent/visibility cases.
 - Removed Ionicons from the package dependency and asset graph permanently; the package standard icon stack is Font Awesome.
-- Remaining roadmap work is intentionally low-risk: source metadata/header cleanup, static analysis/coding standards, and incremental release/documentation hygiene.
+- Centralized URL, HTTP(S), email, CSS-class, icon-class, and external-link safety policy in internal `SafeHtml`; migrated the main security-sensitive widgets to it.
+- Completed a package-owned CSP pass: Invoice print behavior moved to an external asset script, SidebarMenu active state no longer requires inline display styles, and static Navbar/Mailbox/Invoice styles were moved into package CSS/utility classes.
+- Added public coding/PHPDoc conventions and a test guard for class-level documentation. Comments now focus on public contracts, compatibility and trust boundaries rather than duplicating obvious code.
+- Remaining roadmap work is intentionally low-risk: source metadata/header cleanup, static analysis/coding standards, the optional strict-CSP path for arbitrary InfoBox progress widths, and incremental release/documentation hygiene.
