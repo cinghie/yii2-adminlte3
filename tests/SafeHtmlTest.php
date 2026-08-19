@@ -15,7 +15,7 @@ final class SafeHtmlTest extends TestCase
     public function testCssClassRemovesAttributeBreakingCharacters(): void
     {
         self::assertSame('fas fa-home onclickalert1', SafeHtml::cssClass('fas fa-home" onclick="alert(1)'));
-        self::assertSame('fallback', SafeHtml::cssClass('<script>', 'fallback'));
+        self::assertSame('fallback', SafeHtml::cssClass('<>"\'', 'fallback'));
     }
 
     public function testDangerousAndUnknownUrlSchemesAreRejected(): void
