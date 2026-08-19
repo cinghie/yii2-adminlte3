@@ -21,7 +21,8 @@ For GridView inside the body and footer action buttons, use the **[Box](example_
 | `outline` | bool | `false` | `card-outline card-{type}`. |
 | `cardClass` | string\|null | `null` | Legacy full class string (e.g. `card-info`). Prefer `type` + `outline`. |
 | `title` | string\|null | `null` | Header title. |
-| `titleIcon` | string\|null | `null` | FA icon class (e.g. `fas fa-chart-pie`). |
+| `icon` | string\|null | `null` | Font Awesome icon class (e.g. `fas fa-chart-pie`). |
+| `titleIcon` | string\|null | `null` | Deprecated alias for `icon`. |
 | `encodeTitle` | bool | `true` | HTML-encode title. |
 | `collapsible` | bool | `false` | Collapse tool. |
 | `removable` | bool | `false` | Remove tool. |
@@ -36,6 +37,8 @@ For GridView inside the body and footer action buttons, use the **[Box](example_
 | `headerOptions` | array | `[]` | Attributes for `.card-header`. |
 | `bodyOptions` | array | `[]` | Attributes for `.card-body`. |
 | `footerOptions` | array | `[]` | Attributes for `.card-footer`. |
+
+When both `icon` and the deprecated `titleIcon` are supplied, `icon` wins.
 
 ---
 
@@ -66,7 +69,7 @@ Legacy `Card::COLOR_*` / `Card::COLORS` (`card-info`, …) still work via `cardC
 <?= Card::widget([
     'type' => Card::TYPE_INFO,
     'title' => 'Info',
-    'titleIcon' => 'fas fa-info-circle',
+    'icon' => 'fas fa-info-circle',
     'body' => 'Card body content.',
     'footer' => 'Updated today',
 ]) ?>
@@ -81,7 +84,7 @@ Legacy `Card::COLOR_*` / `Card::COLORS` (`card-info`, …) still work via `cardC
     'type' => Card::TYPE_PRIMARY,
     'outline' => true,
     'title' => 'Orders',
-    'titleIcon' => 'fas fa-shopping-cart',
+    'icon' => 'fas fa-shopping-cart',
     'collapsible' => true,
     'maximizable' => true,
 ]); ?>
@@ -128,3 +131,4 @@ Legacy `Card::COLOR_*` / `Card::COLORS` (`card-info`, …) still work via `cardC
 - Tools require AdminLTE’s card widgets JS (included with AdminLTE 3 assets).
 - Set `encodeBody` / `encodeTitle` / `encodeFooter` to `false` only for trusted HTML.
 - Use **Box** when you need GridView body + footer buttons.
+- `titleIcon` remains available for backward compatibility but is deprecated; use `icon` in new code.
