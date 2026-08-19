@@ -45,6 +45,8 @@ jobs:
     name: prefer-lowest (PHP 8.1)
     runs-on: ubuntu-latest
     continue-on-error: true
+    env:
+      COMPOSER_MAX_PARALLEL_PROCESSES: 1
 
     steps:
       - uses: actions/checkout@v4
