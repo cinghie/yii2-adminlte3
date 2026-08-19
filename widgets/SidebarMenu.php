@@ -2,6 +2,7 @@
 
 namespace cinghie\adminlte3\widgets;
 
+use cinghie\adminlte3\widgets\support\SafeHtml;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -9,35 +10,68 @@ use yii\helpers\Url;
 use yii\widgets\Menu;
 
 /**
- * SidebarMenu widget for AdminLTE 3 with Bootstrap 4.
+ * Renders an AdminLTE 3 sidebar navigation menu.
+ *
+ * Labels follow Yii Menu encoding rules, while icon and badge classes are
+ * normalized before they are used in HTML attributes. Active-route matching
+ * handles controller default actions and module default routes by path segment
+ * rather than substring matching.
  */
 class SidebarMenu extends Menu
 {
+    /** @var string Template used for leaf links. */
     public $linkTemplate = '<a class="nav-link{activeClass}" href="{url}">{icon}<p>{label}{caret}{badge}</p></a>';
+
+    /** @var string Template used for encoded/normalized labels. */
     public $labelTemplate = '{label}';
+
+    /** @var string Template used for links that own a submenu. */
     public $parentLinkTemplate = '<a class="nav-link{activeClass}" href="{url}">{icon}<p>{label}<i class="right fas fa-angle-left"></i>{badge}</p></a>';
+
+    /** @var string Template used for nested menu lists. */
     public $submenuTemplate = "\n<ul class=\"nav nav-treeview\" {show}>\n{items}\n</ul>\n";
+
+    /** @var bool Whether an active child should activate its parent item. */
     public $activateParents = true;
+
+    /** @var string Trusted fallback icon HTML. */
     public $defaultIconHtml = '';
+
+    /** @var bool Whether badge text should be HTML-encoded. */
     public $encodeBadges = true;
+
+    /** @var array HTML options for the root menu element. */
     public $options = [
         'class' => 'nav nav-pills nav-sidebar flex-column',
         'data-widget' => 'treeview',
         'role' => 'menu',
         'data-accordion' => 'false',
     ];
+
+    /** @var string Prefix prepended to item icon classes. */
     public static $iconClassPrefix = 'nav-icon ';
+
+    /** @var string Default icon class for submenu entries. */
     public $submenuIconClass = 'far fa-circle nav-icon';
 
+    /** @var string|false Current route without its controller default action. */
     private $noDefaultAction;
+
+    /** @var string|false Current route without its module default route. */
     private $noDefaultRoute;
 
+    /**
+     * {@inheritdoc}
+     */
     public function init()
     {
         parent::init();
         $this->resolveRequestContext();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function run()
     {
         $this->resolveRequestContext();
@@ -53,7 +87,12 @@ class SidebarMenu extends Menu
         }
     }
 
-    protected function resolveRequestContext()
+    /**
+     * Fills route and query parameters from the active request when omitted.
+     *
+     * @return void
+     */
+    protected function resolveRequestContext(): void
     {
         if ($this->route === null && Yii::$app->controller !== null) {
             $this->route = Yii::$app->controller->getRoute();
@@ -63,7 +102,12 @@ class SidebarMenu extends Menu
         }
     }
 
-    protected function resolveDefaultRoutes()
+    /**
+     * Computes shorthand routes that omit default actions/module routes.
+     *
+     * @return void
+     */
+    protected function resolveDefaultRoutes(): void
     {
         $this->noDefaultAction = false;
         $this->noDefaultRoute = false;
@@ -97,19 +141,14 @@ class SidebarMenu extends Menu
         }
     }
 
-    protected static function sanitizeClass($value, $default = '')
-    {
-        if ($value === null || $value === '') {
-            return $default;
-        }
-        $sanitized = preg_replace('/[^A-Za-z0-9_\- ]/', '', (string) $value);
-        return $sanitized !== '' ? $sanitized : $default;
-    }
-
+    /**
+     * {@inheritdoc}
+     */
     protected function renderItem($item)
     {
         $optionsClass = (string) ArrayHelper::getValue($item, 'options.class', '');
-        $isHeader = strpos($optionsClass, 'nav-header') !== false || preg_match('/(^|\s)header(\s|$)/', $optionsClass);
+        $isHeader = strpos($optionsClass, 'nav-header') !== false
+            || preg_match('/(^|\s)header(\s|$)/', $optionsClass);
         if ($isHeader) {
             return strtr($this->labelTemplate, ['{label}' => $item['label']]);
         }
@@ -118,7 +157,10 @@ class SidebarMenu extends Menu
         $badge = ArrayHelper::getValue($item, 'badge', '');
         if ($badge !== '') {
             $badgeOptions = ArrayHelper::getValue($item, 'badgeOptions', ['class' => 'right badge badge-danger']);
-            $badgeOptions['class'] = self::sanitizeClass(ArrayHelper::getValue($badgeOptions, 'class', ''), 'right badge badge-danger');
+            $badgeOptions['class'] = SafeHtml::cssClass(
+                ArrayHelper::getValue($badgeOptions, 'class', ''),
+                'right badge badge-danger'
+            );
             $badgeContent = $this->encodeBadges ? Html::encode((string) $badge) : (string) $badge;
             $badge = ' ' . Html::tag('span', $badgeContent, $badgeOptions);
         }
@@ -131,7 +173,7 @@ class SidebarMenu extends Menu
 
         $icon = $this->defaultIconHtml;
         if (!empty($item['icon'])) {
-            $iconClass = self::sanitizeClass(static::$iconClassPrefix . $item['icon']);
+            $iconClass = SafeHtml::iconClass(static::$iconClassPrefix . $item['icon']);
             $icon = $iconClass === '' ? '' : Html::tag('i', '', ['class' => $iconClass]) . ' ';
         }
 
@@ -149,6 +191,9 @@ class SidebarMenu extends Menu
         ]);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function renderItems($items)
     {
         $n = count($items);
@@ -158,11 +203,14 @@ class SidebarMenu extends Menu
             $options = array_merge($this->itemOptions, ArrayHelper::getValue($item, 'options', []));
             $tag = ArrayHelper::remove($options, 'tag', 'li');
             $optionsClass = (string) ArrayHelper::getValue($options, 'class', '');
-            $isHeader = strpos($optionsClass, 'nav-header') !== false || preg_match('/(^|\s)header(\s|$)/', $optionsClass);
+            $isHeader = strpos($optionsClass, 'nav-header') !== false
+                || preg_match('/(^|\s)header(\s|$)/', $optionsClass);
 
             if ($isHeader) {
                 if (strpos($optionsClass, 'nav-header') === false) {
-                    $options['class'] = trim(preg_replace('/(^|\s)header(\s|$)/', ' nav-header ', $optionsClass));
+                    $options['class'] = trim(
+                        (string) preg_replace('/(^|\s)header(\s|$)/', ' nav-header ', $optionsClass)
+                    );
                 }
                 $lines[] = Html::tag($tag, $this->renderItem($item), $options);
                 continue;
@@ -196,6 +244,9 @@ class SidebarMenu extends Menu
         return implode("\n", $lines);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function normalizeItems($items, &$active)
     {
         foreach ($items as $i => $item) {
@@ -204,19 +255,24 @@ class SidebarMenu extends Menu
                 continue;
             }
 
-            $item['label'] = isset($item['label']) ? $item['label'] : '';
-            $encodeLabel = isset($item['encode']) ? $item['encode'] : $this->encodeLabels;
+            $item['label'] = $item['label'] ?? '';
+            $encodeLabel = $item['encode'] ?? $this->encodeLabels;
             $items[$i]['label'] = $encodeLabel ? Html::encode($item['label']) : $item['label'];
-            $items[$i]['icon'] = isset($item['icon']) ? self::sanitizeClass($item['icon']) : '';
+            $items[$i]['icon'] = isset($item['icon']) ? SafeHtml::iconClass($item['icon']) : '';
             $items[$i]['options'] = ArrayHelper::getValue($item, 'options', []);
             $items[$i]['badge'] = ArrayHelper::getValue($item, 'badge', '');
-            $items[$i]['badgeOptions'] = ArrayHelper::getValue($item, 'badgeOptions', ['class' => 'right badge badge-danger']);
+            $items[$i]['badgeOptions'] = ArrayHelper::getValue(
+                $item,
+                'badgeOptions',
+                ['class' => 'right badge badge-danger']
+            );
             $hasActiveChild = false;
 
             if (isset($item['items'])) {
                 $items[$i]['items'] = $this->normalizeItems($item['items'], $hasActiveChild);
                 $class = (string) ArrayHelper::getValue($items[$i], 'options.class', '');
-                $isHeader = strpos($class, 'nav-header') !== false || preg_match('/(^|\s)header(\s|$)/', $class);
+                $isHeader = strpos($class, 'nav-header') !== false
+                    || preg_match('/(^|\s)header(\s|$)/', $class);
                 if (empty($items[$i]['items']) && $this->hideEmptyItems && !$isHeader) {
                     unset($items[$i]['items']);
                     if (!isset($item['url'])) {
@@ -227,7 +283,8 @@ class SidebarMenu extends Menu
             }
 
             if (!isset($item['active'])) {
-                if (($this->activateParents && $hasActiveChild) || ($this->activateItems && $this->isItemActive($item))) {
+                if (($this->activateParents && $hasActiveChild)
+                    || ($this->activateItems && $this->isItemActive($item))) {
                     $active = $items[$i]['active'] = true;
                 } else {
                     $items[$i]['active'] = false;
@@ -241,6 +298,9 @@ class SidebarMenu extends Menu
         return array_values($items);
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function isItemActive($item)
     {
         if (!isset($item['url']) || !is_array($item['url']) || !isset($item['url'][0])) {
