@@ -19,10 +19,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 ## Priority list
 
 1. Normalize source-file metadata and license headers across the package — **Low**.
-2. Reduce `Box` / `Card` architectural duplication while preserving backward compatibility — **Medium**.
-3. Extend regression coverage to every public widget and deeper SidebarMenu route cases — **Medium**.
-4. Decide the long-term Ionicons compatibility strategy without reintroducing Bootstrap 3 — **Medium**.
-5. Add static analysis and coding-standard automation after the current runtime baseline is stable — **Low**.
+2. Add static analysis and coding-standard automation after the current runtime baseline is stable — **Low**.
 
 ---
 
@@ -31,8 +28,8 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
 | — | No known open medium-or-higher security issue from the 2026-08-19 hardening pass | Mail body rendering, dynamic icon classes, SidebarMenu output, external Invoice links, logout semantics, and dangerous URL schemes were hardened and covered by regression tests. | Keep security regression tests mandatory in CI and review every future raw-HTML or dynamic-URL API as an explicit trust boundary. |
-| **Low** | Centralize safe URL / CSS-class normalization helpers | Similar validation logic now exists in multiple widgets (`Invoice`, `MailboxRead`, `SidebarMenu`, `Box`, `SmallBox`, navbar widgets). Independent copies can drift over time. | Introduce a small internal helper/trait for URL schemes, HTTP(S) validation, icon/CSS-class normalization, and external-link options. Keep the helper internal unless a stable public API is intentionally designed. |
-| **Low** | Content Security Policy compatibility review | Fixed event handlers and inline HTML patterns may be acceptable today but stronger CSP deployments can require nonce-based or external JavaScript handling. | Audit widgets for inline event handlers/scripts and prefer Yii-registered JavaScript or data attributes where practical. Document CSP expectations without weakening current defaults. |
+| **Low** | Centralize safe URL / CSS-class normalization helpers | Similar validation logic exists in multiple widgets (`Invoice`, `MailboxRead`, `SidebarMenu`, `Box`, `SmallBox`, navbar widgets). Independent copies can drift over time. | Introduce a small internal helper/trait for URL schemes, HTTP(S) validation, icon/CSS-class normalization, and external-link options. Keep the helper internal unless a stable public API is intentionally designed. |
+| **Low** | Content Security Policy compatibility review | Inline handlers/patterns may be acceptable today but stronger CSP deployments can require nonce-based or external JavaScript handling. | Audit widgets for inline event handlers/scripts and prefer Yii-registered JavaScript or data attributes where practical. Document CSP expectations without weakening current defaults. |
 
 ---
 
@@ -40,8 +37,6 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| **Medium** | Consolidate legacy `Box` with `Card` | `Box` is deprecated and safer than before, but the package still maintains two independent card implementations with overlapping header/body/footer/tools behaviour. Divergence increases maintenance cost and future bug risk. | Refactor `Box` into a compatibility facade/subclass over `Card`, retaining legacy properties and GridView/footer-button behaviour through adapters. Add BC tests before internal consolidation. |
-| **Medium** | Define the Ionicons compatibility path | Removing the implicit Ionicons asset avoids a Bootstrap 3 conflict, but applications that relied on automatic Ionicons loading may see visual regressions. | Prefer a Bootstrap-4-safe/public Ionicons asset package, or keep Ionicons explicitly optional and document migration. Do not reintroduce a Bootstrap 3 dependency into the core AdminLTE3 bundle. |
 | **Low** | Normalize shared widget option semantics | Similar concepts (`type`, `icon`, `url`, link options, outline, encode flags) are not always named or normalized identically across widgets. | Gradually align property names/defaults in backward-compatible releases; use deprecation aliases before removals in a major release. |
 | **Low** | Review translation categories owned by external/legacy packages | Some widgets still reference translation categories historically supplied by other modules/packages. That makes standalone rendering less predictable. | Move package-owned user-facing strings to an `adminlte3` translation category, leaving compatibility fallbacks only where needed. |
 
@@ -51,8 +46,8 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| — | No known open medium-or-higher performance issue from the 2026-08-19 pass | Duplicate Bootstrap JS and redundant asset dependencies were removed, and stable widget CSS was moved to cacheable assets. | Keep bundle-size and asset-order checks in CI when dependencies change. |
-| **Low** | Split optional plugin assets from the core bundle | The main AdminLTE bundle still carries plugins that not every page uses (for example date/time-related assets). | Consider small optional AssetBundles for plugin families so applications can register only what a page requires. Preserve a convenience aggregate bundle for backward compatibility. |
+| — | No known open medium-or-higher performance issue from the 2026-08-19 pass | Duplicate Bootstrap JS and redundant asset dependencies were removed, stable widget CSS moved to cacheable assets, and Box now reuses Card rendering. | Keep bundle-size and asset-order checks in CI when dependencies change. |
+| **Low** | Split optional plugin assets from the core bundle | The main AdminLTE bundle still carries plugins that not every page uses. | Consider small optional AssetBundles for plugin families so applications can register only what a page requires. Preserve a convenience aggregate bundle for backward compatibility. |
 | **Low** | Minified/non-minified asset parity tests | Current bundles are aligned, but future edits can accidentally change dependencies or plugin ordering between debug and production variants. | Add a test asserting equivalent dependency graphs and corresponding source/minified files. |
 | **Low** | Evaluate preloading/defer strategy for non-critical JS | AdminLTE/plugin scripts can delay parsing on large admin pages. | Benchmark before changing defaults. If useful, expose opt-in script-position/defer guidance rather than introducing a breaking global behaviour change. |
 
@@ -62,10 +57,8 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| **Medium** | Add render tests for every public widget | The current 19 tests focus on the highest-risk regression areas, but not every widget has a direct smoke/render test. | Add at least one valid render test per public widget plus malformed-input tests for widgets accepting URLs, icons, HTML, or user-supplied option arrays. |
-| **Medium** | Expand SidebarMenu route regression matrix | Route matching was fixed to operate on path segments; nested modules/default routes/default actions deserve broader coverage because navigation active-state regressions are subtle. | Test controller default action, module default route, nested modules, query parameters, child activation, invisible items, headers, and similarly named route segments. |
-| **Low** | Add DOM/XPath assertions for complex widgets | Pure string assertions can become brittle when harmless markup ordering changes. | Use `DOMDocument`/XPath for structural assertions around classes, links, `rel`, `data-method`, ARIA attributes, and encoded text. |
-| **Low** | Add Composer lowest-dependency validation | CI currently validates supported PHP versions against normal dependency resolution, but minimum declared dependency versions are not independently exercised. | Add a separate `composer update --prefer-lowest --prefer-stable` job where dependency ecosystems permit it; keep it non-blocking initially if upstream constraints are noisy. |
+| **Low** | Add DOM/XPath assertions for complex widgets | String assertions are useful but can become brittle when harmless markup ordering changes. | Use `DOMDocument`/XPath for structural assertions around classes, links, `rel`, `data-method`, ARIA attributes, and encoded text. |
+| **Low** | Add Composer lowest-dependency validation | CI validates supported PHP versions against normal dependency resolution, but minimum declared dependency versions are not independently exercised. | Add a separate `composer update --prefer-lowest --prefer-stable` job where dependency ecosystems permit it; keep it non-blocking initially if upstream constraints are noisy. |
 | **Low** | Add static analysis and coding standards | Runtime tests catch behaviour but not all dead imports, type mismatches, duplicated branches, or style drift. | Introduce PHPStan/Psalm at a realistic initial level and a coding-standard tool in separate CI jobs; ratchet strictness gradually. |
 
 ---
@@ -75,7 +68,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
 | **Low** | Normalize source-file headers | Several files still contain historical package names, hardcoded versions, outdated license labels, or duplicated metadata despite Composer and the repository license being aligned to MIT. | Remove hardcoded version tags and obsolete package/license metadata from source headers, or replace them with a minimal consistent copyright/license notice. |
-| **Low** | Define a public deprecation policy | `Box` is now deprecated, and future normalization may need additional aliases/deprecations. | Document how long deprecated classes/properties remain available and reserve removals for a major release. |
+| **Low** | Define a public deprecation policy | `Box` remains deprecated as a public compatibility facade and future normalization may need additional aliases/deprecations. | Document how long deprecated classes/properties remain available and reserve removals for a major release. |
 | **Low** | Add release checklist | Asset packages are sensitive to dependency and browser regressions. | Document a release checklist: Composer validation, full CI, asset graph check, README/CHANGELOG/UPDATE sync, compatibility notes, and tagged release smoke install. |
 | **Low** | Clarify semantic-versioning expectations | Security-safe defaults and runtime baseline changes can be breaking even when APIs remain callable. | Document which changes require major/minor releases, especially runtime minimums, implicit asset removal, default encoding, and deprecated widget removal. |
 
@@ -100,7 +93,8 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 |------|--------|
 | SidebarMenu default action/default route matched via substring logic | **Processed.** Route matching now works on route path segments. |
 | `Box` unsafe type/class normalization | **Processed.** Legacy widget input normalization was aligned with safer Card-style conventions. |
-| `Box` used Kartik GridView directly | **Processed.** It now uses the package-local AdminLTE GridView implementation. |
+| `Box` used Kartik GridView directly | **Processed.** It uses the package-local AdminLTE GridView implementation. |
+| `Box` and `Card` duplicated card rendering | **Processed.** `Box` is now a deprecated compatibility facade/subclass over `Card`; shared card classes, header, body markup, tools, and sanitization use the Card implementation while Box retains its GridView/footer-button API and legacy aliases. |
 | `GridView` / `DetailView` changed the application formatter | **Processed.** Shared formatter state is no longer mutated when changing `nullDisplay`. |
 | Grid export dependency failure was silently hidden | **Processed.** Explicit export configuration now fails fast with `InvalidConfigException` when the required dropdown package is unavailable. |
 | Redundant empty `init()` overrides | **Processed.** Removed from simple widgets where they added no behaviour. |
@@ -122,16 +116,18 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Missing Kartik dependencies in Composer | **Processed.** Runtime packages used by public widgets are declared explicitly. |
 | Broad `@dev` runtime dependencies | **Processed.** Runtime dependency declarations were stabilized/removed as appropriate. |
 | Bootstrap version ambiguity | **Processed.** Yii Bootstrap 4 is explicit and the runtime baseline is PHP 8.1+ / Yii 2.0.54+. |
-| License metadata mismatch | **Processed.** Composer metadata now matches the repository MIT license. Source header cleanup remains an open documentation task. |
-| Implicit Ionicons package pulled Bootstrap 3 | **Processed for core safety.** The dependency was removed from the core bundle; long-term optional Ionicons compatibility remains open. |
+| License metadata mismatch | **Processed.** Composer metadata matches the repository MIT license. Source header cleanup remains an open documentation task. |
+| Ionicons dependency / compatibility | **Processed.** Ionicons has been removed from the package dependency and asset graph. AdminLTE3 uses its Font Awesome icon stack; no Ionicons compatibility layer is planned for this package. |
 
 ### Processed — Tests & CI
 
 | Item | Result |
 |------|--------|
-| No automated test suite | **Processed.** PHPUnit configuration and 19 regression tests were added. |
+| No automated test suite | **Processed.** PHPUnit configuration and regression tests were added. |
 | No GitHub Actions validation | **Processed.** CI runs Composer validation, clean dependency resolution, PHP lint, and PHPUnit on PHP 8.1, 8.3, and 8.5. |
-| Headless Kartik/Yii test environment incomplete | **Processed.** Test bootstrap now configures Asset Packagist aliases, assets/runtime directories, request context, Bootstrap 4, GridView module, and local translation sources. |
+| Headless Kartik/Yii test environment incomplete | **Processed.** Test bootstrap configures Asset Packagist aliases, assets/runtime directories, request context, Bootstrap 4, GridView module, and local translation sources. |
+| Public widgets lacked broad smoke coverage | **Processed.** Public widget classes now have package-level smoke/load coverage, with dedicated behavioural/security tests retained for complex widgets. |
+| SidebarMenu route matrix was narrow | **Processed.** Regression coverage now includes trailing default actions, module default routes, query parameters, active parents, invisible items, headers, and similarly named non-matching routes. |
 
 ---
 
@@ -195,6 +191,8 @@ These are **not current defects**. They are public-package evolution ideas that 
 
 - Completed the first comprehensive package hardening pass covering rendering safety, route correctness, dependency declarations, asset duplication, formatter isolation, Invoice/Navbar URL handling, and browser-cache-friendly widget CSS.
 - Added a supported runtime baseline of PHP 8.1+ and Yii 2.0.54+ with explicit Yii Bootstrap 4 and Kartik dependencies.
-- Added the first automated test suite and GitHub Actions matrix; final CI is green on PHP 8.1, 8.3, and 8.5 with all 19 regression tests passing.
-- During clean dependency validation, the published Ionicons package was found to pull Yii Bootstrap 3; the implicit core dependency was removed rather than reintroducing a mixed-Bootstrap asset graph.
-- Remaining work is intentionally lower-risk: metadata/header cleanup, `Box`/`Card` consolidation, broader per-widget tests, and a deliberate optional Ionicons strategy.
+- Added the first automated test suite and GitHub Actions matrix for PHP 8.1, 8.3, and 8.5.
+- Consolidated legacy `Box` rendering onto `Card` while preserving Box defaults, aliases, GridView support, and footer actions.
+- Expanded regression coverage across the public widget surface and deeper SidebarMenu route/parent/visibility cases.
+- Removed Ionicons from the package dependency and asset graph permanently; the package standard icon stack is Font Awesome.
+- Remaining roadmap work is intentionally low-risk: source metadata/header cleanup, static analysis/coding standards, and incremental release/documentation hygiene.
