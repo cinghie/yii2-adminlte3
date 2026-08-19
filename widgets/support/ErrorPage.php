@@ -41,7 +41,7 @@ abstract class ErrorPage extends Widget
      */
     public function run()
     {
-        return $this->render('@cinghie/adminlte3/views/error/page', [
+        return $this->getView()->renderFile(dirname(__DIR__, 2) . '/views/error/page.php', [
             'statusCode' => $this->statusCode(),
             'headlineClass' => $this->headlineClass(),
             'title' => (string) $this->title,
@@ -49,6 +49,6 @@ abstract class ErrorPage extends Widget
             'homeUrl' => $this->homeUrl,
             'homeLabel' => (string) $this->homeLabel,
             'options' => $this->options,
-        ]);
+        ], $this);
     }
 }
