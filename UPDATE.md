@@ -76,64 +76,65 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 ## Processed — 2026-08-19 hardening and stabilization
 
-### Processed — Security
+### Security
 
 | Item | Result |
 |------|--------|
-| `MailboxRead` body rendered as raw HTML by default | **Processed.** Body is encoded by default; explicit HTML mode remains purified by default. |
-| `MailboxRead` attachment icon accepted arbitrary HTML | **Processed.** Icons are normalized to safe CSS classes instead of emitted as arbitrary markup. |
-| SidebarMenu dynamic icon/badge/template output | **Processed.** Icon/badge classes are normalized, badges are encoded by default, and dynamic rendering relies more heavily on Yii HTML helpers. |
-| Dangerous external URL schemes in widgets | **Processed.** Mailbox/Invoice/navbar/small-box style link surfaces reject unsafe or unsupported explicit schemes as applicable. |
-| Invoice external link hardening | **Processed.** HTTP(S) and email values are validated; external new-tab links receive `noopener noreferrer`; remote logos require explicit opt-in. |
-| Logout rendered as an ordinary GET link | **Processed.** `NavbarUser` right-footer action uses Yii POST semantics by default. |
-| Repeated URL / CSS-class / icon-class normalization | **Processed.** Internal `widgets/support/SafeHtml` is now the shared policy for safe link schemes, HTTP(S), email links, CSS/icon classes, route arrays, and external-link options. The helper is marked internal rather than becoming a public extension API. |
-| CSP compatibility review | **Processed.** Invoice browser printing moved from inline `onclick` to package JS + `data-cinghie-action`; SidebarMenu no longer writes inline submenu display state; static Navbar/Mailbox styles moved to package CSS/utility classes. The one documented residual is arbitrary `InfoBox` progress width (Open Low). |
-| Security policy regression coverage | **Processed.** Dedicated tests cover shared normalization and avoidable package-owned inline JS/style patterns; these tests remain part of the normal PHPUnit CI matrix. |
+| `MailboxRead` body rendered as raw HTML by default | Body is encoded by default; explicit HTML mode remains purified by default. |
+| `MailboxRead` attachment icon accepted arbitrary HTML | Icons are normalized to safe CSS classes instead of emitted as arbitrary markup. |
+| SidebarMenu dynamic icon/badge/template output | Icon/badge classes are normalized, badges are encoded by default, and dynamic rendering relies more heavily on Yii HTML helpers. |
+| Dangerous external URL schemes in widgets | Mailbox/Invoice/navbar/small-box style link surfaces reject unsafe or unsupported explicit schemes as applicable. |
+| Invoice external link hardening | HTTP(S) and email values are validated; external new-tab links receive `noopener noreferrer`; remote logos require explicit opt-in. |
+| Logout rendered as an ordinary GET link | `NavbarUser` right-footer action uses Yii POST semantics by default. |
+| Repeated URL / CSS-class / icon-class normalization | Internal `widgets/support/SafeHtml` is the shared policy for safe link schemes, HTTP(S), email links, CSS/icon classes, route arrays, and external-link options. The helper is marked internal rather than becoming a public extension API. |
+| CSP compatibility review | Invoice browser printing moved from inline `onclick` to package JS + `data-cinghie-action`; SidebarMenu no longer writes inline submenu display state; static Navbar/Mailbox styles moved to package CSS/utility classes. The one documented residual is arbitrary `InfoBox` progress width (Open Low). |
+| Security policy regression coverage | Dedicated tests cover shared normalization and avoidable package-owned inline JS/style patterns; these tests remain part of the normal PHPUnit CI matrix. |
 
-### Processed — Correctness & architecture
-
-| Item | Result |
-|------|--------|
-| SidebarMenu default action/default route matched via substring logic | **Processed.** Route matching works on route path segments. |
-| `Box` unsafe type/class normalization | **Processed.** Legacy widget input normalization was aligned with safer Card-style conventions. |
-| `Box` used Kartik GridView directly | **Processed.** It uses the package-local AdminLTE GridView implementation. |
-| `Box` and `Card` duplicated card rendering | **Processed.** `Box` is a deprecated compatibility facade/subclass over `Card`; shared card classes, header, body markup, tools, and sanitization use the Card implementation while Box retains its GridView/footer-button API and legacy aliases. |
-| `GridView` / `DetailView` changed the application formatter | **Processed.** Shared formatter state is no longer mutated when changing `nullDisplay`. |
-| Grid export dependency failure was silently hidden | **Processed.** Explicit export configuration now fails fast with `InvalidConfigException` when the required dropdown package is unavailable. |
-| Redundant empty `init()` overrides | **Processed.** Removed from simple widgets where they added no behaviour. |
-| `NavTabs` duplicate/ineffective link options | **Processed.** Link construction was simplified. |
-
-### Processed — Assets & performance
+### Correctness & architecture
 
 | Item | Result |
 |------|--------|
-| Duplicate Bootstrap JS | **Processed.** The AdminLTE-packaged Bootstrap bundle was removed from the main asset graph; Yii Bootstrap 4 is the single source. |
-| Redundant direct jQuery dependency | **Processed.** Removed where Yii already provides the dependency chain. |
-| Inconsistent `appendTimestamp` behaviour | **Processed.** Minified and non-minified bundles are aligned. |
-| Large stable widget CSS blocks emitted inline | **Processed.** GridView, DetailView, and Invoice stable styles moved to `assets/css/widgets.css` through `AdminLTEThemeAsset`. |
-| Static widget presentation embedded in HTML `style` attributes | **Processed where practical.** NavbarLogo, NavbarUser, MailboxRead, and Invoice static presentation moved to package CSS/Bootstrap utility classes. Dynamic InfoBox progress width remains documented separately. |
-| Package-owned behavior needed inline JS | **Processed.** `AdminLTEThemeAsset` publishes `assets/js/widgets.js`, allowing behavior such as browser printing to be bound from a data attribute instead of an inline handler. |
+| SidebarMenu default action/default route matched via substring logic | Route matching works on route path segments. |
+| `Box` unsafe type/class normalization | Legacy widget input normalization was aligned with safer Card-style conventions. |
+| `Box` used Kartik GridView directly | It uses the package-local AdminLTE GridView implementation. |
+| `Box` and `Card` duplicated card rendering | `Box` is a deprecated compatibility facade/subclass over `Card`; shared card classes, header, body markup, tools, and sanitization use the Card implementation while Box retains its GridView/footer-button API and legacy aliases. |
+| `GridView` / `DetailView` changed the application formatter | Shared formatter state is no longer mutated when changing `nullDisplay`. |
+| Grid export dependency failure was silently hidden | Explicit export configuration now fails fast with `InvalidConfigException` when the required dropdown package is unavailable. |
+| Redundant empty `init()` overrides | Removed from simple widgets where they added no behaviour. |
+| `NavTabs` duplicate/ineffective link options | Link construction was simplified. |
 
-### Processed — Packaging
-
-| Item | Result |
-|------|--------|
-| Missing Kartik dependencies in Composer | **Processed.** Runtime packages used by public widgets are declared explicitly. |
-| Broad `@dev` runtime dependencies | **Processed.** Runtime dependency declarations were stabilized/removed as appropriate. |
-| Bootstrap version ambiguity | **Processed.** Yii Bootstrap 4 is explicit and the runtime baseline is PHP 8.1+ / Yii 2.0.54+. |
-| License metadata mismatch | **Processed.** Composer metadata matches the repository MIT license. Source header cleanup remains an open documentation task. |
-| Ionicons dependency / compatibility | **Processed.** Ionicons has been removed from the package dependency and asset graph. AdminLTE3 uses its Font Awesome icon stack; no Ionicons compatibility layer is planned for this package. |
-
-### Processed — Tests, code comments & CI
+### Assets & performance
 
 | Item | Result |
 |------|--------|
-| No automated test suite | **Processed.** PHPUnit configuration and regression tests were added. |
-| No GitHub Actions validation | **Processed.** CI runs Composer validation, clean dependency resolution, PHP lint, and PHPUnit on PHP 8.1, 8.3, and 8.5. |
-| Headless Kartik/Yii test environment incomplete | **Processed.** Test bootstrap configures Asset Packagist aliases, assets/runtime directories, request context, Bootstrap 4, GridView module, and local translation sources. |
-| Public widgets lacked broad smoke coverage | **Processed.** Public widget classes have package-level smoke/load coverage, with dedicated behavioural/security tests retained for complex widgets. |
-| SidebarMenu route matrix was narrow | **Processed.** Regression coverage includes trailing default actions, module default routes, query parameters, active parents, invisible items, headers, and similarly named non-matching routes. |
-| Comment/PHPDoc conventions were implicit | **Processed.** `docs/CODING_STYLE.md` records Yii-oriented output encoding/trust-boundary rules, useful PHPDoc expectations, PSR-12 formatting, CSP conventions, and public-package documentation restrictions. A regression test requires every public widget class to retain class-level PHPDoc. |
+| Duplicate Bootstrap JS | The AdminLTE-packaged Bootstrap bundle was removed from the main asset graph; Yii Bootstrap 4 is the single source. |
+| Redundant direct jQuery dependency | Removed where Yii already provides the dependency chain. |
+| Inconsistent `appendTimestamp` behaviour | Minified and non-minified bundles are aligned. |
+| Large stable widget CSS blocks emitted inline | GridView, DetailView, and Invoice stable styles moved to `assets/css/widgets.css` through `AdminLTEThemeAsset`. |
+| Static widget presentation embedded in HTML `style` attributes | NavbarLogo, NavbarUser, MailboxRead, and Invoice static presentation moved to package CSS/Bootstrap utility classes where practical. Dynamic InfoBox progress width remains documented separately. |
+| Package-owned behavior needed inline JS | `AdminLTEThemeAsset` publishes `assets/js/widgets.js`, allowing behavior such as browser printing to be bound from a data attribute instead of an inline handler. |
+
+### Packaging
+
+| Item | Result |
+|------|--------|
+| Missing Kartik dependencies in Composer | Runtime packages used by public widgets are declared explicitly. |
+| Broad `@dev` runtime dependencies | Runtime dependency declarations were stabilized/removed as appropriate. |
+| Bootstrap version ambiguity | Yii Bootstrap 4 is explicit and the runtime baseline is PHP 8.1+ / Yii 2.0.54+. |
+| License metadata mismatch | Composer metadata matches the repository MIT license. Source header cleanup remains an open documentation task. |
+| Ionicons dependency / compatibility | Ionicons has been removed from the package dependency and asset graph. AdminLTE3 uses its Font Awesome icon stack; no Ionicons compatibility layer is planned for this package. |
+
+### Tests, code comments & CI
+
+| Item | Result |
+|------|--------|
+| No automated test suite | PHPUnit configuration and regression tests were added. |
+| No GitHub Actions validation | CI runs Composer validation, clean dependency resolution, PHP lint, and PHPUnit on every PHP minor from 8.1 through 8.5. |
+| Headless Kartik/Yii test environment incomplete | Test bootstrap configures Asset Packagist aliases, assets/runtime directories, request context, Bootstrap 4, GridView module, and local translation sources. |
+| Public widgets lacked broad smoke coverage | Public widget classes have package-level smoke/load coverage, with dedicated behavioural/security tests retained for complex widgets. |
+| SidebarMenu route matrix was narrow | Regression coverage includes trailing default actions, module default routes, query parameters, active parents, invisible items, headers, and similarly named non-matching routes. |
+| Comment/PHPDoc conventions were implicit | `docs/CODING_STYLE.md` records Yii-oriented output encoding/trust-boundary rules, useful PHPDoc expectations, PSR-12 formatting, CSP conventions, and public-package documentation restrictions. A regression test requires every public widget class to retain class-level PHPDoc. |
+| Source-level Yii/PSR hygiene was implicit | `Yii2BestPracticesTest` guards four-space indentation, valid/used `Yii` imports, and the normative PSR-12 ordering of class/function/constant import groups without inventing an alphabetical requirement that PSR-12 does not define. |
 
 ---
 
@@ -189,6 +190,13 @@ These are **not current defects**. They are public-package evolution ideas that 
 - Add automated release validation for tags: clean install from the tagged package, Composer metadata validation, full CI, and package API smoke tests.
 - Optionally generate release notes from dated changelog entries while keeping `CHANGELOG.md` human-maintained.
 
+### 9. Additional AdminLTE widgets
+
+- Add a `Calendar` widget with explicit event-data encoding, bounded rendering responsibilities, and optional asset registration that does not force calendar dependencies onto unrelated pages.
+- Add a `ChartJS` widget with JSON-safe dataset/configuration encoding, deterministic canvas identifiers, responsive defaults, and an optional Chart.js asset bundle.
+- Add dedicated `404` and `500` error widgets/views with encoded user-facing text, no sensitive exception disclosure by default, accessible navigation actions, and package styling consistent with AdminLTE error pages.
+- Cover all four additions with public smoke tests, security-focused rendering tests, documentation examples, and asset-dependency checks before promoting them to the stable public API.
+
 ---
 
 ## History / operations
@@ -197,11 +205,11 @@ These are **not current defects**. They are public-package evolution ideas that 
 
 - Completed the first comprehensive package hardening pass covering rendering safety, route correctness, dependency declarations, asset duplication, formatter isolation, Invoice/Navbar URL handling, and browser-cache-friendly widget CSS.
 - Added a supported runtime baseline of PHP 8.1+ and Yii 2.0.54+ with explicit Yii Bootstrap 4 and Kartik dependencies.
-- Added the first automated test suite and GitHub Actions matrix for PHP 8.1, 8.3, and 8.5.
+- Added the first automated test suite and expanded the GitHub Actions matrix to every PHP minor from 8.1 through 8.5.
 - Consolidated legacy `Box` rendering onto `Card` while preserving Box defaults, aliases, GridView support, and footer actions.
 - Expanded regression coverage across the public widget surface and deeper SidebarMenu route/parent/visibility cases.
 - Removed Ionicons from the package dependency and asset graph permanently; the package standard icon stack is Font Awesome.
 - Centralized URL, HTTP(S), email, CSS-class, icon-class, and external-link safety policy in internal `SafeHtml`; migrated the main security-sensitive widgets to it.
 - Completed a package-owned CSP pass: Invoice print behavior moved to an external asset script, SidebarMenu active state no longer requires inline display styles, and static Navbar/Mailbox/Invoice styles were moved into package CSS/utility classes.
-- Added public coding/PHPDoc conventions and a test guard for class-level documentation. Comments now focus on public contracts, compatibility and trust boundaries rather than duplicating obvious code.
+- Added public coding/PHPDoc conventions, class-level documentation guards, and source-level Yii/PSR best-practice tests. Comments focus on public contracts, compatibility and trust boundaries rather than duplicating obvious code.
 - Remaining roadmap work is intentionally low-risk: source metadata/header cleanup, static analysis/coding standards, the optional strict-CSP path for arbitrary InfoBox progress widths, and incremental release/documentation hygiene.
