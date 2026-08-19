@@ -23,6 +23,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added `assets/js/widgets.js` for package-owned behavior that should not require inline JavaScript; Invoice browser printing delegates through `data-cinghie-action="print"`.
 - Added `assets/css/progress-widths.css` with bounded 0–100 percentage classes so `InfoBox` progress keeps its existing integer precision without inline style attributes.
 - Added CSP regression coverage for Invoice printing, MailboxRead attachments, SidebarMenu active submenus, InfoBox progress rendering, and package-owned external behavior.
+- Added JSON-backed Calendar/ChartJS rendering that keeps executable callbacks out of the server-side widget API and initializes both plugins from package-owned external JavaScript.
+- Added dedicated `Error404` and `Error500` widgets whose shared view HTML-encodes public text; `Error500` defaults to a generic message and exposes no exception object, file path, stack trace, or debug context.
 
 #### Translation ownership
 - Added the internal `widgets/support/Translation` helper and package-owned `adminlte3` message catalog.
@@ -31,7 +33,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 #### Modular assets
 - Added `AdminLTECoreAsset` and `AdminLTECoreMinifyAsset` for pages that only need the AdminLTE shell without optional plugin families.
 - Added optional source/minified bundles for jQuery UI (`AdminLTEJqueryUiAsset`), Moment + Tempus Dominus (`AdminLTEDateTimeAsset`), and iCheck Bootstrap (`AdminLTEIcheckAsset`).
-- Added asset graph tests that verify source/minified parity, dependency equivalence, declared vendor-file existence, core payload size, and historical aggregate ordering.
+- Added optional FullCalendar source/minified bundles (`AdminLTECalendarAsset` / `AdminLTECalendarMinifyAsset`) and Chart.js source/minified bundles (`AdminLTEChartJSAsset` / `AdminLTEChartJSMinifyAsset`).
+- Added small `CalendarWidgetAsset` and `ChartJSWidgetAsset` initializers so FullCalendar/Chart.js load only on pages that render those widgets unless applications explicitly own asset registration.
+- Added asset graph tests that verify source/minified parity, dependency equivalence, declared vendor-file existence, core payload size, historical aggregate ordering, and isolation of optional Calendar/ChartJS plugin families.
+
+#### Additional public widgets
+- Added `Calendar`, which JSON-encodes event/configuration data, keeps browser interaction in FullCalendar, supports application-owned asset registration, and adapts to both AdminLTE 3.0.x modular FullCalendar files and the bundled FullCalendar layout used by later AdminLTE 3 releases.
+- Added `ChartJS`, which renders a deterministic/sanitized canvas id, JSON-encodes datasets/configuration, normalizes supported chart types, defaults to responsive rendering, and optionally registers the package Chart.js bundle.
+- Added `Error404` with AdminLTE error-page styling, encoded user-facing text, and an accessible dashboard/home action.
+- Added `Error500` with the same shared safe renderer plus a generic non-diagnostic default message.
+- Added documentation examples for all four widgets under `docs/example_calendar.md`, `docs/example_chartjs.md`, `docs/example_error404.md`, and `docs/example_error500.md`.
 
 #### Code documentation and quality gates
 - Added `docs/CODING_STYLE.md` with public Yii/PHPDoc, trust-boundary, security, CSP, and PSR-12 conventions for contributors.
@@ -44,6 +55,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 #### Tests and continuous integration
 - Added PHPUnit configuration and a headless Yii web-application bootstrap for package tests.
 - Added regression coverage for mail/XSS handling, attachment icon normalization, widget rendering hardening, Invoice URL policy, formatter isolation, AdminLTE asset dependencies, CSP-safe InfoBox progress, widget option aliases, and translation ownership.
+- Added `AdditionalWidgetsTest` with smoke and security-focused DOM coverage for Calendar, ChartJS, Error404, and Error500, including JSON round trips, injected-markup resistance, deterministic canvas ids, responsive chart defaults, encoded error text, safe 500 disclosure, and accessible navigation.
 - Added `Yii2BestPracticesTest` for valid/used `Yii` imports and normative PSR-12 class/function/constant import-group ordering.
 - Added a reusable `HtmlDomTestCase` based on `DOMDocument`/`DOMXPath` and migrated complex rendering assertions for classes, links, `rel`, `target`, `data-method`, ARIA attributes, and encoded text away from brittle serialized-markup ordering.
 - Added structural accessibility coverage for AdminLTE Card tool attributes.
@@ -58,6 +70,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `SafeHtml::linkUrl()` validates absolute HTTP(S) URLs and rejects protocol-relative URLs instead of treating them as ordinary relative links.
 - Static package-owned presentation moved from inline style/handler patterns into package CSS/JS or Bootstrap utility classes where practical.
 - `InfoBox::$progress` maps its normalized 0–100 value to package CSS classes instead of generating a `style="width: ...%"` attribute.
+- Calendar and ChartJS configuration is emitted as HTML-encoded JSON data and consumed by external package scripts instead of generating per-widget inline JavaScript.
 
 #### Runtime requirements and package dependencies
 - Raised the supported runtime baseline to PHP 8.1+ and Yii 2.0.54+.
@@ -65,6 +78,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Removed broad development-only runtime constraints and unused runtime dependencies.
 - Removed `cinghie/yii2-ionicons`; AdminLTE3 relies on its Font Awesome icon stack.
 - Aligned Composer license metadata with the repository MIT license.
+- Reused the FullCalendar and Chart.js copies already shipped by the supported AdminLTE dependency instead of adding new Composer runtime packages.
 
 #### Asset graph and browser caching
 - Removed the duplicate AdminLTE-packaged Bootstrap JavaScript bundle and rely on Yii Bootstrap 4 as the single Bootstrap JS source.
@@ -72,6 +86,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Made `appendTimestamp` behavior consistent between minified and non-minified bundles.
 - Moved stable widget styles into cacheable package CSS and package-owned behavior into `assets/js/widgets.js`.
 - Converted `AdminLTEAsset` and `AdminLTEMinifyAsset` into backward-compatible convenience aggregates. They still load the historical plugin set in the same order, while new code can choose core-only or individual optional plugin bundles.
+- Kept FullCalendar and Chart.js out of both the core and historical aggregate asset graphs; their public widgets register dedicated minified plugin/initializer bundles only when needed.
+- FullCalendar asset registration now detects the installed AdminLTE 3 vendor layout: 3.0.x modular plugin files are loaded when present, while later bundled `plugins/fullcalendar/main.*` installations use only the combined files.
 - The historical aggregate CSS order remains Tempus Dominus → iCheck → AdminLTE; JavaScript order remains jQuery UI → Moment → Tempus Dominus → AdminLTE.
 - Evaluated `defer`/preload and intentionally kept them out of package defaults. Yii exposes `jsOptions` and dependency ordering for application-level opt-in, while these scripts normally load near the end of the document where global `defer` offers little default benefit.
 
@@ -79,6 +95,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Converted legacy `Box` into a backward-compatible facade/subclass over `Card`, preserving defaults, GridView body support, footer actions, and historical aliases.
 - Normalized genuinely shared option names: `Card::$icon`, `SmallBox::$url`, `NavbarButton::$options`, and sidebar `$icon` options are canonical; historical names remain deprecated aliases and canonical values win when both are configured.
 - Kept role-specific URLs such as profile/logout/footer actions explicitly named rather than forcing unrelated targets into a generic alias.
+- Kept Calendar's PHP responsibilities version-neutral: it serializes events/options and lets the external initializer apply only the FullCalendar 4 plugin/theme defaults required by legacy AdminLTE 3.0.x installations.
+- Kept ChartJS browser callbacks outside the PHP configuration surface while providing deterministic ids and responsive defaults directly in the serialized chart configuration.
 - Removed redundant no-op `init()` implementations and simplified `NavTabs` link generation.
 
 #### Translation categories
@@ -92,12 +110,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - PHPCS treats the PSR-12 120-character line recommendation as non-blocking and keeps narrow, documented transitional formatting exceptions for legacy multi-line control structures; `Timeline` remains excluded from the initial quality scope because it imports optional external domain models.
 
 #### Documentation
-- Updated README requirements, installation guidance, modular asset registration, script-loading policy, security defaults, test instructions, and compatibility notes.
+- Updated README requirements, installation guidance, modular asset registration, script-loading policy, security defaults, test instructions, compatibility notes, and the public widget table.
 - Removed the recommendation to install the package with a broad `@dev` stability flag.
 - Streamlined `UPDATE.md` so the dated processed section does not repeat “Processed” in every subsection/result.
-- Closed the package-owned InfoBox CSP item, widget-option normalization, translation ownership, optional asset splitting, source/minified parity, `defer`/preload evaluation, source-metadata cleanup, static-analysis/coding-standard, DOM/XPath structural-test, and lowest-dependency-validation roadmap items.
+- Closed the package-owned InfoBox CSP item, widget-option normalization, translation ownership, optional asset splitting, source/minified parity, `defer`/preload evaluation, source-metadata cleanup, static-analysis/coding-standard, DOM/XPath structural-test, lowest-dependency-validation, and additional-widget roadmap items.
 - Documented that lowest-dependency CI remains observational/non-blocking until the complete minimum set installs and executes reliably; successful dependency resolution alone is not presented as runtime compatibility certification.
-- Added future widget candidates for Calendar, ChartJS, dedicated 404, and dedicated 500 rendering.
+- Promoted Calendar, ChartJS, Error404, and Error500 from future candidates to documented/tested public widgets and removed them from the future-expansion list.
 
 ### Fixed
 
@@ -120,19 +138,24 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 #### InfoBox CSP compatibility
 - Removed the remaining package-owned dynamic `style` attribute from InfoBox progress rendering while preserving integer 0–100 clamp semantics.
 
+#### FullCalendar compatibility
+- Avoided coupling Calendar assets to only the AdminLTE 3.0.x FullCalendar directory layout. The bundle now supports both modular 3.0.x files and the single bundled FullCalendar files used by currently resolved AdminLTE 3.2.x installations.
+
 ### Performance
 
 - Reduced duplicated front-end payload by removing the second Bootstrap JS copy and redundant dependencies.
 - Reduced repeated inline CSS output by moving stable widget styles into cacheable package assets.
 - Added a core-only AdminLTE asset path containing one AdminLTE CSS and one AdminLTE JS file instead of forcing jQuery UI, Moment, Tempus Dominus, and iCheck onto every page.
 - Preserved the complete historical bundle as an aggregate for backward compatibility while allowing page-level optional plugin registration.
-- Added CI guards for asset payload, ordering, source/minified parity, and declared vendor files.
-- Reduced maintenance duplication by routing legacy Box rendering through Card, shared safety normalization through one internal helper, and package UI translation through one internal category helper.
+- Kept FullCalendar and Chart.js page-scoped: neither library is loaded unless its widget/asset bundle is explicitly used.
+- Added CI guards for asset payload, ordering, source/minified parity, declared vendor files, and optional Calendar/ChartJS isolation.
+- Reduced maintenance duplication by routing legacy Box rendering through Card, shared safety normalization through one internal helper, package UI translation through one internal category helper, and both dedicated HTTP error widgets through one safe shared view.
 
 ### Validation
 
 - CI targets every PHP minor from 8.1 through 8.5.
 - Every runtime CI job performs strict Composer validation, clean dependency installation, syntax linting, and PHPUnit regression tests.
+- Calendar, ChartJS, Error404, and Error500 smoke/security/asset checks pass on every supported PHP minor against the currently resolved AdminLTE dependency.
 - A separate blocking PHP 8.3 quality job performs PHPStan level 5 analysis and PHP_CodeSniffer/PSR-12 checks.
 - A separate non-blocking PHP 8.1 lowest-dependency job resolves the minimum dependency graph and attempts installation/tests; current upstream extraction noise is retained as visible CI signal rather than weakening the normal runtime gates.
 
