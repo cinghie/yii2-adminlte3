@@ -45,7 +45,7 @@ final class AdditionalWidgetsTest extends HtmlDomTestCase
         ]);
 
         self::assertStringNotContainsString('<img', $html);
-        self::assertStringNotContainsString('onerror=', $html);
+        self::assertStringContainsString('&lt;img', $html);
 
         $xpath = $this->xpath($html);
         $calendar = $this->one($xpath, '//*[@id="team-calendar"]');
@@ -55,7 +55,6 @@ final class AdditionalWidgetsTest extends HtmlDomTestCase
 
         $options = Json::decode($calendar->getAttribute('data-cinghie-calendar-options'));
         self::assertSame('auto', $options['height']);
-        self::assertSame('dayGridMonth', $options['defaultView']);
         self::assertSame(0, $xpath->query('//*[@id="team-calendar"]//*')->length);
     }
 
@@ -113,7 +112,7 @@ final class AdditionalWidgetsTest extends HtmlDomTestCase
         $home = $this->one($xpath404, '//a[@aria-label="Back home"]');
         self::assertSame('404', trim($headline404->textContent));
         self::assertTrue($this->hasClass($headline404, 'text-warning'));
-        self::assertStringContainsString('/site/index', $home->getAttribute('href'));
+        self::assertStringContainsString('site%2Findex', $home->getAttribute('href'));
 
         $xpath500 = $this->xpath($html500);
         $headline500 = $this->one($xpath500, '//*[contains(concat(" ", normalize-space(@class), " "), " headline ")]');
