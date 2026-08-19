@@ -61,7 +61,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added structural accessibility coverage for AdminLTE Card tool attributes.
 - Expanded `SidebarMenu` regression coverage for trailing default actions, module default routes, query parameters, active parents, invisible items, headers, and similarly named non-matching routes.
 - Expanded GitHub Actions validation to every PHP minor from 8.1 through 8.5 with strict Composer validation, clean dependency resolution, PHP syntax linting, and PHPUnit.
-- Added a separate PHP 8.1 `prefer-lowest` job that resolves minimum declared dependencies with `composer update --prefer-lowest --prefer-stable`, then attempts a clean install, lint, and test run. The job is intentionally non-blocking while legacy minimum-version combinations exhibit upstream Composer/package extraction noise.
+- Added a separate PHP 8.1 `prefer-lowest` job that resolves minimum declared dependencies with `composer update --prefer-lowest --prefer-stable`, installs the locked set from source, verifies the critical autoload surface, runs PHP lint, and executes the full PHPUnit suite.
 
 ### Changed
 
@@ -117,7 +117,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added `RELEASE_CHECKLIST.md` covering compatibility review, Composer/CI/quality gates, asset/browser checks, clean smoke installation, tagging, Packagist verification, and post-release checks.
 - Streamlined `UPDATE.md` so the dated processed section does not repeat “Processed” in every subsection/result and moved release-hygiene documentation items out of Open after implementation.
 - Closed the package-owned InfoBox CSP item, widget-option normalization, translation ownership, optional asset splitting, source/minified parity, `defer`/preload evaluation, source-metadata cleanup, static-analysis/coding-standard, DOM/XPath structural-test, lowest-dependency-validation, additional-widget, deprecation-policy, release-checklist, and semantic-versioning roadmap items.
-- Documented that lowest-dependency CI remains observational/non-blocking until the complete minimum set installs and executes reliably; successful dependency resolution alone is not presented as runtime compatibility certification.
+- Promoted lowest-dependency CI from observational coverage to runtime certification after the complete minimum declared dependency set installed successfully and passed the full PHPUnit suite.
 - Promoted Calendar, ChartJS, Error404, and Error500 from future candidates to documented/tested public widgets and removed them from the future-expansion list.
 
 ### Fixed
@@ -160,7 +160,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Every runtime CI job performs strict Composer validation, clean dependency installation, syntax linting, and PHPUnit regression tests.
 - Calendar, ChartJS, Error404, and Error500 smoke/security/asset checks pass on every supported PHP minor against the currently resolved AdminLTE dependency.
 - A separate blocking PHP 8.3 quality job performs PHPStan level 5 analysis and PHP_CodeSniffer/PSR-12 checks.
-- A separate non-blocking PHP 8.1 lowest-dependency job resolves the minimum dependency graph and attempts installation/tests; current upstream extraction noise is retained as visible CI signal rather than weakening the normal runtime gates.
+- A separate PHP 8.1 lowest-dependency job resolves the minimum dependency graph, installs it from source, verifies required autoload classes, runs syntax checks, and passes the full PHPUnit regression suite.
 
 ## 2026-07-30
 
