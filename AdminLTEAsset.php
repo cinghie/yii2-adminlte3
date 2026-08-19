@@ -2,42 +2,24 @@
 
 namespace cinghie\adminlte3;
 
-use cinghie\adminlte3\assets\AdminLTEThemeAsset;
-use cinghie\fontawesome\FontAwesomeAsset;
-use yii\bootstrap4\BootstrapAsset;
 use yii\web\AssetBundle;
-use yii\web\YiiAsset;
 
 /**
- * AdminLTE 3 asset bundle (non-minified).
+ * Backward-compatible aggregate AdminLTE 3 asset bundle.
+ *
+ * This convenience bundle preserves the historical plugin set. New pages that
+ * do not need jQuery UI, Tempus Dominus or iCheck should prefer
+ * {@see AdminLTECoreAsset} and register optional plugin bundles explicitly.
  */
 class AdminLTEAsset extends AssetBundle
 {
     public $sourcePath = '@vendor/almasaeed2010/adminlte/';
     public $appendTimestamp = true;
 
-    public $css = [
-        'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.css',
-        'plugins/icheck-bootstrap/icheck-bootstrap.css',
-        'dist/css/adminlte.css',
-    ];
-
-    public $js = [
-        'plugins/jquery-ui/jquery-ui.js',
-        'plugins/moment/moment.min.js',
-        'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.js',
-        'dist/js/adminlte.js',
-    ];
-
     public $depends = [
-        YiiAsset::class,
-        BootstrapAsset::class,
-        FontAwesomeAsset::class,
+        AdminLTEJqueryUiAsset::class,
+        AdminLTEDateTimeAsset::class,
+        AdminLTEIcheckAsset::class,
+        AdminLTECoreAsset::class,
     ];
-
-    public function registerAssetFiles($view)
-    {
-        parent::registerAssetFiles($view);
-        AdminLTEThemeAsset::register($view);
-    }
 }
