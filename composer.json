@@ -2,16 +2,16 @@
     "name": "cinghie/yii2-adminlte3",
     "description": "Asset Bundle to include AdminLTE 3 on your Yii 2 project",
     "keywords": [
-        "yii2", 
-        "yii2 template", 
-        "yii2 AdminLTE", 
-        "AdminLTE 3", 
-        "adminlte 3", 
+        "yii2",
+        "yii2 template",
+        "yii2 AdminLTE",
+        "AdminLTE 3",
+        "adminlte 3",
         "admin lte 3"
     ],
     "homepage": "https://github.com/cinghie/yii2-adminlte3",
     "type": "yii2-extension",
-    "license": "BSD-3-Clause",
+    "license": "MIT",
     "authors": [
         {
             "name": "Gogodigital.it",
