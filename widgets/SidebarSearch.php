@@ -43,8 +43,8 @@ class SidebarSearch extends Widget
     /** @var array HTML attributes for the input. */
     public $inputOptions = [];
 
-    /** @var string Font Awesome icon class list. */
-    public $icon = 'fas fa-search fa-fw';
+    /** @var string|null Canonical Font Awesome icon class list. */
+    public $icon;
 
     /**
      * @var string|null Legacy search icon class list.
@@ -77,9 +77,9 @@ class SidebarSearch extends Widget
         ], $this->inputOptions);
 
         $input = Html::input('search', $this->name, null, $inputOptions);
-        $icon = $this->searchIconClass !== null && $this->searchIconClass !== ''
-            ? $this->searchIconClass
-            : $this->icon;
+        $icon = $this->icon !== null && $this->icon !== ''
+            ? $this->icon
+            : $this->searchIconClass;
         $icon = SafeHtml::iconClass($icon, 'fas fa-search fa-fw');
 
         $button = Html::button(
