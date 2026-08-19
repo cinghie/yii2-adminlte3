@@ -37,22 +37,11 @@ class Calendar extends Widget
             CalendarWidgetAsset::register($this->getView());
         }
 
-        $options = array_merge([
-            'plugins' => ['interaction', 'dayGrid', 'timeGrid', 'bootstrap'],
-            'themeSystem' => 'bootstrap',
-            'defaultView' => 'dayGridMonth',
-            'header' => [
-                'left' => 'prev,next today',
-                'center' => 'title',
-                'right' => 'dayGridMonth,timeGridWeek,timeGridDay',
-            ],
-        ], $this->calendarOptions);
-
         $htmlOptions = $this->options;
         $htmlOptions['id'] = $this->getId();
         $htmlOptions['data-cinghie-calendar'] = '1';
         $htmlOptions['data-cinghie-calendar-events'] = Json::encode($this->events);
-        $htmlOptions['data-cinghie-calendar-options'] = Json::encode($options);
+        $htmlOptions['data-cinghie-calendar-options'] = Json::encode($this->calendarOptions);
         Html::addCssClass($htmlOptions, 'cinghie-calendar');
 
         return Html::tag('div', '', $htmlOptions);
