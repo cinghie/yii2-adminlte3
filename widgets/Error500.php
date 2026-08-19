@@ -9,8 +9,8 @@ use cinghie\adminlte3\widgets\support\ErrorPage;
  */
 class Error500 extends ErrorPage
 {
-    public $title = 'Server error';
-    public $message = 'An unexpected error occurred while processing your request.';
+    public $title = 'Oops! Something went wrong.';
+    public $message = 'We will work on fixing that right away.';
 
     protected function statusCode(): int
     {
