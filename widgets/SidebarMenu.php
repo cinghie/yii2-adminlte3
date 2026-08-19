@@ -121,7 +121,10 @@ class SidebarMenu extends Menu
             return;
         }
 
-        $segments = array_values(array_filter(explode('/', trim($this->route, '/')), 'strlen'));
+        $segments = array_values(array_filter(
+            explode('/', trim($this->route, '/')),
+            static fn (string $segment): bool => $segment !== ''
+        ));
         if ($segments === []) {
             return;
         }
@@ -136,7 +139,10 @@ class SidebarMenu extends Menu
         if ($module !== null) {
             $defaultRoute = trim((string) $module->defaultRoute, '/');
             if ($defaultRoute !== '') {
-                $routeSegments = array_values(array_filter(explode('/', $defaultRoute), 'strlen'));
+                $routeSegments = array_values(array_filter(
+                    explode('/', $defaultRoute),
+                    static fn (string $segment): bool => $segment !== ''
+                ));
                 $candidate = $segments;
                 $count = count($routeSegments);
                 if ($count > 0 && array_slice($candidate, -$count) === $routeSegments) {
