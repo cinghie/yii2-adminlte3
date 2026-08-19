@@ -18,6 +18,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+#### Security policy and CSP support
+- Added the internal `widgets/support/SafeHtml` policy helper for CSS/icon class normalization, safe link schemes, HTTP(S) validation, email links, and `_blank` hardening. The helper is intentionally internal so the security policy can evolve without creating a new public API contract.
+- Added `assets/js/widgets.js` for package-owned behavior that should not require inline JavaScript. The Invoice browser-print action now delegates through `data-cinghie-action="print"`.
+- Added CSP regression coverage for Invoice printing, MailboxRead attachments, SidebarMenu active submenus, and the external widget behavior script.
+- Added focused `SafeHtml` regression tests covering dangerous/unknown schemes, HTTP(S), email validation, CSS-class normalization, and external-link attributes.
+
+#### Code documentation
+- Added `docs/CODING_STYLE.md` with public Yii/PHPDoc, trust-boundary, security, CSP, and PSR-12 conventions for contributors.
+- Added a documentation guard test requiring every public widget class to expose a non-empty class-level PHPDoc block.
+- Completed class/property/trust-boundary PHPDoc for the security-sensitive widgets touched by this pass, including `Alert`, `Card`, `Box`, `MailboxRead`, `SidebarMenu`, `Invoice`, `InfoBox`, `SmallBox`, `NavbarButton`, `NavbarLogo`, and `NavbarUser`.
+
 #### Tests and continuous integration
 - Added PHPUnit configuration and a headless Yii web-application bootstrap for package tests.
 - Added regression coverage for `MailboxRead` HTML/XSS handling, attachment icon normalization, widget rendering hardening, `Invoice` URL policy, formatter isolation, and AdminLTE asset dependencies.
@@ -27,6 +38,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added test-only Asset Packagist aliases, runtime asset directories, request context, GridView module configuration, Bootstrap 4 configuration, and local translation sources required by Kartik widgets under CLI.
 
 ### Changed
+
+#### Shared rendering safety
+- `Card`, `Box`, `MailboxRead`, `SidebarMenu`, `InfoBox`, `SmallBox`, `NavbarButton`, `NavbarLogo`, `NavbarUser`, and `Invoice` now reuse the internal `SafeHtml` normalization policy instead of maintaining independent URL/class validation branches.
+- `NavbarLogo` and `NavbarUser` static image presentation moved from inline `style` attributes to package CSS classes.
+- `MailboxRead` attachment truncation moved from an inline style declaration to Bootstrap utility classes.
+- `SidebarMenu` active submenus now rely on AdminLTE's `menu-open` state instead of emitting an inline `display` style.
+- `Invoice` no longer emits an inline `onclick` handler for browser printing and no longer uses an inline margin style on the PDF action.
 
 #### Runtime requirements and package dependencies
 - Raised the supported runtime baseline to PHP 8.1+ and Yii 2.0.54+.
@@ -40,7 +58,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Removed the duplicate AdminLTE-packaged Bootstrap JavaScript bundle and rely on Yii Bootstrap 4 as the single Bootstrap JS source.
 - Removed the redundant direct `JqueryAsset` dependency where Yii already provides the dependency chain.
 - Made `appendTimestamp` behaviour consistent between minified and non-minified AdminLTE asset bundles.
-- Moved stable GridView, DetailView, and Invoice styles into `assets/css/widgets.css` and publish them through `AdminLTEThemeAsset` instead of emitting large inline CSS blocks from each widget.
+- Moved stable GridView, DetailView, Invoice, NavbarLogo, and NavbarUser presentation into cacheable package CSS where applicable.
+- `AdminLTEThemeAsset` now publishes package-owned `js/*` in addition to CSS so CSP-friendly widget behavior can live outside generated HTML attributes.
 
 #### Widget architecture and behaviour
 - Converted legacy `Box` into a backward-compatible facade/subclass over `Card`, so card class resolution, header rendering, body markup, tool buttons, and class sanitization now have a single implementation path.
@@ -51,7 +70,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 #### Documentation
 - Updated README requirements, installation guidance, security defaults, asset behaviour, test instructions, and compatibility notes.
 - Removed the recommendation to install the package with a broad `@dev` stability flag.
-- Updated `UPDATE.md` to mark `Box`/`Card` consolidation, broader widget regression coverage, and permanent Ionicons removal as processed work.
+- Updated `UPDATE.md` to mark `Box`/`Card` consolidation, broader widget regression coverage, permanent Ionicons removal, shared safety normalization, and the CSP review as processed work.
 
 ### Fixed
 
@@ -75,7 +94,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Validated HTTP(S) website URLs and email/PEC addresses before generating links.
 - Added `noopener noreferrer` to automatically generated external links opened in a new tab.
 - Remote company logos are disabled by default and require explicit opt-in for trusted HTTP(S) sources.
-- Removed user-controlled `javascript:` print URLs; the default print action uses a fixed print handler.
+- Removed user-controlled `javascript:` print URLs and inline print handlers; the default print action is handled by package JavaScript through a data attribute.
 - `NavbarUser` right-footer action (normally logout) uses Yii POST semantics by default.
 - Hardened URL/class handling in `Box`, `SmallBox`, `NavbarUser`, and related widgets.
 
@@ -84,7 +103,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Reduced duplicated front-end payload by removing the second Bootstrap JS copy.
 - Reduced repeated inline CSS output by moving stable widget styles into cacheable package assets.
 - Reduced redundant asset dependencies in the main AdminLTE bundles.
-- Reduced maintenance duplication by routing legacy `Box` card rendering through `Card`.
+- Reduced maintenance duplication by routing legacy `Box` card rendering through `Card` and shared safety normalization through one internal helper.
 
 ### Validation
 
