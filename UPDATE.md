@@ -20,7 +20,6 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 1. Normalize source-file metadata and license headers across the package — **Low**.
 2. Add static analysis and coding-standard automation after the current runtime baseline is stable — **Low**.
-3. Decide whether arbitrary `InfoBox` progress percentages need a CSP `style-src-attr 'none'` alternative — **Low**.
 
 ---
 
@@ -28,8 +27,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| — | No known open medium-or-higher security issue from the 2026-08-19 hardening pass | Mail body rendering, dynamic icon classes, SidebarMenu output, external Invoice links, logout semantics, dangerous URL schemes, and package-owned inline-script patterns have been hardened and covered by regression tests. | Keep security regression tests mandatory in CI and review every future raw-HTML, URL, CSS-class, image-source, or external-link API as an explicit trust boundary. |
-| **Low** | `InfoBox` arbitrary progress width under a strict `style-src-attr 'none'` CSP | `InfoBox::$progress` supports any percentage from 0–100 and therefore currently renders a numeric inline width. Static package styles and inline JavaScript were removed where practical, but Bootstrap 4 does not provide a utility class for every percentage. | Keep the current precise API for compatibility. If strict style-attribute CSP becomes a supported target, evaluate stepped CSS classes, a package script that applies widths from validated data attributes, or a documented opt-out of the progress indicator. |
+| — | No known open medium-or-higher security issue from the 2026-08-19 hardening pass | Mail body rendering, dynamic icon classes, SidebarMenu output, external Invoice links, logout semantics, dangerous URL schemes, package-owned inline-script patterns, and InfoBox progress rendering have been hardened and covered by regression tests. | Keep security regression tests mandatory in CI and review every future raw-HTML, URL, CSS-class, image-source, external-link, or dynamic-presentation API as an explicit trust boundary. |
 
 ---
 
@@ -87,8 +85,9 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Invoice external link hardening | HTTP(S) and email values are validated; external new-tab links receive `noopener noreferrer`; remote logos require explicit opt-in. |
 | Logout rendered as an ordinary GET link | `NavbarUser` right-footer action uses Yii POST semantics by default. |
 | Repeated URL / CSS-class / icon-class normalization | Internal `widgets/support/SafeHtml` is the shared policy for safe link schemes, HTTP(S), email links, CSS/icon classes, route arrays, and external-link options. The helper is marked internal rather than becoming a public extension API. |
-| CSP compatibility review | Invoice browser printing moved from inline `onclick` to package JS + `data-cinghie-action`; SidebarMenu no longer writes inline submenu display state; static Navbar/Mailbox styles moved to package CSS/utility classes. The one documented residual is arbitrary `InfoBox` progress width (Open Low). |
-| Security policy regression coverage | Dedicated tests cover shared normalization and avoidable package-owned inline JS/style patterns; these tests remain part of the normal PHPUnit CI matrix. |
+| CSP compatibility review | Invoice browser printing moved from inline `onclick` to package JS + `data-cinghie-action`; SidebarMenu no longer writes inline submenu display state; static Navbar/Mailbox styles moved to package CSS/utility classes. |
+| `InfoBox` arbitrary progress width under strict CSP | Integer progress values remain clamped to 0–100 but now map to package-owned `cinghie-progress-width-*` classes. No `style` attribute is emitted, preserving the public API while supporting `style-src-attr 'none'` for package-owned InfoBox markup. |
+| Security policy regression coverage | Dedicated tests cover shared normalization, CSP-safe InfoBox progress, and avoidable package-owned inline JS/style patterns; these tests remain part of the normal PHPUnit CI matrix. |
 
 ### Correctness & architecture
 
@@ -111,8 +110,9 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Redundant direct jQuery dependency | Removed where Yii already provides the dependency chain. |
 | Inconsistent `appendTimestamp` behaviour | Minified and non-minified bundles are aligned. |
 | Large stable widget CSS blocks emitted inline | GridView, DetailView, and Invoice stable styles moved to `assets/css/widgets.css` through `AdminLTEThemeAsset`. |
-| Static widget presentation embedded in HTML `style` attributes | NavbarLogo, NavbarUser, MailboxRead, and Invoice static presentation moved to package CSS/Bootstrap utility classes where practical. Dynamic InfoBox progress width remains documented separately. |
+| Static/deterministic widget presentation embedded in HTML `style` attributes | NavbarLogo, NavbarUser, MailboxRead, Invoice, and bounded InfoBox progress presentation now use package CSS/Bootstrap utility classes instead of package-owned inline styles. |
 | Package-owned behavior needed inline JS | `AdminLTEThemeAsset` publishes `assets/js/widgets.js`, allowing behavior such as browser printing to be bound from a data attribute instead of an inline handler. |
+| InfoBox progress width asset | Added `assets/css/progress-widths.css` with the exact 0–100 integer width classes required by the existing InfoBox normalization contract; the bundle is cacheable and avoids per-widget generated CSS/JS. |
 
 ### Packaging
 
@@ -169,8 +169,7 @@ These are **not current defects**. They are public-package evolution ideas that 
 
 ### 5. Stronger end-to-end CSP verification
 
-- The package-owned CSP pass removed avoidable inline JavaScript and most static style attributes.
-- Evaluate the remaining dynamic `InfoBox` width if `style-src-attr 'none'` becomes a supported target.
+- Package-owned Invoice, SidebarMenu, Navbar, Mailbox, and InfoBox markup now avoid the previously identified inline-handler/static-style patterns.
 - Add a small browser fixture with a restrictive CSP to validate the complete AdminLTE/Kartik/third-party asset stack, because upstream plugins can have requirements outside this package's generated markup.
 
 ### 6. Visual regression / browser smoke testing
@@ -210,6 +209,6 @@ These are **not current defects**. They are public-package evolution ideas that 
 - Expanded regression coverage across the public widget surface and deeper SidebarMenu route/parent/visibility cases.
 - Removed Ionicons from the package dependency and asset graph permanently; the package standard icon stack is Font Awesome.
 - Centralized URL, HTTP(S), email, CSS-class, icon-class, and external-link safety policy in internal `SafeHtml`; migrated the main security-sensitive widgets to it.
-- Completed a package-owned CSP pass: Invoice print behavior moved to an external asset script, SidebarMenu active state no longer requires inline display styles, and static Navbar/Mailbox/Invoice styles were moved into package CSS/utility classes.
+- Completed the package-owned CSP pass: Invoice print behavior moved to an external asset script, SidebarMenu active state no longer requires inline display styles, static Navbar/Mailbox/Invoice styles moved into package CSS/utility classes, and InfoBox progress widths now use bounded package CSS classes instead of inline styles.
 - Added public coding/PHPDoc conventions, class-level documentation guards, and source-level Yii/PSR best-practice tests. Comments focus on public contracts, compatibility and trust boundaries rather than duplicating obvious code.
-- Remaining roadmap work is intentionally low-risk: source metadata/header cleanup, static analysis/coding standards, the optional strict-CSP path for arbitrary InfoBox progress widths, and incremental release/documentation hygiene.
+- Remaining roadmap work is intentionally low-risk: source metadata/header cleanup, static analysis/coding standards, incremental release/documentation hygiene, and optional browser-level verification of the complete third-party CSP stack.
