@@ -7,6 +7,9 @@ namespace cinghie\adminlte3\tests;
 use cinghie\adminlte3\widgets\Invoice;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Security regression coverage for Invoice-generated URLs and actions.
+ */
 final class InvoiceSecurityTest extends TestCase
 {
     public function testDangerousWebsiteDoesNotBecomeLink(): void
@@ -16,7 +19,7 @@ final class InvoiceSecurityTest extends TestCase
             'showActions' => false,
         ]);
 
-        $this->assertStringNotContainsString('href="javascript:', $html);
+        self::assertStringNotContainsString('href="javascript:', $html);
     }
 
     public function testRemoteCompanyLogoIsBlockedByDefault(): void
@@ -27,8 +30,8 @@ final class InvoiceSecurityTest extends TestCase
             'showActions' => false,
         ]);
 
-        $this->assertStringNotContainsString($url, $html);
-        $this->assertStringContainsString('fas fa-globe', $html);
+        self::assertStringNotContainsString($url, $html);
+        self::assertStringContainsString('fas fa-globe', $html);
     }
 
     public function testRemoteCompanyLogoCanBeExplicitlyEnabled(): void
@@ -40,7 +43,7 @@ final class InvoiceSecurityTest extends TestCase
             'showActions' => false,
         ]);
 
-        $this->assertStringContainsString($url, $html);
+        self::assertStringContainsString($url, $html);
     }
 
     public function testInvalidEmailDoesNotBecomeMailtoLink(): void
@@ -50,7 +53,7 @@ final class InvoiceSecurityTest extends TestCase
             'showActions' => false,
         ]);
 
-        $this->assertStringNotContainsString('mailto:', $html);
+        self::assertStringNotContainsString('mailto:', $html);
     }
 
     public function testCustomJavascriptPrintUrlIsRejected(): void
@@ -59,16 +62,18 @@ final class InvoiceSecurityTest extends TestCase
             'printUrl' => 'javascript:alert(1)',
         ]);
 
-        $this->assertStringNotContainsString('href="javascript:', $html);
-        $this->assertStringNotContainsString('alert(1)', $html);
+        self::assertStringNotContainsString('href="javascript:', $html);
+        self::assertStringNotContainsString('alert(1)', $html);
     }
 
-    public function testDefaultPrintUsesFixedHandler(): void
+    public function testDefaultPrintUsesCspFriendlyDataAction(): void
     {
         $html = Invoice::widget();
 
-        $this->assertStringContainsString('window.print()', $html);
-        $this->assertStringContainsString('href="#"', $html);
+        self::assertStringContainsString('href="#"', $html);
+        self::assertStringContainsString('data-cinghie-action="print"', $html);
+        self::assertStringNotContainsString('onclick=', $html);
+        self::assertStringNotContainsString('window.print()', $html);
     }
 
     public function testAutolinkUsesNoopener(): void
@@ -83,6 +88,6 @@ final class InvoiceSecurityTest extends TestCase
             'showActions' => false,
         ]);
 
-        $this->assertStringContainsString('rel="noopener noreferrer"', $html);
+        self::assertStringContainsString('rel="noopener noreferrer"', $html);
     }
 }
