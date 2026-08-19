@@ -49,8 +49,9 @@ class MailboxRead extends Widget
     public function run()
     {
         $userBlockContent = '';
-        if ($this->userImage !== '') {
-            $userBlockContent .= Html::img($this->userImage, [
+        $userImage = self::safeImageUrl($this->userImage);
+        if ($userImage !== '') {
+            $userBlockContent .= Html::img($userImage, [
                 'class' => 'img-circle',
                 'alt' => $this->userName,
                 'title' => $this->userName,
@@ -79,6 +80,21 @@ class MailboxRead extends Widget
     {
         $sanitized = preg_replace('/[^A-Za-z0-9_\- ]/', '', (string) $value);
         return $sanitized !== '' ? $sanitized : $default;
+    }
+
+    protected static function safeImageUrl($url)
+    {
+        if ($url === null || $url === '') {
+            return '';
+        }
+        $url = trim((string) $url);
+        if (preg_match('#^\s*(?:javascript|data|vbscript):#i', $url)) {
+            return '';
+        }
+        if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $url) && !preg_match('#^https?://#i', $url)) {
+            return '';
+        }
+        return $url;
     }
 
     protected static function safeAttachmentUrl($url)
@@ -141,5 +157,24 @@ class MailboxRead extends Widget
         }
 
         return Html::tag('ul', implode("\n", $items), ['class' => 'mailbox-attachments d-flex align-items-stretch clearfix']);
+    }
+
+    /**
+     * Backward-compatible demo markup helper.
+     */
+    public function demo()
+    {
+        return static::widget([
+            'mailSubject' => 'Message Subject Is Placed Here',
+            'mailSender' => 'John Doe <example@example.com>',
+            'mailBody' => '<p>Hello John,</p><p>This is a sample message.</p><p>Thanks,<br>Jane</p>',
+            'encodeMailBody' => false,
+            'purifyMailBody' => true,
+            'userName' => 'John Doe',
+            'mailAttachments' => [
+                ['url' => '#', 'filename' => 'Sep2014-report.pdf', 'size' => '1,245 KB', 'icon' => 'far fa-file-pdf'],
+                ['url' => '#', 'filename' => 'App Description.docx', 'size' => '1,245 KB', 'icon' => 'far fa-file-word'],
+            ],
+        ]);
     }
 }
