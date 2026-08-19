@@ -22,10 +22,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added the internal `widgets/support/SafeHtml` policy helper for CSS/icon class normalization, safe link schemes, HTTP(S) validation, email links, and `_blank` hardening. The helper is intentionally internal so the security policy can evolve without creating a new public API contract.
 - Added `assets/js/widgets.js` for package-owned behavior that should not require inline JavaScript. The Invoice browser-print action now delegates through `data-cinghie-action="print"`.
 - Added CSP regression coverage for Invoice printing, MailboxRead attachments, SidebarMenu active submenus, and the external widget behavior script.
-- Added focused `SafeHtml` regression tests covering dangerous/unknown schemes, HTTP(S), email validation, CSS-class normalization, and external-link attributes.
+- Added focused `SafeHtml` regression tests covering dangerous/unknown schemes, malformed and protocol-relative absolute targets, HTTP(S), email validation, CSS-class normalization, and external-link attributes.
 
 #### Code documentation
 - Added `docs/CODING_STYLE.md` with public Yii/PHPDoc, trust-boundary, security, CSP, and PSR-12 conventions for contributors.
+- Clarified that PSR-12 defines import-block ordering but does not mandate alphabetical sorting within each import group.
 - Added a documentation guard test requiring every public widget class to expose a non-empty class-level PHPDoc block.
 - Completed class/property/trust-boundary PHPDoc for the security-sensitive widgets touched by this pass, including `Alert`, `Card`, `Box`, `MailboxRead`, `SidebarMenu`, `Invoice`, `InfoBox`, `SmallBox`, `NavbarButton`, `NavbarLogo`, and `NavbarUser`.
 
@@ -33,17 +34,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added PHPUnit configuration and a headless Yii web-application bootstrap for package tests.
 - Added regression coverage for `MailboxRead` HTML/XSS handling, attachment icon normalization, widget rendering hardening, `Invoice` URL policy, formatter isolation, and AdminLTE asset dependencies.
 - Added public-widget smoke coverage across the package and explicit backward-compatibility coverage for the legacy `Box` API.
+- Added `Yii2BestPracticesTest` to guard four-space PHP indentation, valid/used `Yii` imports, and the normative PSR-12 class/function/constant import-group order.
 - Expanded `SidebarMenu` regression coverage for trailing default actions, module default routes, query-parameter matching, active parents, invisible items, headers, and similarly named non-matching routes.
-- Added GitHub Actions validation across PHP 8.1, 8.3, and 8.5 with strict Composer validation, clean dependency resolution, PHP syntax linting, and PHPUnit execution.
+- Expanded GitHub Actions validation to every PHP minor from 8.1 through 8.5 with strict Composer validation, clean dependency resolution, PHP syntax linting, and PHPUnit execution.
 - Added test-only Asset Packagist aliases, runtime asset directories, request context, GridView module configuration, Bootstrap 4 configuration, and local translation sources required by Kartik widgets under CLI.
 
 ### Changed
 
 #### Shared rendering safety
-- `Card`, `Box`, `MailboxRead`, `SidebarMenu`, `InfoBox`, `SmallBox`, `NavbarButton`, `NavbarLogo`, `NavbarUser`, and `Invoice` now reuse the internal `SafeHtml` normalization policy instead of maintaining independent URL/class validation branches.
+- `Card`, `Box`, `MailboxRead`, `SidebarMenu`, `InfoBox`, `SmallBox`, `NavbarButton`, `NavbarLogo`, `NavbarUser`, and `Invoice` reuse the internal `SafeHtml` normalization policy instead of maintaining independent URL/class validation branches.
+- `SafeHtml::linkUrl()` now validates absolute HTTP(S) URLs through the strict HTTP helper and rejects protocol-relative URLs instead of treating them as ordinary relative links.
 - `NavbarLogo` and `NavbarUser` static image presentation moved from inline `style` attributes to package CSS classes.
 - `MailboxRead` attachment truncation moved from an inline style declaration to Bootstrap utility classes.
-- `SidebarMenu` active submenus now rely on AdminLTE's `menu-open` state instead of emitting an inline `display` style.
+- `SidebarMenu` active submenus rely on AdminLTE's `menu-open` state instead of emitting an inline `display` style.
 - `Invoice` no longer emits an inline `onclick` handler for browser printing and no longer uses an inline margin style on the PDF action.
 
 #### Runtime requirements and package dependencies
@@ -59,7 +62,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Removed the redundant direct `JqueryAsset` dependency where Yii already provides the dependency chain.
 - Made `appendTimestamp` behaviour consistent between minified and non-minified AdminLTE asset bundles.
 - Moved stable GridView, DetailView, Invoice, NavbarLogo, and NavbarUser presentation into cacheable package CSS where applicable.
-- `AdminLTEThemeAsset` now publishes package-owned `js/*` in addition to CSS so CSP-friendly widget behavior can live outside generated HTML attributes.
+- `AdminLTEThemeAsset` publishes package-owned `js/*` in addition to CSS so CSP-friendly widget behavior can live outside generated HTML attributes.
 
 #### Widget architecture and behaviour
 - Converted legacy `Box` into a backward-compatible facade/subclass over `Card`, so card class resolution, header rendering, body markup, tool buttons, and class sanitization now have a single implementation path.
@@ -70,12 +73,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 #### Documentation
 - Updated README requirements, installation guidance, security defaults, asset behaviour, test instructions, and compatibility notes.
 - Removed the recommendation to install the package with a broad `@dev` stability flag.
-- Updated `UPDATE.md` to mark `Box`/`Card` consolidation, broader widget regression coverage, permanent Ionicons removal, shared safety normalization, and the CSP review as processed work.
+- Streamlined `UPDATE.md` so the dated processed section does not repeat “Processed” in every subsection/result.
+- Added future widget candidates for Calendar, ChartJS, dedicated 404, and dedicated 500 rendering, with security/test expectations recorded before public implementation.
 
 ### Fixed
 
 #### Mail rendering security
-- `MailboxRead` now HTML-encodes message bodies by default.
+- `MailboxRead` HTML-encodes message bodies by default.
 - HTML mail rendering is explicit (`encodeMailBody=false`) and remains purified by default through Yii HTML Purifier.
 - Attachment icons are treated as validated CSS icon classes instead of arbitrary HTML fragments.
 - Dangerous attachment and image URL schemes are rejected.
@@ -107,7 +111,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Validation
 
-- CI targets PHP 8.1, 8.3, and 8.5.
+- CI targets every PHP minor from 8.1 through 8.5.
 - Every CI job performs strict Composer validation, clean dependency installation, syntax linting, and PHPUnit regression tests.
 
 ## 2026-07-30
