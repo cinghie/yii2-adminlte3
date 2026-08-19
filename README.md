@@ -67,14 +67,14 @@ Package-owned markup avoids inline JavaScript where practical. The default Invoi
 
 ## Tests
 
-The repository includes PHPUnit tests and a GitHub Actions matrix for PHP 8.1, 8.3 and 8.5. Locally:
+The repository includes PHPUnit tests and a GitHub Actions matrix for every supported PHP minor from 8.1 through 8.5. Locally:
 
 ```bash
 composer install
 composer test
 ```
 
-CI also runs strict Composer validation and PHP syntax checks. Security/CSP and public-widget documentation guards are part of the normal regression suite.
+CI also runs strict Composer validation and PHP syntax checks. Security/CSP, Yii/PSR source-hygiene, and public-widget documentation guards are part of the normal regression suite.
 
 ## Contributing
 
