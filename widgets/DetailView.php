@@ -2,23 +2,41 @@
 
 namespace cinghie\adminlte3\widgets;
 
-use Yii;
 use kartik\detail\DetailView as BaseDetailView;
+use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
+/**
+ * Kartik DetailView adapter for AdminLTE 3 / Bootstrap 4 card markup.
+ *
+ * Panel headings and contextual types are normalized to AdminLTE card classes.
+ * The widget also isolates formatter customization so changing {@see $nullDisplay}
+ * does not mutate the application-wide formatter instance.
+ */
 class DetailView extends BaseDetailView
 {
+    /** @var int Bootstrap version forced for Kartik rendering. */
     public $bsVersion = 4;
+
+    /** @var string Additional card class list. */
     public $cardClass = '';
+
+    /** @var string Value used when an attribute formats to null. */
     public $nullDisplay = '';
+
+    /** @var string|null Contextual type converted to AdminLTE outline classes. */
     protected $cardOutlineType;
 
+    /**
+     * {@inheritdoc}
+     */
     public function init()
     {
         $this->bsVersion = 4;
         $this->normalizePanelForAdminLte();
         parent::init();
+
         if (isset(Yii::$app->formatter) && $this->formatter === Yii::$app->formatter) {
             $this->formatter = clone $this->formatter;
         }
@@ -27,7 +45,12 @@ class DetailView extends BaseDetailView
         }
     }
 
-    protected function normalizePanelForAdminLte()
+    /**
+     * Converts Kartik panel configuration to AdminLTE 3 card conventions.
+     *
+     * @return void
+     */
+    protected function normalizePanelForAdminLte(): void
     {
         if (!is_array($this->panel) || empty($this->panel)) {
             return;
@@ -71,6 +94,11 @@ class DetailView extends BaseDetailView
         }
     }
 
+    /**
+     * Resolves additional card and contextual outline classes.
+     *
+     * @return string
+     */
     protected function resolveCardOutlineClass()
     {
         $parts = array_filter([trim((string) $this->cardClass)]);
@@ -78,6 +106,7 @@ class DetailView extends BaseDetailView
             $parts[] = 'card-outline';
             $parts[] = 'card-' . $this->cardOutlineType;
         }
+
         return trim(implode(' ', $parts));
     }
 }
