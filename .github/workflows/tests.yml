@@ -45,6 +45,12 @@ jobs:
     name: prefer-lowest (PHP 8.1)
     runs-on: ubuntu-latest
     continue-on-error: true
+    env:
+      COMPOSER_PROCESS_TIMEOUT: 0
+      COMPOSER_NO_INTERACTION: 1
+      COMPOSER_NO_AUDIT: 1
+      COMPOSER_MAX_PARALLEL_HTTP: 1
+      COMPOSER_MAX_PARALLEL_PROCESSES: 1
 
     steps:
       - uses: actions/checkout@v4
@@ -67,6 +73,10 @@ jobs:
 
       - name: Install lowest dependency set
         run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Verify lowest autoload surface
+        run: |
+          php -r "require 'vendor/autoload.php'; foreach (['yii\\bootstrap4\\Widget', 'kartik\\grid\\GridView', 'kartik\\detail\\DetailView', 'cinghie\\fontawesome\\FontAwesomeAsset'] as $class) { if (!class_exists($class)) { fwrite(STDERR, 'Missing class: ' . $class . PHP_EOL); exit(1); } }"
 
       - name: PHP syntax check
         run: find . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
