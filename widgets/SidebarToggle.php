@@ -12,7 +12,8 @@
 
 namespace cinghie\adminlte3\widgets;
 
-use Yii;
+use cinghie\adminlte3\widgets\support\SafeHtml;
+use cinghie\adminlte3\widgets\support\Translation;
 use yii\bootstrap4\Widget;
 use yii\helpers\Html;
 
@@ -29,24 +30,22 @@ use yii\helpers\Html;
  */
 class SidebarToggle extends Widget
 {
-    /**
-     * @var string Icon class for the toggle button (Font Awesome 5)
-     */
-    public $iconClass = 'fas fa-bars';
+    /** @var string Font Awesome icon class list. */
+    public $icon = 'fas fa-bars';
 
     /**
-     * @var string Aria-label for accessibility
+     * @var string|null Legacy toggle icon class list.
+     * @deprecated Use {@see $icon}.
      */
+    public $iconClass;
+
+    /** @var string Aria-label for accessibility. */
     public $ariaLabel;
 
-    /**
-     * @var bool Whether to wrap the output in <li class="nav-item"> (for use inside navbar-nav)
-     */
+    /** @var bool Whether to wrap the output in `<li class="nav-item">`. */
     public $renderAsLi = true;
 
-    /**
-     * @var array HTML attributes for the anchor tag
-     */
+    /** @var array HTML attributes for the anchor tag. */
     public $linkOptions = [];
 
     /**
@@ -55,7 +54,7 @@ class SidebarToggle extends Widget
     public function init()
     {
         if ($this->ariaLabel === null) {
-            $this->ariaLabel = Yii::t('app', 'Toggle sidebar');
+            $this->ariaLabel = Translation::t('Toggle navigation');
         }
         parent::init();
     }
@@ -73,8 +72,9 @@ class SidebarToggle extends Widget
             'aria-label' => $this->ariaLabel,
         ], $this->linkOptions);
 
-        $icon = Html::tag('i', '', ['class' => $this->iconClass]);
-        $link = Html::a($icon, '#', $linkOptions);
+        $icon = $this->icon !== null && $this->icon !== '' ? $this->icon : $this->iconClass;
+        $icon = SafeHtml::iconClass($icon, 'fas fa-bars');
+        $link = Html::a(Html::tag('i', '', ['class' => $icon]), '#', $linkOptions);
 
         if ($this->renderAsLi) {
             return Html::tag('li', $link, ['class' => 'nav-item']);
