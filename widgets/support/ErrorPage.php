@@ -46,7 +46,7 @@ abstract class ErrorPage extends Widget
             'headlineClass' => $this->headlineClass(),
             'title' => (string) $this->title,
             'message' => (string) $this->message,
-            'homeUrl' => $this->homeUrl,
+            'homeHref' => SafeHtml::linkUrl($this->homeUrl, '/'),
             'homeLabel' => (string) $this->homeLabel,
             'options' => $this->options,
         ], $this);
