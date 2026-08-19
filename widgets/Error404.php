@@ -9,8 +9,8 @@ use cinghie\adminlte3\widgets\support\ErrorPage;
  */
 class Error404 extends ErrorPage
 {
-    public $title = 'Page not found';
-    public $message = 'The page you requested could not be found.';
+    public $title = 'Oops! Page not found.';
+    public $message = 'We could not find the page you were looking for.';
 
     protected function statusCode(): int
     {
