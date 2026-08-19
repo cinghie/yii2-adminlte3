@@ -57,7 +57,9 @@ final class TranslationTest extends TestCase
             'sourceLanguage' => 'en-US',
         ];
 
-        self::assertSame('Custom Search', Translation::t('Search', [], 'en-US'));
+        // Yii returns source text directly when target language equals the source
+        // language, so use a distinct target to exercise the configured catalog.
+        self::assertSame('Ricerca personalizzata', Translation::t('Search', [], 'it-IT'));
     }
 
     public function testPackageWidgetsDoNotDependOnLegacyUiTranslationCategories(): void
