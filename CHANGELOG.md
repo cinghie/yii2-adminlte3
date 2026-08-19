@@ -45,8 +45,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added PHPUnit configuration and a headless Yii web-application bootstrap for package tests.
 - Added regression coverage for mail/XSS handling, attachment icon normalization, widget rendering hardening, Invoice URL policy, formatter isolation, AdminLTE asset dependencies, CSP-safe InfoBox progress, widget option aliases, and translation ownership.
 - Added `Yii2BestPracticesTest` for valid/used `Yii` imports and normative PSR-12 class/function/constant import-group ordering.
+- Added a reusable `HtmlDomTestCase` based on `DOMDocument`/`DOMXPath` and migrated complex rendering assertions for classes, links, `rel`, `target`, `data-method`, ARIA attributes, and encoded text away from brittle serialized-markup ordering.
+- Added structural accessibility coverage for AdminLTE Card tool attributes.
 - Expanded `SidebarMenu` regression coverage for trailing default actions, module default routes, query parameters, active parents, invisible items, headers, and similarly named non-matching routes.
 - Expanded GitHub Actions validation to every PHP minor from 8.1 through 8.5 with strict Composer validation, clean dependency resolution, PHP syntax linting, and PHPUnit.
+- Added a separate PHP 8.1 `prefer-lowest` job that resolves minimum declared dependencies with `composer update --prefer-lowest --prefer-stable`, then attempts a clean install, lint, and test run. The job is intentionally non-blocking while legacy minimum-version combinations exhibit upstream Composer/package extraction noise.
 
 ### Changed
 
@@ -92,7 +95,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Updated README requirements, installation guidance, modular asset registration, script-loading policy, security defaults, test instructions, and compatibility notes.
 - Removed the recommendation to install the package with a broad `@dev` stability flag.
 - Streamlined `UPDATE.md` so the dated processed section does not repeat “Processed” in every subsection/result.
-- Closed the package-owned InfoBox CSP item, widget-option normalization, translation ownership, optional asset splitting, source/minified parity, `defer`/preload evaluation, source-metadata cleanup, and static-analysis/coding-standard roadmap items.
+- Closed the package-owned InfoBox CSP item, widget-option normalization, translation ownership, optional asset splitting, source/minified parity, `defer`/preload evaluation, source-metadata cleanup, static-analysis/coding-standard, DOM/XPath structural-test, and lowest-dependency-validation roadmap items.
+- Documented that lowest-dependency CI remains observational/non-blocking until the complete minimum set installs and executes reliably; successful dependency resolution alone is not presented as runtime compatibility certification.
 - Added future widget candidates for Calendar, ChartJS, dedicated 404, and dedicated 500 rendering.
 
 ### Fixed
@@ -130,6 +134,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - CI targets every PHP minor from 8.1 through 8.5.
 - Every runtime CI job performs strict Composer validation, clean dependency installation, syntax linting, and PHPUnit regression tests.
 - A separate blocking PHP 8.3 quality job performs PHPStan level 5 analysis and PHP_CodeSniffer/PSR-12 checks.
+- A separate non-blocking PHP 8.1 lowest-dependency job resolves the minimum dependency graph and attempts installation/tests; current upstream extraction noise is retained as visible CI signal rather than weakening the normal runtime gates.
 
 ## 2026-07-30
 
