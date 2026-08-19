@@ -6,50 +6,74 @@
 ![Latest Commit](https://img.shields.io/github/last-commit/cinghie/yii2-adminlte3.svg)
 [![Total Downloads](https://img.shields.io/packagist/dt/cinghie/yii2-adminlte3.svg)](https://packagist.org/packages/cinghie/yii2-adminlte3)
 
-Asset Bundle to include AdminLTE 3 on your Yii 2 project: https://github.com/ColorlibHQ/AdminLTE/tree/v3/
+Asset bundle and widgets for AdminLTE 3 on Yii 2.
+
+## Requirements
+
+- PHP 7.4 or later
+- Yii 2.0.54 or later
+- Yii Bootstrap 4
+- Composer configured to resolve `bower-asset/*` packages, for example through Asset Packagist
 
 ## Installation
 
-The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
+Until the first stable release is tagged, install the development branch explicitly rather than using the broad `@dev` stability flag:
 
-Either run
-
-```
-php composer.phar require cinghie/yii2-adminlte3 "@dev"
+```bash
+composer require cinghie/yii2-adminlte3:dev-main
 ```
 
-or add this line to the require section of your `composer.json` file.
-
-```
-"cinghie/yii2-adminlte3": "@dev"
-```
+For production deployments, prefer a tagged stable release when available, or pin the exact commit you have validated.
 
 ## Configuration
 
-Add in the view for normal CSS and JS
+Register the normal CSS and JavaScript bundle in your view/layout:
 
-```
+```php
 use cinghie\adminlte3\AdminLTEAsset;
 
 AdminLTEAsset::register($this);
 ```
 
-Add in the view for minify CSS and JS
+Or use the minified bundle:
 
-```
+```php
 use cinghie\adminlte3\AdminLTEMinifyAsset;
 
 AdminLTEMinifyAsset::register($this);
 ```
 
-Both asset bundles also register `cinghie\adminlte3\assets\AdminLTEThemeAsset` (package theme CSS under `assets/css/`). Keep application-only CSS in your project `web/css` (do not duplicate AdminLTE shell styles there).
+Both bundles register `cinghie\adminlte3\assets\AdminLTEThemeAsset`. Static GridView, DetailView and Invoice styles are shipped by the package under `assets/css/`, so they can be cached by the browser rather than emitted inline by each widget.
+
+## Security defaults
+
+`MailboxRead` HTML-encodes message bodies by default. To render an HTML email explicitly, set `encodeMailBody` to `false`; `purifyMailBody` remains enabled by default and passes the content through Yii's HTML purifier.
+
+Attachment icons are treated as CSS classes rather than arbitrary HTML, and dangerous attachment URL schemes are rejected.
+
+`Invoice` validates website and email links. Remote company logos are disabled by default to avoid unintended third-party requests; set `allowRemoteCompanyLogo` to `true` only for trusted HTTP(S) logo URLs.
+
+`NavbarUser` renders the right footer action (normally logout) with `data-method="post"` by default. This preserves Yii's POST/CSRF logout semantics when Yii JavaScript is active; override `footerRightOptions` if the action is not a logout.
+
+`Box` is retained for backward compatibility but is deprecated. Prefer `Card` for new code; `Box` remains useful where its legacy GridView/footer-button API is required.
+
+## Tests
+
+The repository includes PHPUnit tests and a GitHub Actions matrix covering supported PHP versions. Locally:
+
+```bash
+composer install
+composer test
+```
+
+CI also runs strict Composer validation and PHP syntax checks.
 
 ## Widgets Examples
 
 | Widget                                          | Guide                                                |
 | ----------------------------------------------- | ---------------------------------------------------- |
 | [Alert](docs/example_alert.md)                  | Alert messages                                       |
-| [Box](docs/example_box.md)                      | Card with header, body (content or GridView), footer |
+| [Box](docs/example_box.md)                      | Legacy card with GridView/footer helpers             |
 | [Breadcrumbs](docs/example_breadcrumbs.md)      | Navigation breadcrumbs                               |
 | [Card](docs/example_card.md)                    | Card (header, tools, body, footer; begin/end)        |
 | [Content Header](docs/example_contentheader.md) | Page title and breadcrumbs                           |
