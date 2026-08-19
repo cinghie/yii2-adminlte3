@@ -2,36 +2,62 @@
 
 namespace cinghie\adminlte3\widgets;
 
+use cinghie\adminlte3\widgets\support\SafeHtml;
 use yii\bootstrap4\Widget;
 use yii\helpers\Html;
 use yii\helpers\HtmlPurifier;
 
 /**
- * MailboxRead widget for AdminLTE 3 with Bootstrap 4.
+ * Renders an AdminLTE 3 mailbox message card.
  *
- * Mail bodies are encoded by default. Set $encodeMailBody to false to render
- * HTML; when $purifyMailBody is true (the default for HTML mode), the body is
- * passed through Yii's HTML purifier first.
+ * Message bodies are encoded by default. Applications that intentionally
+ * render HTML must set {@see $encodeMailBody} to false; purified HTML remains
+ * the default in that mode through {@see $purifyMailBody}.
  */
 class MailboxRead extends Widget
 {
+    /** @var array<int,array|object> Attachment definitions or attachment objects. */
     public $mailAttachments = [];
+
+    /** @var string Message body. */
     public $mailBody = '';
+
+    /** @var bool Whether to HTML-encode the message body. */
     public $encodeMailBody = true;
+
+    /** @var bool Whether to purify HTML when body encoding is disabled. */
     public $purifyMailBody = true;
+
+    /** @var string Message sender label. */
     public $mailSender = '';
+
+    /** @var string Message subject. */
     public $mailSubject = '';
+
+    /** @var mixed Optional message timestamp retained for API compatibility. */
     public $mailTime;
+
+    /** @var string Sender display name used for image metadata. */
     public $userName = '';
+
+    /** @var string|null Sender image URL. */
     public $userImage;
+
+    /** @var string Card contextual type, for example `primary`. */
     public $cardType = 'primary';
+
+    /** @var array HTML options for the outer card element. */
     public $options = [];
 
+    /**
+     * {@inheritdoc}
+     */
     public function init()
     {
         if (!is_array($this->mailAttachments)) {
             $this->mailAttachments = [];
         }
+
         foreach (['mailBody', 'mailSender', 'mailSubject', 'userName', 'userImage'] as $property) {
             if ($this->{$property} === null) {
                 $this->{$property} = '';
@@ -40,12 +66,16 @@ class MailboxRead extends Widget
 
         Html::addCssClass($this->options, 'card');
         if ($this->cardType) {
-            Html::addCssClass($this->options, 'card-' . self::sanitizeClass($this->cardType));
+            Html::addCssClass($this->options, 'card-' . SafeHtml::cssClass($this->cardType));
             Html::addCssClass($this->options, 'card-outline');
         }
+
         parent::init();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function run()
     {
         $userBlockContent = '';
@@ -57,6 +87,7 @@ class MailboxRead extends Widget
                 'title' => $this->userName,
             ]);
         }
+
         $userBlockContent .= Html::tag('span', Html::encode($this->mailSubject), ['class' => 'username']);
         $userBlockContent .= Html::tag('span', Html::encode($this->mailSender), ['class' => 'description']);
 
@@ -71,48 +102,45 @@ class MailboxRead extends Widget
         $cardBody = Html::tag('div', implode("\n", $bodyParts), ['class' => 'card-body p-0']);
 
         $attachmentsHtml = $this->renderAttachments();
-        $cardFooter = $attachmentsHtml === '' ? '' : Html::tag('div', $attachmentsHtml, ['class' => 'card-footer bg-white']);
+        $cardFooter = $attachmentsHtml === ''
+            ? ''
+            : Html::tag('div', $attachmentsHtml, ['class' => 'card-footer bg-white']);
 
         return Html::tag('div', $cardBody . $cardFooter, $this->options);
     }
 
-    protected static function sanitizeClass($value, $default = '')
+    /**
+     * Normalizes an image target while allowing relative and HTTP(S) URLs.
+     *
+     * @param mixed $url Candidate image URL.
+     * @return string Empty string when rejected.
+     */
+    protected static function safeImageUrl($url): string
     {
-        $sanitized = preg_replace('/[^A-Za-z0-9_\- ]/', '', (string) $value);
-        return $sanitized !== '' ? $sanitized : $default;
+        return SafeHtml::linkUrl($url, '');
     }
 
-    protected static function safeImageUrl($url)
+    /**
+     * Normalizes an attachment download target.
+     *
+     * @param mixed $url Candidate attachment URL.
+     * @return string Safe URL or `#`.
+     */
+    protected static function safeAttachmentUrl($url): string
     {
-        if ($url === null || $url === '') {
-            return '';
-        }
-        $url = trim((string) $url);
-        if (preg_match('#^\s*(?:javascript|data|vbscript):#i', $url)) {
-            return '';
-        }
-        if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $url) && !preg_match('#^https?://#i', $url)) {
-            return '';
-        }
-        return $url;
+        return SafeHtml::linkUrl($url, '#');
     }
 
-    protected static function safeAttachmentUrl($url)
-    {
-        if ($url === null || $url === '' || $url === '#') {
-            return '#';
-        }
-        $url = (string) $url;
-        if (preg_match('#^\s*(?:javascript|data|vbscript):#i', $url)) {
-            return '#';
-        }
-        if (preg_match('#^https?://#i', $url) || preg_match('#^/#', $url) || !preg_match('#^[a-z][a-z0-9+.-]*:#i', $url)) {
-            return $url;
-        }
-        return '#';
-    }
-
-    protected static function normalizeIconClass($icon)
+    /**
+     * Converts legacy icon markup or class strings into a safe icon class list.
+     *
+     * Legacy callers may still provide a single `<i class="..."></i>` string;
+     * arbitrary markup is rejected rather than rendered.
+     *
+     * @param mixed $icon Icon class string or legacy single-icon markup.
+     * @return string
+     */
+    protected static function normalizeIconClass($icon): string
     {
         $default = 'far fa-file';
         if ($icon === null || $icon === '') {
@@ -127,10 +155,15 @@ class MailboxRead extends Widget
             $icon = $matches[1];
         }
 
-        return self::sanitizeClass($icon, $default);
+        return SafeHtml::iconClass($icon, $default);
     }
 
-    protected function renderAttachments()
+    /**
+     * Renders the attachment list.
+     *
+     * @return string
+     */
+    protected function renderAttachments(): string
     {
         if (empty($this->mailAttachments)) {
             return '';
@@ -139,15 +172,17 @@ class MailboxRead extends Widget
         $items = [];
         foreach ($this->mailAttachments as $attachment) {
             if (is_array($attachment)) {
-                $url = isset($attachment['url']) ? $attachment['url'] : '#';
-                $filename = isset($attachment['filename']) ? $attachment['filename'] : 'file';
-                $size = isset($attachment['size']) ? $attachment['size'] : '';
-                $icon = isset($attachment['icon']) ? $attachment['icon'] : 'far fa-file';
+                $url = $attachment['url'] ?? '#';
+                $filename = $attachment['filename'] ?? 'file';
+                $size = $attachment['size'] ?? '';
+                $icon = $attachment['icon'] ?? 'far fa-file';
             } else {
-                $url = isset($attachment->fileUrl) ? $attachment->fileUrl : '#';
-                $filename = isset($attachment->filename) ? $attachment->filename : 'file';
+                $url = $attachment->fileUrl ?? '#';
+                $filename = $attachment->filename ?? 'file';
                 $size = method_exists($attachment, 'formatSize') ? $attachment->formatSize() : '';
-                $icon = method_exists($attachment, 'getAttachmentTypeIcon') ? $attachment->getAttachmentTypeIcon() : 'far fa-file';
+                $icon = method_exists($attachment, 'getAttachmentTypeIcon')
+                    ? $attachment->getAttachmentTypeIcon()
+                    : 'far fa-file';
             }
 
             $iconHtml = Html::tag('i', '', ['class' => self::normalizeIconClass($icon)]);
@@ -155,19 +190,30 @@ class MailboxRead extends Widget
             $link = Html::a(
                 Html::tag('i', '', ['class' => 'fas fa-paperclip']) . ' ' . Html::encode($filename),
                 self::safeAttachmentUrl($url),
-                ['class' => 'mailbox-attachment-name', 'style' => 'display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;']
+                ['class' => 'mailbox-attachment-name d-block text-truncate']
             );
-            $sizeSpan = $size !== '' ? Html::tag('span', Html::encode($size), ['class' => 'mailbox-attachment-size']) : '';
-            $items[] = Html::tag('li', $iconSpan . Html::tag('div', $link . $sizeSpan, ['class' => 'mailbox-attachment-info']));
+            $sizeSpan = $size !== ''
+                ? Html::tag('span', Html::encode($size), ['class' => 'mailbox-attachment-size'])
+                : '';
+            $items[] = Html::tag(
+                'li',
+                $iconSpan . Html::tag('div', $link . $sizeSpan, ['class' => 'mailbox-attachment-info'])
+            );
         }
 
-        return Html::tag('ul', implode("\n", $items), ['class' => 'mailbox-attachments d-flex align-items-stretch clearfix']);
+        return Html::tag(
+            'ul',
+            implode("\n", $items),
+            ['class' => 'mailbox-attachments d-flex align-items-stretch clearfix']
+        );
     }
 
     /**
-     * Backward-compatible demo markup helper.
+     * Returns backward-compatible demo markup.
+     *
+     * @return string
      */
-    public function demo()
+    public function demo(): string
     {
         return static::widget([
             'mailSubject' => 'Message Subject Is Placed Here',
