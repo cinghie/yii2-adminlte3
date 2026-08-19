@@ -7,8 +7,11 @@ require dirname(__DIR__) . '/vendor/yiisoft/yii2/Yii.php';
 
 $basePath = dirname(__DIR__);
 $runtimePath = $basePath . '/runtime';
-if (!is_dir($runtimePath)) {
-    mkdir($runtimePath, 0777, true);
+$assetPath = $runtimePath . '/assets';
+foreach ([$runtimePath, $assetPath] as $directory) {
+    if (!is_dir($directory)) {
+        mkdir($directory, 0777, true);
+    }
 }
 
 if (Yii::$app === null) {
@@ -30,6 +33,10 @@ if (Yii::$app === null) {
                 'cookieValidationKey' => 'test-key',
                 'scriptFile' => __FILE__,
                 'scriptUrl' => '/index.php',
+            ],
+            'assetManager' => [
+                'basePath' => $assetPath,
+                'baseUrl' => '/assets',
             ],
             'i18n' => [
                 'translations' => [
