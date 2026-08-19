@@ -12,9 +12,7 @@ class AdminLTEChartJSMinifyAsset extends AssetBundle
     public $sourcePath = '@vendor/almasaeed2010/adminlte/';
     public $appendTimestamp = true;
 
-    public $css = [
-        'plugins/chart.js/Chart.min.css',
-    ];
+    public $css = [];
 
     public $js = [
         'plugins/chart.js/Chart.min.js',
