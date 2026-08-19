@@ -30,8 +30,8 @@ use yii\helpers\Html;
  */
 class SidebarToggle extends Widget
 {
-    /** @var string Font Awesome icon class list. */
-    public $icon = 'fas fa-bars';
+    /** @var string|null Canonical Font Awesome icon class list. */
+    public $icon;
 
     /**
      * @var string|null Legacy toggle icon class list.
