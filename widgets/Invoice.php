@@ -2,21 +2,33 @@
 
 namespace cinghie\adminlte3\widgets;
 
+use cinghie\adminlte3\widgets\support\SafeHtml;
 use Yii;
 use yii\base\Widget;
 use yii\helpers\Html;
-use yii\helpers\Url;
 
 /**
- * AdminLTE 3 / Bootstrap 4 invoice layout.
+ * Renders an AdminLTE 3 / Bootstrap 4 invoice layout.
+ *
+ * All visible values are encoded unless a method explicitly creates trusted
+ * package markup. URLs are normalized before being emitted. The built-in print
+ * action uses a data attribute handled by the package asset JavaScript instead
+ * of an inline event handler, which improves Content Security Policy support.
  */
 class Invoice extends Widget
 {
+    /** @var string Company display name. */
     public $companyName = '';
+
+    /** @var string Company logo URL/path or legacy single icon markup. */
     public $companyLogo = '';
-    /** @var bool allow remote http(s) company-logo requests */
+
+    /** @var bool Whether trusted remote HTTP(S) company logos are allowed. */
     public $allowRemoteCompanyLogo = false;
+
+    /** @var string Invoice creation/date label. */
     public $invoiceDate = '';
+
     public $invoiceFromName = '';
     public $invoiceFromAddress = '';
     public $invoiceFromAddressInfo = '';
@@ -28,6 +40,7 @@ class Invoice extends Widget
     public $invoiceFromPec = '';
     public $invoiceFromWebsite = '';
     public $invoiceFromFax = '';
+
     public $invoiceToName = '';
     public $invoiceToAddress = '';
     public $invoiceToAddressInfo = '';
@@ -40,6 +53,7 @@ class Invoice extends Widget
     public $invoiceToSdi = '';
     public $invoiceToPec = '';
     public $invoiceToWebsite = '';
+
     public $invoiceNumber = '';
     public $invoiceOrderID = '';
     public $invoiceType = '';
@@ -47,7 +61,10 @@ class Invoice extends Widget
     public $invoicePaid = '';
     public $invoiceSent = '';
     public $invoiceAccount = '';
+
+    /** @var array<int,array> Invoice line definitions. */
     public $invoiceItems = [];
+
     public $invoiceSubtotal = '';
     public $invoiceTax = '';
     public $invoiceTaxLabel = '';
@@ -56,15 +73,29 @@ class Invoice extends Widget
     public $invoiceNotes = '';
     public $invoicePaymentMethod = '';
     public $invoicePaymentMethodCode = '';
+
+    /** @var bool Whether print/PDF actions should be rendered. */
     public $showActions = true;
+
+    /** @var string|array|null Optional custom print target; null uses browser print. */
     public $printUrl;
+
+    /** @var string|array|null Optional generated-PDF target. */
     public $pdfUrl;
 
+    /**
+     * {@inheritdoc}
+     */
     public function run()
     {
         return $this->renderInvoice();
     }
 
+    /**
+     * Renders the complete invoice container.
+     *
+     * @return string
+     */
     protected function renderInvoice()
     {
         $html = Html::beginTag('div', ['class' => 'invoice cinghie-invoice']);
@@ -75,9 +106,15 @@ class Invoice extends Widget
         if ($this->showActions) {
             $html .= $this->renderActionsRow();
         }
+
         return $html . Html::endTag('div');
     }
 
+    /**
+     * Renders company branding and invoice date.
+     *
+     * @return string
+     */
     protected function renderTitleRow()
     {
         $brand = Html::tag(
@@ -100,6 +137,11 @@ class Invoice extends Widget
             . '</div></div>';
     }
 
+    /**
+     * Renders a safe company logo or the default globe icon.
+     *
+     * @return string
+     */
     protected function renderLogo()
     {
         if (!$this->isFilled($this->companyLogo)) {
@@ -108,35 +150,48 @@ class Invoice extends Widget
 
         $logo = (string) $this->companyLogo;
         if (preg_match('#^\s*<i\s+class="([^"]+)"\s*>\s*</i>\s*$#i', $logo, $matches)) {
-            $class = preg_replace('/[^A-Za-z0-9_\- ]/', '', $matches[1]);
-            return $class === '' ? '<i class="fas fa-globe"></i> ' : Html::tag('i', '', ['class' => $class]) . ' ';
+            $class = SafeHtml::iconClass($matches[1]);
+
+            return $class === ''
+                ? '<i class="fas fa-globe"></i> '
+                : Html::tag('i', '', ['class' => $class]) . ' ';
         }
 
         $url = $this->normalizeCompanyLogoUrl($logo);
+
         return $url === null ? '<i class="fas fa-globe"></i> ' : Html::img($url, ['alt' => '']);
     }
 
+    /**
+     * Normalizes a local or explicitly allowed remote company-logo target.
+     *
+     * @param string $url Candidate logo URL/path.
+     * @return string|null
+     */
     protected function normalizeCompanyLogoUrl(string $url)
     {
         $url = trim($url);
-        if ($url === '' || strpos($url, '<') !== false || preg_match('#^\s*(?:javascript|data|vbscript):#i', $url)) {
+        if ($url === '' || strpos($url, '<') !== false || SafeHtml::hasDangerousScheme($url)) {
             return null;
         }
         if (strpos($url, '//') === 0) {
             return null;
         }
         if (preg_match('#^https?://#i', $url)) {
-            if (!$this->allowRemoteCompanyLogo || !$this->isValidHttpUrl($url)) {
-                return null;
-            }
-            return $url;
+            return $this->allowRemoteCompanyLogo ? SafeHtml::httpUrl($url) : null;
         }
         if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $url)) {
             return null;
         }
+
         return $url;
     }
 
+    /**
+     * Renders sender, recipient and invoice metadata columns.
+     *
+     * @return string
+     */
     protected function renderInfoRow()
     {
         return '<div class="row invoice-info">'
@@ -174,26 +229,46 @@ class Invoice extends Widget
             . '<div class="col-sm-4 invoice-col">' . $this->renderMetaBlock() . '</div></div>';
     }
 
+    /**
+     * Returns whether a display value is present.
+     *
+     * @param mixed $value Value to inspect.
+     * @return bool
+     */
     protected function isFilled($value): bool
     {
         return $value !== null && $value !== '';
     }
 
+    /**
+     * Renders one encoded metadata line with an optional safe link.
+     *
+     * @param string $label Display label.
+     * @param string $value Display value.
+     * @param string|null $href Optional normalized target.
+     * @return string
+     */
     protected function extraLine(string $label, string $value, $href = null): string
     {
         $content = '<b>' . Html::encode($label) . ':</b> ';
         if ($href) {
-            $options = [];
-            if (preg_match('#^https?://#i', (string) $href)) {
-                $options = ['target' => '_blank', 'rel' => 'noopener noreferrer'];
-            }
+            $options = preg_match('#^https?://#i', (string) $href)
+                ? SafeHtml::externalLinkOptions('_blank')
+                : [];
             $content .= Html::a(Html::encode($value), $href, $options);
         } else {
             $content .= Html::encode($value);
         }
+
         return '<span class="invoice-extra">' . $content . '</span>';
     }
 
+    /**
+     * Converts a website value into a validated absolute HTTP(S) URL.
+     *
+     * @param string $website Website input.
+     * @return string|null
+     */
     protected function normalizeWebsiteHref(string $website)
     {
         $website = trim($website);
@@ -206,54 +281,57 @@ class Invoice extends Widget
             }
             $website = 'https://' . $website;
         }
-        return $this->isValidHttpUrl($website) ? $website : null;
+
+        return SafeHtml::httpUrl($website);
     }
 
+    /**
+     * Backward-compatible HTTP(S) validation wrapper.
+     *
+     * @param string $url URL to validate.
+     * @return bool
+     */
     protected function isValidHttpUrl(string $url): bool
     {
-        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
-            return false;
-        }
-        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
-        $host = parse_url($url, PHP_URL_HOST);
-        return in_array($scheme, ['http', 'https'], true) && is_string($host) && $host !== '';
+        return SafeHtml::httpUrl($url) !== null;
     }
 
+    /**
+     * Converts an email address into a validated mailto target.
+     *
+     * @param mixed $email Email value.
+     * @return string|null
+     */
     protected function normalizeEmailHref($email)
     {
-        $email = trim((string) $email);
-        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false ? 'mailto:' . $email : null;
+        return SafeHtml::emailHref($email);
     }
 
+    /**
+     * Renders an encoded invoice-party address block.
+     *
+     * @param array $party Party values.
+     * @return string
+     */
     protected function renderAddressBlock(array $party)
     {
         $parts = [];
-        $plain = [
-            ['name', null],
-            ['address', null],
-            ['addressInfo', null],
-        ];
-        foreach ($plain as $field) {
-            $value = isset($party[$field[0]]) ? $party[$field[0]] : '';
+        foreach (['name', 'address', 'addressInfo'] as $field) {
+            $value = $party[$field] ?? '';
             if ($this->isFilled($value)) {
-                $parts[] = $field[0] === 'name'
+                $parts[] = $field === 'name'
                     ? '<strong>' . Html::encode($value) . '</strong>'
                     : Html::encode($value);
             }
         }
 
-        $labels = [
-            'vatCode' => 'Vat Code',
-            'taxCode' => 'Tax Code',
-            'sdi' => 'SDI',
-        ];
-        foreach ($labels as $field => $label) {
-            if ($this->isFilled(isset($party[$field]) ? $party[$field] : '')) {
+        foreach (['vatCode' => 'Vat Code', 'taxCode' => 'Tax Code', 'sdi' => 'SDI'] as $field => $label) {
+            if ($this->isFilled($party[$field] ?? '')) {
                 $parts[] = $this->extraLine(Yii::t('traits', $label), (string) $party[$field]);
             }
         }
 
-        if ($this->isFilled(isset($party['pec']) ? $party['pec'] : '')) {
+        if ($this->isFilled($party['pec'] ?? '')) {
             $parts[] = $this->extraLine(
                 Yii::t('traits', 'PEC'),
                 (string) $party['pec'],
@@ -261,18 +339,18 @@ class Invoice extends Widget
             );
         }
         foreach (['phone' => 'Phone', 'mobile' => 'Mobile', 'fax' => 'Fax'] as $field => $label) {
-            if ($this->isFilled(isset($party[$field]) ? $party[$field] : '')) {
+            if ($this->isFilled($party[$field] ?? '')) {
                 $parts[] = $this->extraLine(Yii::t('traits', $label), (string) $party[$field]);
             }
         }
-        if ($this->isFilled(isset($party['email']) ? $party['email'] : '')) {
+        if ($this->isFilled($party['email'] ?? '')) {
             $parts[] = $this->extraLine(
                 Yii::t('traits', 'Email'),
                 (string) $party['email'],
                 $this->normalizeEmailHref($party['email'])
             );
         }
-        if ($this->isFilled(isset($party['website']) ? $party['website'] : '')) {
+        if ($this->isFilled($party['website'] ?? '')) {
             $parts[] = $this->extraLine(
                 Yii::t('traits', 'Website'),
                 (string) $party['website'],
@@ -283,6 +361,11 @@ class Invoice extends Widget
         return implode('<br>', $parts);
     }
 
+    /**
+     * Renders invoice identifiers and payment metadata.
+     *
+     * @return string
+     */
     protected function renderMetaBlock()
     {
         $lines = [];
@@ -290,42 +373,53 @@ class Invoice extends Widget
             $lines[] = '<b>' . Html::encode(Yii::t('traits', 'Invoice') . ' #' . $this->invoiceNumber) . '</b>';
             $lines[] = '';
         }
+
         foreach ([
             'invoiceType' => ['traits', 'Type'],
             'invoiceOrderID' => ['traits', 'Order ID'],
             'invoicePaymentDue' => ['traits', 'Payment Due'],
         ] as $property => $label) {
             if ($this->isFilled($this->{$property})) {
-                $lines[] = '<b>' . Html::encode(Yii::t($label[0], $label[1])) . ':</b> ' . Html::encode($this->{$property});
+                $lines[] = '<b>' . Html::encode(Yii::t($label[0], $label[1])) . ':</b> '
+                    . Html::encode($this->{$property});
             }
         }
-        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice created')) . ':</b> ' . Html::encode((string) $this->invoiceDate);
-        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice sent')) . ':</b> ' . Html::encode((string) $this->invoiceSent);
-        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice paid')) . ':</b> ' . Html::encode((string) $this->invoicePaid);
+
+        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice created')) . ':</b> '
+            . Html::encode((string) $this->invoiceDate);
+        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice sent')) . ':</b> '
+            . Html::encode((string) $this->invoiceSent);
+        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice paid')) . ':</b> '
+            . Html::encode((string) $this->invoicePaid);
 
         if ($this->isFilled($this->invoicePaymentMethod) || $this->isFilled($this->invoicePaymentMethodCode)) {
             $method = (string) $this->invoicePaymentMethod;
             if ($this->isFilled($this->invoicePaymentMethodCode)) {
                 $method .= ($method !== '' ? ' ' : '') . '(' . $this->invoicePaymentMethodCode . ')';
             }
-            $lines[] = '<b>' . Html::encode(Yii::t('traits', 'Payment Method')) . ':</b> ' . Html::encode($method);
+            $lines[] = '<b>' . Html::encode(Yii::t('traits', 'Payment Method')) . ':</b> '
+                . Html::encode($method);
         }
+
         return implode('<br>', $lines);
     }
 
+    /**
+     * Normalizes supported invoice-line aliases into one stable shape.
+     *
+     * @param array $item Raw line definition.
+     * @return array{nr:string,name:string,description:string,qty:string,partial:string}
+     */
     public static function normalizeItem(array $item): array
     {
-        $hasName = (isset($item['name']) && $item['name'] !== '') || (isset($item['product']) && $item['product'] !== '');
-        if (isset($item['name']) && $item['name'] !== '') {
-            $name = (string) $item['name'];
-        } elseif (isset($item['product']) && $item['product'] !== '') {
-            $name = (string) $item['product'];
-        } else {
-            $name = (string) (isset($item['description']) ? $item['description'] : '');
-        }
+        $hasName = (!empty($item['name'])) || (!empty($item['product']));
+        $name = !empty($item['name'])
+            ? (string) $item['name']
+            : (!empty($item['product']) ? (string) $item['product'] : (string) ($item['description'] ?? ''));
         $description = $hasName
-            ? (string) (isset($item['detail']) ? $item['detail'] : (isset($item['description']) ? $item['description'] : ''))
-            : (string) (isset($item['detail']) ? $item['detail'] : '');
+            ? (string) ($item['detail'] ?? ($item['description'] ?? ''))
+            : (string) ($item['detail'] ?? '');
+
         $nr = '';
         foreach (['sort', 'nr', 'serial'] as $field) {
             if (isset($item[$field]) && $item[$field] !== '') {
@@ -333,6 +427,7 @@ class Invoice extends Widget
                 break;
             }
         }
+
         $partial = '';
         foreach (['subtotal', 'amount', 'product_price', 'unit_price', 'price'] as $field) {
             if (isset($item[$field])) {
@@ -340,15 +435,21 @@ class Invoice extends Widget
                 break;
             }
         }
+
         return [
             'nr' => $nr,
             'name' => $name,
             'description' => $description,
-            'qty' => (string) (isset($item['quantity']) ? $item['quantity'] : (isset($item['qty']) ? $item['qty'] : '')),
+            'qty' => (string) ($item['quantity'] ?? ($item['qty'] ?? '')),
             'partial' => $partial,
         ];
     }
 
+    /**
+     * Renders invoice line items.
+     *
+     * @return string
+     */
     protected function renderItemsTable()
     {
         $html = '<div class="row"><div class="col-12 table-responsive invoice-items"><table class="table table-striped">'
@@ -379,15 +480,23 @@ class Invoice extends Widget
                     . '</tr>';
             }
         }
+
         return $html . '</tbody></table></div></div>';
     }
 
+    /**
+     * Encodes a description while linkifying validated HTTP(S) candidates.
+     *
+     * @param string $description Description text.
+     * @return string
+     */
     protected function formatItemDescription(string $description): string
     {
         $description = trim($description);
         if ($description === '') {
             return '';
         }
+
         $pattern = '#(https?://[^\s<>"\']+|www\.[^\s<>"\']+|(?<![\w.@+-])(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}(?:/[^\s<>"\']*)?)#iu';
         if (!preg_match_all($pattern, $description, $matches, PREG_OFFSET_CAPTURE)) {
             return Html::encode($description);
@@ -402,26 +511,36 @@ class Invoice extends Widget
             if ($pos > $offset) {
                 $html .= Html::encode(substr($description, $offset, $pos - $offset));
             }
+
             $trailing = '';
             if (preg_match('/[.,;:!?)\]]+$/u', $raw, $trailMatch)) {
                 $trailing = $trailMatch[0];
                 $raw = substr($raw, 0, -strlen($trailing));
             }
+
             $href = $this->isSafeHttpUrlCandidate($raw) ? $this->normalizeWebsiteHref($raw) : null;
             $html .= $href !== null
-                ? Html::a(Html::encode($raw), $href, ['target' => '_blank', 'rel' => 'noopener noreferrer'])
+                ? Html::a(Html::encode($raw), $href, SafeHtml::externalLinkOptions('_blank'))
                 : Html::encode($raw);
             if ($trailing !== '') {
                 $html .= Html::encode($trailing);
             }
             $offset = $pos + strlen($match[0]);
         }
+
         if ($offset < $length) {
             $html .= Html::encode(substr($description, $offset));
         }
+
         return $html;
     }
 
+    /**
+     * Checks whether plain text resembles a web URL candidate.
+     *
+     * @param string $value Candidate text.
+     * @return bool
+     */
     protected function isSafeHttpUrlCandidate(string $value): bool
     {
         $value = trim($value);
@@ -431,11 +550,17 @@ class Invoice extends Widget
         if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $value) && !preg_match('#^https?://#i', $value)) {
             return false;
         }
+
         return preg_match('#^https?://#i', $value)
             || preg_match('#^www\.#i', $value)
             || preg_match('#^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}(?:/.*)?$#i', $value);
     }
 
+    /**
+     * Renders payment notes and invoice totals.
+     *
+     * @return string
+     */
     protected function renderTotalsRow()
     {
         $left = '';
@@ -444,7 +569,8 @@ class Invoice extends Widget
                 . '<p>' . Html::encode($this->invoicePaymentMethod) . '</p>';
         }
         if ($this->isFilled($this->invoiceNotes)) {
-            $left .= '<p class="text-muted invoice-notes">' . nl2br(Html::encode($this->invoiceNotes), false) . '</p>';
+            $left .= '<p class="text-muted invoice-notes">'
+                . nl2br(Html::encode($this->invoiceNotes), false) . '</p>';
         }
 
         $amountDueLabel = Yii::t('traits', 'Amount Due');
@@ -478,47 +604,56 @@ class Invoice extends Widget
             . '</div><div class="col-6">' . $right . '</div></div>';
     }
 
+    /**
+     * Normalizes an action target and additionally validates remote HTTP(S).
+     *
+     * @param mixed $url String URL or Yii route array.
+     * @return string
+     */
     protected function safeActionUrl($url)
     {
-        if (is_array($url)) {
-            return Url::to($url);
-        }
-        $url = trim((string) $url);
-        if ($url === '' || preg_match('#^\s*(?:javascript|data|vbscript):#i', $url)) {
+        $url = SafeHtml::linkUrl($url, '#');
+        if (preg_match('#^https?://#i', $url) && SafeHtml::httpUrl($url) === null) {
             return '#';
         }
-        if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $url) && !preg_match('#^https?://#i', $url)) {
-            return '#';
-        }
-        if (preg_match('#^https?://#i', $url) && !$this->isValidHttpUrl($url)) {
-            return '#';
-        }
+
         return $url;
     }
 
+    /**
+     * Renders print/PDF actions without inline JavaScript handlers.
+     *
+     * The default print control is handled by `assets/js/widgets.js` through
+     * the `data-cinghie-action="print"` attribute.
+     *
+     * @return string
+     */
     protected function renderActionsRow()
     {
         $printOptions = ['class' => 'btn btn-default'];
         if (!$this->isFilled($this->printUrl)) {
             $printUrl = '#';
-            $printOptions['onclick'] = 'window.print(); return false;';
+            $printOptions['data-cinghie-action'] = 'print';
+            $printOptions['role'] = 'button';
         } else {
             $printUrl = $this->safeActionUrl($this->printUrl);
             if (preg_match('#^https?://#i', $printUrl)) {
-                $printOptions['target'] = '_blank';
-                $printOptions['rel'] = 'noopener noreferrer';
+                $printOptions = array_merge($printOptions, SafeHtml::externalLinkOptions('_blank'));
             }
         }
 
         $html = '<div class="row no-print"><div class="col-12">'
-            . Html::a('<i class="fas fa-print"></i> ' . Html::encode(Yii::t('traits', 'Print')), $printUrl, $printOptions);
+            . Html::a(
+                '<i class="fas fa-print"></i> ' . Html::encode(Yii::t('traits', 'Print')),
+                $printUrl,
+                $printOptions
+            );
 
         if ($this->isFilled($this->pdfUrl)) {
             $pdfUrl = $this->safeActionUrl($this->pdfUrl);
-            $pdfOptions = ['class' => 'btn btn-primary float-right', 'style' => 'margin-right: 5px;'];
+            $pdfOptions = ['class' => 'btn btn-primary float-right mr-1'];
             if (preg_match('#^https?://#i', $pdfUrl)) {
-                $pdfOptions['target'] = '_blank';
-                $pdfOptions['rel'] = 'noopener noreferrer';
+                $pdfOptions = array_merge($pdfOptions, SafeHtml::externalLinkOptions('_blank'));
             }
             $html .= ' ' . Html::a(
                 '<i class="fas fa-download"></i> ' . Html::encode(Yii::t('traits', 'Generate PDF')),
