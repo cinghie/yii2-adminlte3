@@ -3,27 +3,31 @@
 namespace cinghie\adminlte3\widgets;
 
 use Yii;
-use yii\bootstrap4\Widget;
 use yii\helpers\Html;
 use yii\helpers\Url;
 
 /**
  * Legacy AdminLTE 3 card widget.
  *
- * @deprecated Prefer {@see Card}. Box remains for backward compatibility and
- *             for its convenience GridView/footer-button API.
+ * Box is now a backward-compatible facade over {@see Card}. New code should
+ * use Card directly; Box keeps its historical GridView and footer-button API.
+ *
+ * @deprecated Prefer {@see Card}.
  */
-class Box extends Widget
+class Box extends Card
 {
+    /** @var string|null Historical Box default wrapper. */
     public $wrapperClass = 'col-lg-6';
-    public $type;
-    public $outline = false;
-    public $title;
-    public $titleIcon;
+
+    /** @var string|null Historical Box default card type. */
+    public $type = self::TYPE_INFO;
+
+    /** @var bool Historical Box default. */
     public $collapsible = true;
+
+    /** @var bool Historical Box default. */
     public $removable = true;
-    public $body;
-    public $encodeBody = true;
+
     public $dataProvider;
     public $columns;
     public $footerLeftTitle;
@@ -32,8 +36,6 @@ class Box extends Widget
     public $footerRightTitle;
     public $footerRightUrl;
     public $footerRightType = 'secondary';
-    public $options = [];
-    public $bodyOptions = [];
 
     // Backward-compatible aliases.
     public $class;
@@ -44,114 +46,78 @@ class Box extends Widget
     public $buttonRightLink;
     public $buttonRightType;
 
+    /**
+     * Box does not use Card's begin()/end() output capture. It delegates the
+     * actual card markup to Card while adapting the legacy Box properties.
+     */
     public function init()
     {
         if ($this->wrapperClass === null && $this->class !== null) {
             $this->wrapperClass = $this->class;
         }
-        if ($this->type === null) {
-            $this->type = 'info';
-        }
-        $this->type = self::normalizeType($this->type);
+
+        $this->type = $this->normalizeType($this->type) ?: self::TYPE_INFO;
+
         if ($this->title === null) {
             $this->title = Yii::t('app', 'Card');
         }
+
         if ($this->footerLeftTitle === null && $this->buttonLeftTitle !== null) {
             $this->footerLeftTitle = $this->buttonLeftTitle;
             $this->footerLeftUrl = $this->buttonLeftLink !== null ? $this->buttonLeftLink : $this->footerLeftUrl;
             if ($this->buttonLeftType !== null) {
-                $this->footerLeftType = str_replace('btn-', '', $this->buttonLeftType);
+                $this->footerLeftType = $this->buttonLeftType;
             }
         }
+
         if ($this->footerRightTitle === null && $this->buttonRightTitle !== null) {
             $this->footerRightTitle = $this->buttonRightTitle;
             $this->footerRightUrl = $this->buttonRightLink !== null ? $this->buttonRightLink : $this->footerRightUrl;
             if ($this->buttonRightType !== null) {
-                $this->footerRightType = str_replace('btn-', '', $this->buttonRightType);
+                $this->footerRightType = $this->buttonRightType;
             }
         }
+
         $this->footerLeftType = self::normalizeButtonType($this->footerLeftType, 'primary');
         $this->footerRightType = self::normalizeButtonType($this->footerRightType, 'secondary');
-        parent::init();
     }
 
     public function run()
     {
-        $cardClasses = ['card'];
-        if ($this->type !== null) {
-            if ($this->outline) {
-                $cardClasses[] = 'card-outline';
-            }
-            $cardClasses[] = 'card-' . $this->type;
-        }
-        Html::addCssClass($this->options, $cardClasses);
+        $bodyHtml = $this->resolveLegacyBody();
+        Html::addCssClass($this->options, $this->resolveCardCssClasses());
 
-        $card = Html::tag(
-            'div',
-            $this->renderHeader() . $this->renderBody() . $this->renderFooter(),
-            $this->options
-        );
+        $html = $this->renderHeader();
+        $html .= parent::renderBody($bodyHtml);
+        $html .= $this->renderFooter();
+
+        $card = Html::tag('div', $html, $this->options);
 
         if ($this->wrapperClass !== null && $this->wrapperClass !== '') {
-            return Html::tag('div', $card, ['class' => self::sanitizeClass($this->wrapperClass)]);
+            return Html::tag('div', $card, ['class' => self::sanitizeClass($this->wrapperClass, '')]);
         }
+
         return $card;
     }
 
-    protected function renderHeader()
+    protected function resolveLegacyBody(): string
     {
-        if ($this->title === null || $this->title === false) {
+        if ($this->body !== null && $this->body !== '') {
+            if (is_string($this->body)) {
+                return $this->encodeBody ? Html::encode($this->body) : $this->body;
+            }
+            if (is_array($this->body) && isset($this->body['dataProvider'], $this->body['columns'])) {
+                return $this->renderGrid($this->body['dataProvider'], $this->body['columns']);
+            }
+
             return '';
         }
 
-        $titleContent = '';
-        if ($this->titleIcon !== null && $this->titleIcon !== '') {
-            $iconClass = self::sanitizeClass($this->titleIcon);
-            if ($iconClass !== '') {
-                $titleContent .= Html::tag('i', '', ['class' => $iconClass . ' mr-1']) . ' ';
-            }
-        }
-        $titleContent .= Html::encode((string) $this->title);
-        $title = Html::tag('h3', $titleContent, ['class' => 'card-title']);
-
-        $toolsContent = '';
-        if ($this->collapsible) {
-            $toolsContent .= Html::button(
-                Html::tag('i', '', ['class' => 'fas fa-minus']),
-                ['type' => 'button', 'class' => 'btn btn-tool', 'data-card-widget' => 'collapse', 'aria-label' => Yii::t('app', 'Collapse')]
-            );
-        }
-        if ($this->removable) {
-            $toolsContent .= Html::button(
-                Html::tag('i', '', ['class' => 'fas fa-times']),
-                ['type' => 'button', 'class' => 'btn btn-tool', 'data-card-widget' => 'remove', 'aria-label' => Yii::t('app', 'Remove')]
-            );
-        }
-        $tools = $toolsContent === '' ? '' : Html::tag('div', $toolsContent, ['class' => 'card-tools']);
-
-        return Html::tag('div', $title . $tools, ['class' => 'card-header']);
-    }
-
-    protected function renderBody()
-    {
-        $bodyOptions = $this->bodyOptions;
-        Html::addCssClass($bodyOptions, 'card-body');
-
-        if ($this->body !== null) {
-            if (is_string($this->body)) {
-                $content = $this->encodeBody ? Html::encode($this->body) : $this->body;
-            } elseif (is_array($this->body) && isset($this->body['dataProvider'], $this->body['columns'])) {
-                $content = $this->renderGrid($this->body['dataProvider'], $this->body['columns']);
-            } else {
-                $content = '';
-            }
-        } elseif ($this->dataProvider !== null && $this->columns !== null) {
-            $content = $this->renderGrid($this->dataProvider, $this->columns);
-        } else {
-            $content = Html::tag('p', Html::encode(Yii::t('app', 'No content.')), ['class' => 'card-text text-muted']);
+        if ($this->dataProvider !== null && $this->columns !== null) {
+            return $this->renderGrid($this->dataProvider, $this->columns);
         }
 
-        return Html::tag('div', $content, $bodyOptions);
+        return Html::tag('p', Html::encode(Yii::t('app', 'No content.')), ['class' => 'card-text text-muted']);
     }
 
     protected function renderGrid($dataProvider, array $columns)
@@ -170,6 +136,7 @@ class Box extends Widget
     {
         $hasLeft = $this->footerLeftTitle !== null && $this->footerLeftTitle !== '' && $this->footerLeftUrl !== null;
         $hasRight = $this->footerRightTitle !== null && $this->footerRightTitle !== '' && $this->footerRightUrl !== null;
+
         if (!$hasLeft && !$hasRight) {
             return '';
         }
@@ -194,41 +161,20 @@ class Box extends Widget
         if (is_array($url)) {
             return Url::to($url);
         }
+
         $url = (string) $url;
         if (preg_match('#^\s*(?:javascript|data|vbscript):#i', $url)) {
             return '#';
         }
+
         return $url;
-    }
-
-    protected static function sanitizeClass($value, $default = '')
-    {
-        if ($value === null || $value === '') {
-            return $default;
-        }
-        $sanitized = preg_replace('/[^A-Za-z0-9_\- ]/', '', (string) $value);
-        return $sanitized !== '' ? $sanitized : $default;
-    }
-
-    protected static function normalizeType($type)
-    {
-        if ($type === null || $type === '') {
-            return null;
-        }
-        $type = strtolower(trim((string) $type));
-        foreach (['box-', 'card-'] as $prefix) {
-            if (strpos($type, $prefix) === 0) {
-                $type = substr($type, strlen($prefix));
-            }
-        }
-        $allowed = ['primary', 'secondary', 'success', 'info', 'warning', 'danger', 'dark', 'light'];
-        return in_array($type, $allowed, true) ? $type : 'info';
     }
 
     protected static function normalizeButtonType($type, $default)
     {
         $type = strtolower(str_replace('btn-', '', trim((string) $type)));
         $allowed = ['primary', 'secondary', 'success', 'info', 'warning', 'danger', 'dark', 'light', 'link'];
+
         return in_array($type, $allowed, true) ? $type : $default;
     }
 }
