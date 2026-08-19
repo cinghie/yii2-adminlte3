@@ -21,7 +21,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 #### Security policy and CSP support
 - Added the internal `widgets/support/SafeHtml` policy helper for CSS/icon class normalization, safe link schemes, HTTP(S) validation, email links, and `_blank` hardening. The helper is intentionally internal so the security policy can evolve without creating a new public API contract.
 - Added `assets/js/widgets.js` for package-owned behavior that should not require inline JavaScript. The Invoice browser-print action now delegates through `data-cinghie-action="print"`.
-- Added CSP regression coverage for Invoice printing, MailboxRead attachments, SidebarMenu active submenus, and the external widget behavior script.
+- Added `assets/css/progress-widths.css` with bounded 0–100 percentage classes so `InfoBox` progress can retain its existing integer precision without emitting inline style attributes.
+- Added CSP regression coverage for Invoice printing, MailboxRead attachments, SidebarMenu active submenus, InfoBox progress rendering, and the external widget behavior script.
 - Added focused `SafeHtml` regression tests covering dangerous/unknown schemes, malformed and protocol-relative absolute targets, HTTP(S), email validation, CSS-class normalization, and external-link attributes.
 
 #### Code documentation
@@ -32,7 +33,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 #### Tests and continuous integration
 - Added PHPUnit configuration and a headless Yii web-application bootstrap for package tests.
-- Added regression coverage for `MailboxRead` HTML/XSS handling, attachment icon normalization, widget rendering hardening, `Invoice` URL policy, formatter isolation, and AdminLTE asset dependencies.
+- Added regression coverage for `MailboxRead` HTML/XSS handling, attachment icon normalization, widget rendering hardening, `Invoice` URL policy, formatter isolation, AdminLTE asset dependencies, and CSP-safe InfoBox progress clamping/rendering.
 - Added public-widget smoke coverage across the package and explicit backward-compatibility coverage for the legacy `Box` API.
 - Added `Yii2BestPracticesTest` to guard valid/used `Yii` imports and the normative PSR-12 class/function/constant import-group order without imposing a non-standard alphabetical rule.
 - Expanded `SidebarMenu` regression coverage for trailing default actions, module default routes, query-parameter matching, active parents, invisible items, headers, and similarly named non-matching routes.
@@ -48,6 +49,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `MailboxRead` attachment truncation moved from an inline style declaration to Bootstrap utility classes.
 - `SidebarMenu` active submenus rely on AdminLTE's `menu-open` state instead of emitting an inline `display` style.
 - `Invoice` no longer emits an inline `onclick` handler for browser printing and no longer uses an inline margin style on the PDF action.
+- `InfoBox::$progress` now maps its existing integer 0–100 normalized value to `cinghie-progress-width-*` package CSS classes instead of generating a `style="width: ...%"` attribute.
 
 #### Runtime requirements and package dependencies
 - Raised the supported runtime baseline to PHP 8.1+ and Yii 2.0.54+.
@@ -61,8 +63,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Removed the duplicate AdminLTE-packaged Bootstrap JavaScript bundle and rely on Yii Bootstrap 4 as the single Bootstrap JS source.
 - Removed the redundant direct `JqueryAsset` dependency where Yii already provides the dependency chain.
 - Made `appendTimestamp` behaviour consistent between minified and non-minified AdminLTE asset bundles.
-- Moved stable GridView, DetailView, Invoice, NavbarLogo, and NavbarUser presentation into cacheable package CSS where applicable.
-- `AdminLTEThemeAsset` publishes package-owned `js/*` in addition to CSS so CSP-friendly widget behavior can live outside generated HTML attributes.
+- Moved stable GridView, DetailView, Invoice, NavbarLogo, NavbarUser, and bounded InfoBox progress presentation into cacheable package CSS where applicable.
+- `AdminLTEThemeAsset` publishes package-owned `js/*` and the CSP-safe progress width stylesheet in addition to the existing theme/widget CSS.
 
 #### Widget architecture and behaviour
 - Converted legacy `Box` into a backward-compatible facade/subclass over `Card`, so card class resolution, header rendering, body markup, tool buttons, and class sanitization now have a single implementation path.
@@ -74,6 +76,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Updated README requirements, installation guidance, security defaults, asset behaviour, test instructions, and compatibility notes.
 - Removed the recommendation to install the package with a broad `@dev` stability flag.
 - Streamlined `UPDATE.md` so the dated processed section does not repeat “Processed” in every subsection/result.
+- Closed the remaining package-owned InfoBox `style-src-attr 'none'` CSP roadmap item after replacing inline progress widths with bounded package CSS classes.
 - Added future widget candidates for Calendar, ChartJS, dedicated 404, and dedicated 500 rendering, with security/test expectations recorded before public implementation.
 
 ### Fixed
@@ -102,10 +105,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `NavbarUser` right-footer action (normally logout) uses Yii POST semantics by default.
 - Hardened URL/class handling in `Box`, `SmallBox`, `NavbarUser`, and related widgets.
 
+#### InfoBox CSP compatibility
+- Removed the remaining package-owned dynamic `style` attribute from `InfoBox` progress rendering.
+- Preserved the existing integer clamp semantics for values below 0 and above 100, with regression coverage for 0, arbitrary in-range percentages, and 100.
+
 ### Performance
 
 - Reduced duplicated front-end payload by removing the second Bootstrap JS copy.
 - Reduced repeated inline CSS output by moving stable widget styles into cacheable package assets.
+- Kept InfoBox progress handling cacheable and JavaScript-free by using one bounded static stylesheet instead of per-instance generated CSS or runtime DOM mutation.
 - Reduced redundant asset dependencies in the main AdminLTE bundles.
 - Reduced maintenance duplication by routing legacy `Box` card rendering through `Card` and shared safety normalization through one internal helper.
 
