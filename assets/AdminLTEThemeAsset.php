@@ -47,7 +47,7 @@ class AdminLTEThemeAsset extends AssetBundle
     {
         parent::init();
 
-        if (defined('YII_DEBUG') && YII_DEBUG) {
+        if (defined('YII_DEBUG') && (bool) constant('YII_DEBUG')) {
             $this->publishOptions['forceCopy'] = true;
         }
     }
