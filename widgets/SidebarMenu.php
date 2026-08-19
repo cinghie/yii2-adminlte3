@@ -28,8 +28,13 @@ class SidebarMenu extends Menu
     /** @var string Template used for links that own a submenu. */
     public $parentLinkTemplate = '<a class="nav-link{activeClass}" href="{url}">{icon}<p>{label}<i class="right fas fa-angle-left"></i>{badge}</p></a>';
 
-    /** @var string Template used for nested menu lists. */
-    public $submenuTemplate = "\n<ul class=\"nav nav-treeview\" {show}>\n{items}\n</ul>\n";
+    /**
+     * @var string Template used for nested menu lists.
+     *
+     * Visibility is controlled by AdminLTE's `menu-open` class on the parent
+     * item rather than an inline `style` attribute, which is friendlier to CSP.
+     */
+    public $submenuTemplate = "\n<ul class=\"nav nav-treeview\">\n{items}\n</ul>\n";
 
     /** @var bool Whether an active child should activate its parent item. */
     public $activateParents = true;
@@ -234,7 +239,6 @@ class SidebarMenu extends Menu
             $menu = $this->renderItem($item);
             if (!empty($item['items'])) {
                 $menu .= strtr($this->submenuTemplate, [
-                    '{show}' => $item['active'] ? 'style="display: block;"' : '',
                     '{items}' => $this->renderItems($item['items']),
                 ]);
             }
