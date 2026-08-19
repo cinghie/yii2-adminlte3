@@ -72,11 +72,11 @@ jobs:
         run: composer update --prefer-lowest --prefer-stable --no-install --no-interaction --no-progress
 
       - name: Install lowest dependency set
-        run: composer install --no-interaction --prefer-dist --no-progress
+        run: composer install --no-interaction --prefer-source --no-progress
 
       - name: Verify lowest autoload surface
-        run: |
-          php -r "require 'vendor/autoload.php'; foreach (['yii\\bootstrap4\\Widget', 'kartik\\grid\\GridView', 'kartik\\detail\\DetailView', 'cinghie\\fontawesome\\FontAwesomeAsset'] as $class) { if (!class_exists($class)) { fwrite(STDERR, 'Missing class: ' . $class . PHP_EOL); exit(1); } }"
+        run: >-
+          php -r 'require "vendor/autoload.php"; foreach (["yii\\bootstrap4\\Widget", "kartik\\grid\\GridView", "kartik\\detail\\DetailView", "cinghie\\fontawesome\\FontAwesomeAsset"] as $class) { if (!class_exists($class)) { fwrite(STDERR, "Missing class: " . $class . PHP_EOL); exit(1); } }'
 
       - name: PHP syntax check
         run: find . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
