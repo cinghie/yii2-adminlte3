@@ -17,6 +17,19 @@
   object-fit: cover;
 }
 
+/* ChartJS */
+.cinghie-chartjs {
+  position: relative;
+  min-height: 250px;
+  height: 250px;
+  max-height: 250px;
+  max-width: 100%;
+}
+
+.cinghie-chartjs-canvas {
+  max-width: 100%;
+}
+
 /* GridView */
 .kv-grid-table thead th a,
 .kv-grid-table thead th a:hover,
