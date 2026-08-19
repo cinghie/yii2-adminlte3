@@ -13,7 +13,9 @@ use yii\helpers\Json;
  *
  * The widget only serializes chart configuration and optionally registers the
  * package's Chart.js assets. It does not accept executable JavaScript callbacks
- * through its data/configuration API.
+ * through its data/configuration API. By default it follows the AdminLTE 3
+ * ChartJS example structure: contextual card, card header/tools, card body,
+ * `.chart` wrapper, and a bounded 250px canvas presentation.
  */
 class ChartJS extends Widget
 {
@@ -35,6 +37,21 @@ class ChartJS extends Widget
     /** @var array HTML options for the canvas element. */
     public $canvasOptions = [];
 
+    /** @var bool Whether to wrap the chart in an AdminLTE card. */
+    public $card = true;
+
+    /** @var string|null Optional card title; defaults to the generic AdminLTE-style label. */
+    public $title = 'Chart';
+
+    /** @var string|null Contextual type for the optional card wrapper. */
+    public $cardType = Card::TYPE_PRIMARY;
+
+    /** @var bool Whether to expose the standard AdminLTE collapse tool. */
+    public $collapsible = true;
+
+    /** @var array HTML options for the optional outer card. */
+    public $cardOptions = [];
+
     /** @var bool Whether to register optional Chart.js assets automatically. */
     public $registerAssets = true;
 
@@ -55,6 +72,7 @@ class ChartJS extends Widget
 
         $canvasOptions = $this->canvasOptions;
         $canvasOptions['id'] = $canvasId;
+        Html::addCssClass($canvasOptions, 'cinghie-chartjs-canvas');
         $canvas = Html::tag('canvas', '', $canvasOptions);
 
         $htmlOptions = $this->options;
@@ -64,9 +82,21 @@ class ChartJS extends Widget
         $htmlOptions['data-cinghie-chartjs-type'] = $this->normalizeType($this->type);
         $htmlOptions['data-cinghie-chartjs-data'] = Json::encode($this->data);
         $htmlOptions['data-cinghie-chartjs-options'] = Json::encode($chartOptions);
-        Html::addCssClass($htmlOptions, 'chart-responsive cinghie-chartjs');
+        Html::addCssClass($htmlOptions, 'chart cinghie-chartjs');
 
-        return Html::tag('div', $canvas, $htmlOptions);
+        $chart = Html::tag('div', $canvas, $htmlOptions);
+        if (!$this->card) {
+            return $chart;
+        }
+
+        return Card::widget([
+            'title' => $this->title,
+            'type' => $this->cardType,
+            'collapsible' => $this->collapsible,
+            'body' => $chart,
+            'encodeBody' => false,
+            'options' => $this->cardOptions,
+        ]);
     }
 
     /**
