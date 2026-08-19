@@ -274,7 +274,10 @@ class Card extends Widget
         $title = $this->encodeTitle ? Html::encode((string) $this->title) : (string) $this->title;
         $icon = $this->icon !== null && $this->icon !== '' ? $this->icon : $this->titleIcon;
         if ($icon !== null && $icon !== '') {
-            $title = Html::tag('i', '', ['class' => self::sanitizeClass($icon)]) . ' ' . $title;
+            $iconClass = self::sanitizeClass($icon);
+            if ($iconClass !== '') {
+                $title = Html::tag('i', '', ['class' => $iconClass . ' mr-1']) . ' ' . $title;
+            }
         }
 
         return Html::tag('h3', $title, ['class' => 'card-title']);
