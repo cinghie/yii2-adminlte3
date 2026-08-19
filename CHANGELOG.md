@@ -33,10 +33,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added optional source/minified bundles for jQuery UI (`AdminLTEJqueryUiAsset`), Moment + Tempus Dominus (`AdminLTEDateTimeAsset`), and iCheck Bootstrap (`AdminLTEIcheckAsset`).
 - Added asset graph tests that verify source/minified parity, dependency equivalence, declared vendor-file existence, core payload size, and historical aggregate ordering.
 
-#### Code documentation
+#### Code documentation and quality gates
 - Added `docs/CODING_STYLE.md` with public Yii/PHPDoc, trust-boundary, security, CSP, and PSR-12 conventions for contributors.
 - Clarified that PSR-12 defines import-block ordering but does not mandate alphabetical sorting within each import group.
 - Added a documentation guard requiring every public widget class to expose a non-empty class-level PHPDoc block.
+- Added `SourceMetadataTest` to prevent obsolete per-file package/version/company/GPL metadata from being reintroduced.
+- Added PHPStan 2.x at level 5 and PHP_CodeSniffer 4 with PSR-12 configuration.
+- Added Composer `analyse`, `cs`, and `quality` scripts plus a dedicated blocking PHP 8.3 `quality` GitHub Actions workflow.
 
 #### Tests and continuous integration
 - Added PHPUnit configuration and a headless Yii web-application bootstrap for package tests.
@@ -79,11 +82,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Card, Box, ContentHeader, SidebarSearch, SidebarToggle, SidebarUser, and Invoice now use `adminlte3` for package-owned UI strings instead of unrelated `app`, `traits`, or `crm` catalogs.
 - `Timeline` retains its dynamic `traits` lookup only for externally supplied action keys as an explicit compatibility fallback.
 
+#### Source metadata and coding standards
+- Removed stale per-file `@package`, hardcoded version, historical company metadata, and GPL license text so the repository `LICENSE` and Composer metadata are authoritative.
+- Normalized affected source headers without duplicating release/version information that belongs in Git tags and Composer metadata.
+- PHPStan bootstraps Yii explicitly and treats legacy PHPDoc declarations conservatively while keeping level 5 error-free on the supported scope.
+- PHPCS treats the PSR-12 120-character line recommendation as non-blocking and keeps narrow, documented transitional formatting exceptions for legacy multi-line control structures; `Timeline` remains excluded from the initial quality scope because it imports optional external domain models.
+
 #### Documentation
 - Updated README requirements, installation guidance, modular asset registration, script-loading policy, security defaults, test instructions, and compatibility notes.
 - Removed the recommendation to install the package with a broad `@dev` stability flag.
 - Streamlined `UPDATE.md` so the dated processed section does not repeat “Processed” in every subsection/result.
-- Closed the package-owned InfoBox CSP item, widget-option normalization, translation ownership, optional asset splitting, source/minified parity, and `defer`/preload evaluation roadmap items.
+- Closed the package-owned InfoBox CSP item, widget-option normalization, translation ownership, optional asset splitting, source/minified parity, `defer`/preload evaluation, source-metadata cleanup, and static-analysis/coding-standard roadmap items.
 - Added future widget candidates for Calendar, ChartJS, dedicated 404, and dedicated 500 rendering.
 
 ### Fixed
@@ -119,7 +128,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 ### Validation
 
 - CI targets every PHP minor from 8.1 through 8.5.
-- Every CI job performs strict Composer validation, clean dependency installation, syntax linting, and PHPUnit regression tests.
+- Every runtime CI job performs strict Composer validation, clean dependency installation, syntax linting, and PHPUnit regression tests.
+- A separate blocking PHP 8.3 quality job performs PHPStan level 5 analysis and PHP_CodeSniffer/PSR-12 checks.
 
 ## 2026-07-30
 
