@@ -16,16 +16,9 @@ use yii\helpers\Url;
  */
 class Box extends Card
 {
-    /** @var string|null Historical Box default wrapper. */
     public $wrapperClass = 'col-lg-6';
-
-    /** @var string|null Historical Box default card type. */
     public $type = self::TYPE_INFO;
-
-    /** @var bool Historical Box default. */
     public $collapsible = true;
-
-    /** @var bool Historical Box default. */
     public $removable = true;
 
     public $dataProvider;
@@ -47,12 +40,12 @@ class Box extends Card
     public $buttonRightType;
 
     /**
-     * Box does not use Card's begin()/end() output capture. It delegates the
-     * actual card markup to Card while adapting the legacy Box properties.
+     * Box intentionally skips Card's output-buffer initialization because the
+     * legacy widget API is widget()-only. Rendering itself is delegated to Card.
      */
     public function init()
     {
-        if ($this->wrapperClass === null && $this->class !== null) {
+        if ($this->class !== null) {
             $this->wrapperClass = $this->class;
         }
 
