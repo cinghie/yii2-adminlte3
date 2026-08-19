@@ -101,16 +101,22 @@ Third-party AdminLTE/Kartik plugins may have additional CSP requirements and sho
 
 `Box` is retained for backward compatibility but is deprecated. Prefer `Card` for new code; `Box` remains useful where its legacy GridView/footer-button API is required.
 
-## Tests
+## Tests and quality checks
 
 The repository includes PHPUnit tests and a GitHub Actions matrix for every supported PHP minor from 8.1 through 8.5. Locally:
 
 ```bash
 composer install
 composer test
+composer analyse
+composer cs
+# or run both static checks
+composer quality
 ```
 
-CI also runs strict Composer validation and PHP syntax checks. Security/CSP, Yii/PSR source-hygiene, asset parity/order, and public-widget documentation guards are part of the normal regression suite.
+CI also runs strict Composer validation and PHP syntax checks. Security/CSP, Yii/PSR source-hygiene, asset parity/order, source-metadata, and public-widget documentation guards are part of the normal regression suite. A separate blocking PHP 8.3 quality workflow runs PHPStan level 5 and PHP_CodeSniffer with PSR-12.
+
+`Timeline` is intentionally outside the initial PHPStan/PHPCS scope because it integrates optional external domain model packages that are not runtime dependencies of this package. The exclusion is explicit and should be removed only when that legacy integration boundary is redesigned or its optional dependencies can be modelled safely.
 
 ## Contributing
 
