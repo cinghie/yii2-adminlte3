@@ -34,7 +34,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added PHPUnit configuration and a headless Yii web-application bootstrap for package tests.
 - Added regression coverage for `MailboxRead` HTML/XSS handling, attachment icon normalization, widget rendering hardening, `Invoice` URL policy, formatter isolation, and AdminLTE asset dependencies.
 - Added public-widget smoke coverage across the package and explicit backward-compatibility coverage for the legacy `Box` API.
-- Added `Yii2BestPracticesTest` to guard four-space PHP indentation, valid/used `Yii` imports, and the normative PSR-12 class/function/constant import-group order.
+- Added `Yii2BestPracticesTest` to guard valid/used `Yii` imports and the normative PSR-12 class/function/constant import-group order without imposing a non-standard alphabetical rule.
 - Expanded `SidebarMenu` regression coverage for trailing default actions, module default routes, query-parameter matching, active parents, invisible items, headers, and similarly named non-matching routes.
 - Expanded GitHub Actions validation to every PHP minor from 8.1 through 8.5 with strict Composer validation, clean dependency resolution, PHP syntax linting, and PHPUnit execution.
 - Added test-only Asset Packagist aliases, runtime asset directories, request context, GridView module configuration, Bootstrap 4 configuration, and local translation sources required by Kartik widgets under CLI.
@@ -79,7 +79,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 ### Fixed
 
 #### Mail rendering security
-- `MailboxRead` HTML-encodes message bodies by default.
+- `MailboxRead` now HTML-encodes message bodies by default.
 - HTML mail rendering is explicit (`encodeMailBody=false`) and remains purified by default through Yii HTML Purifier.
 - Attachment icons are treated as validated CSS icon classes instead of arbitrary HTML fragments.
 - Dangerous attachment and image URL schemes are rejected.
