@@ -59,9 +59,11 @@ Security-sensitive URL, HTTP(S), email, CSS-class, icon-class and external-link 
 
 ## Content Security Policy
 
-Package-owned markup avoids inline JavaScript where practical. The default Invoice print action uses `data-cinghie-action="print"` and is handled by the published `assets/js/widgets.js` file; active SidebarMenu state uses AdminLTE classes instead of an inline display style. Static Navbar and Mailbox presentation is also kept in package CSS/Bootstrap utility classes.
+Package-owned markup avoids inline JavaScript and inline style attributes where package assets can express the same behavior safely. The default Invoice print action uses `data-cinghie-action="print"` and is handled by the published `assets/js/widgets.js` file; active SidebarMenu state uses AdminLTE classes instead of an inline display style. Static Navbar and Mailbox presentation is kept in package CSS/Bootstrap utility classes.
 
-`InfoBox::$progress` currently retains one dynamic inline width so arbitrary progress values from 0–100 remain backward compatible. Applications enforcing `style-src-attr 'none'` can omit the progress indicator until a non-breaking alternative is introduced. Third-party AdminLTE/Kartik plugins may have additional CSP requirements and should be tested as part of the complete application asset stack.
+`InfoBox::$progress` keeps the existing integer 0–100 behavior without inline styles: normalized values map to package-owned `cinghie-progress-width-*` classes published through `AdminLTEThemeAsset`. This allows package-owned InfoBox markup to work with strict `style-src-attr 'none'` policies while preserving backward-compatible percentage semantics.
+
+Third-party AdminLTE/Kartik plugins may have additional CSP requirements and should be tested as part of the complete application asset stack.
 
 `Box` is retained for backward compatibility but is deprecated. Prefer `Card` for new code; `Box` remains useful where its legacy GridView/footer-button API is required.
 
