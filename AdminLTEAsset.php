@@ -4,7 +4,6 @@ namespace cinghie\adminlte3;
 
 use cinghie\adminlte3\assets\AdminLTEThemeAsset;
 use cinghie\fontawesome\FontAwesomeAsset;
-use cinghie\ionicons\IoniconsAsset;
 use yii\bootstrap4\BootstrapAsset;
 use yii\web\AssetBundle;
 use yii\web\YiiAsset;
@@ -34,7 +33,6 @@ class AdminLTEAsset extends AssetBundle
         YiiAsset::class,
         BootstrapAsset::class,
         FontAwesomeAsset::class,
-        IoniconsAsset::class,
     ];
 
     public function registerAssetFiles($view)
