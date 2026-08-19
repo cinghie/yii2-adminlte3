@@ -82,13 +82,21 @@ final class AssetBundleTest extends TestCase
 
     public function testAdditionalWidgetInitializersKeepHeavyPluginsOptional(): void
     {
-        self::assertSame([AdminLTECalendarMinifyAsset::class], (new CalendarWidgetAsset())->depends);
-        self::assertSame([
-            AdminLTEChartJSMinifyAsset::class,
-            AdminLTEThemeAsset::class,
-        ], (new ChartJSWidgetAsset())->depends);
-        self::assertContains('js/calendar.js', (new CalendarWidgetAsset())->js);
-        self::assertContains('js/chartjs.js', (new ChartJSWidgetAsset())->js);
+        $calendar = new CalendarWidgetAsset();
+        $chart = new ChartJSWidgetAsset();
+
+        self::assertSame([AdminLTECalendarMinifyAsset::class], $calendar->depends);
+        self::assertSame([AdminLTEChartJSMinifyAsset::class], $chart->depends);
+        self::assertContains('js/calendar.js', $calendar->js);
+        self::assertContains('js/chartjs.js', $chart->js);
+        self::assertContains('css/chartjs.css', $chart->css);
+        self::assertSame([], (new AdminLTEChartJSAsset())->css);
+        self::assertSame([], (new AdminLTEChartJSMinifyAsset())->css);
+
+        $chartCss = file_get_contents(dirname(__DIR__) . '/assets/css/chartjs.css');
+        self::assertIsString($chartCss);
+        self::assertStringContainsString('height: 250px;', $chartCss);
+        self::assertStringContainsString('max-width: 100%;', $chartCss);
     }
 
     public function testAggregateKeepsHistoricalPluginOrderAndCoreIsSmaller(): void
