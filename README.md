@@ -17,13 +17,13 @@ Asset bundle and widgets for AdminLTE 3 on Yii 2.
 
 ## Installation
 
-Until the first stable release is tagged, install the development branch explicitly rather than using the broad `@dev` stability flag:
+Install the stable 1.x release with Composer:
 
 ```bash
-composer require cinghie/yii2-adminlte3:dev-main
+composer require cinghie/yii2-adminlte3:^1.0
 ```
 
-For production deployments, prefer a tagged stable release when available, or pin the exact commit you have validated.
+For reproducible production deployments, commit the generated `composer.lock` in applications and deploy from the validated lock file. Development branches such as `dev-main` are not recommended for production use.
 
 ## Configuration
 
