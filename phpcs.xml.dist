@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<ruleset name="yii2-adminlte3">
+    <description>PSR-12 coding standards for the yii2-adminlte3 public package.</description>
+
+    <file>AdminLTEAsset.php</file>
+    <file>AdminLTEMinifyAsset.php</file>
+    <file>AdminLTECoreAsset.php</file>
+    <file>AdminLTECoreMinifyAsset.php</file>
+    <file>AdminLTEJqueryUiAsset.php</file>
+    <file>AdminLTEJqueryUiMinifyAsset.php</file>
+    <file>AdminLTEDateTimeAsset.php</file>
+    <file>AdminLTEDateTimeMinifyAsset.php</file>
+    <file>AdminLTEIcheckAsset.php</file>
+    <file>AdminLTEIcheckMinifyAsset.php</file>
+    <file>assets</file>
+    <file>widgets</file>
+
+    <exclude-pattern>*/widgets/Timeline.php</exclude-pattern>
+
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+
+    <rule ref="PSR12"/>
+</ruleset>
