@@ -2,6 +2,8 @@
 
 `Calendar` renders a FullCalendar container and JSON-encodes event data and configuration into HTML data attributes. By default it registers the package's optional minified FullCalendar asset set only on pages where the widget is used.
 
+The default markup follows the AdminLTE 3 Calendar example: a `card card-primary` wrapper with a `card-body p-0` around the calendar. Set `card` to `false` when the application wants to compose the bare calendar container itself; `cardType` and `cardOptions` customize the default wrapper without changing the FullCalendar data contract.
+
 ```php
 use cinghie\adminlte3\widgets\Calendar;
 
