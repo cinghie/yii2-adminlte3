@@ -3,7 +3,7 @@
 namespace cinghie\adminlte3\widgets;
 
 use cinghie\adminlte3\widgets\support\SafeHtml;
-use Yii;
+use cinghie\adminlte3\widgets\support\Translation;
 use yii\base\Widget;
 use yii\helpers\Html;
 
@@ -127,7 +127,7 @@ class Invoice extends Widget
         if ($this->isFilled($this->invoiceDate)) {
             $date = Html::tag(
                 'small',
-                Html::encode(Yii::t('traits', 'Date') . ': ' . $this->invoiceDate),
+                Html::encode(Translation::t('Date') . ': ' . $this->invoiceDate),
                 ['class' => 'invoice-date']
             );
         }
@@ -196,7 +196,7 @@ class Invoice extends Widget
     {
         return '<div class="row invoice-info">'
             . '<div class="col-sm-4 invoice-col"><span class="invoice-col-label">'
-            . Html::encode(Yii::t('traits', 'From')) . '</span><address>'
+            . Html::encode(Translation::t('From')) . '</span><address>'
             . $this->renderAddressBlock([
                 'name' => $this->invoiceFromName,
                 'address' => $this->invoiceFromAddress,
@@ -211,7 +211,7 @@ class Invoice extends Widget
                 'website' => $this->invoiceFromWebsite,
             ]) . '</address></div>'
             . '<div class="col-sm-4 invoice-col"><span class="invoice-col-label">'
-            . Html::encode(Yii::t('traits', 'To')) . '</span><address>'
+            . Html::encode(Translation::t('To')) . '</span><address>'
             . $this->renderAddressBlock([
                 'name' => $this->invoiceToName,
                 'address' => $this->invoiceToAddress,
@@ -327,32 +327,32 @@ class Invoice extends Widget
 
         foreach (['vatCode' => 'Vat Code', 'taxCode' => 'Tax Code', 'sdi' => 'SDI'] as $field => $label) {
             if ($this->isFilled($party[$field] ?? '')) {
-                $parts[] = $this->extraLine(Yii::t('traits', $label), (string) $party[$field]);
+                $parts[] = $this->extraLine(Translation::t($label), (string) $party[$field]);
             }
         }
 
         if ($this->isFilled($party['pec'] ?? '')) {
             $parts[] = $this->extraLine(
-                Yii::t('traits', 'PEC'),
+                Translation::t('PEC'),
                 (string) $party['pec'],
                 $this->normalizeEmailHref($party['pec'])
             );
         }
         foreach (['phone' => 'Phone', 'mobile' => 'Mobile', 'fax' => 'Fax'] as $field => $label) {
             if ($this->isFilled($party[$field] ?? '')) {
-                $parts[] = $this->extraLine(Yii::t('traits', $label), (string) $party[$field]);
+                $parts[] = $this->extraLine(Translation::t($label), (string) $party[$field]);
             }
         }
         if ($this->isFilled($party['email'] ?? '')) {
             $parts[] = $this->extraLine(
-                Yii::t('traits', 'Email'),
+                Translation::t('Email'),
                 (string) $party['email'],
                 $this->normalizeEmailHref($party['email'])
             );
         }
         if ($this->isFilled($party['website'] ?? '')) {
             $parts[] = $this->extraLine(
-                Yii::t('traits', 'Website'),
+                Translation::t('Website'),
                 (string) $party['website'],
                 $this->normalizeWebsiteHref((string) $party['website'])
             );
@@ -370,26 +370,26 @@ class Invoice extends Widget
     {
         $lines = [];
         if ($this->isFilled($this->invoiceNumber)) {
-            $lines[] = '<b>' . Html::encode(Yii::t('traits', 'Invoice') . ' #' . $this->invoiceNumber) . '</b>';
+            $lines[] = '<b>' . Html::encode(Translation::t('Invoice') . ' #' . $this->invoiceNumber) . '</b>';
             $lines[] = '';
         }
 
         foreach ([
-            'invoiceType' => ['traits', 'Type'],
-            'invoiceOrderID' => ['traits', 'Order ID'],
-            'invoicePaymentDue' => ['traits', 'Payment Due'],
+            'invoiceType' => 'Type',
+            'invoiceOrderID' => 'Order ID',
+            'invoicePaymentDue' => 'Payment Due',
         ] as $property => $label) {
             if ($this->isFilled($this->{$property})) {
-                $lines[] = '<b>' . Html::encode(Yii::t($label[0], $label[1])) . ':</b> '
+                $lines[] = '<b>' . Html::encode(Translation::t($label)) . ':</b> '
                     . Html::encode($this->{$property});
             }
         }
 
-        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice created')) . ':</b> '
+        $lines[] = '<b>' . Html::encode(Translation::t('Invoice created')) . ':</b> '
             . Html::encode((string) $this->invoiceDate);
-        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice sent')) . ':</b> '
+        $lines[] = '<b>' . Html::encode(Translation::t('Invoice sent')) . ':</b> '
             . Html::encode((string) $this->invoiceSent);
-        $lines[] = '<b>' . Html::encode(Yii::t('crm', 'Invoice paid')) . ':</b> '
+        $lines[] = '<b>' . Html::encode(Translation::t('Invoice paid')) . ':</b> '
             . Html::encode((string) $this->invoicePaid);
 
         if ($this->isFilled($this->invoicePaymentMethod) || $this->isFilled($this->invoicePaymentMethodCode)) {
@@ -397,7 +397,7 @@ class Invoice extends Widget
             if ($this->isFilled($this->invoicePaymentMethodCode)) {
                 $method .= ($method !== '' ? ' ' : '') . '(' . $this->invoicePaymentMethodCode . ')';
             }
-            $lines[] = '<b>' . Html::encode(Yii::t('traits', 'Payment Method')) . ':</b> '
+            $lines[] = '<b>' . Html::encode(Translation::t('Payment Method')) . ':</b> '
                 . Html::encode($method);
         }
 
@@ -454,17 +454,17 @@ class Invoice extends Widget
     {
         $html = '<div class="row"><div class="col-12 table-responsive invoice-items"><table class="table table-striped">'
             . '<thead><tr>'
-            . '<th class="text-center">' . Html::encode(Yii::t('crm', 'Nr.')) . '</th>'
-            . '<th class="text-center">' . Html::encode(Yii::t('traits', 'Name')) . '</th>'
-            . '<th class="text-center">' . Html::encode(Yii::t('traits', 'Description')) . '</th>'
-            . '<th class="text-center">' . Html::encode(Yii::t('traits', 'Quantity')) . '</th>'
-            . '<th class="text-center">' . Html::encode(Yii::t('crm', 'Partial price')) . '</th>'
+            . '<th class="text-center">' . Html::encode(Translation::t('Nr.')) . '</th>'
+            . '<th class="text-center">' . Html::encode(Translation::t('Name')) . '</th>'
+            . '<th class="text-center">' . Html::encode(Translation::t('Description')) . '</th>'
+            . '<th class="text-center">' . Html::encode(Translation::t('Quantity')) . '</th>'
+            . '<th class="text-center">' . Html::encode(Translation::t('Partial price')) . '</th>'
             . '</tr></thead><tbody>';
 
         $items = is_array($this->invoiceItems) ? $this->invoiceItems : [];
         if ($items === []) {
             $html .= '<tr><td colspan="5" class="text-center text-muted">'
-                . Html::encode(Yii::t('traits', 'No line items')) . '</td></tr>';
+                . Html::encode(Translation::t('No line items')) . '</td></tr>';
         } else {
             foreach ($items as $item) {
                 if (!is_array($item)) {
@@ -565,7 +565,7 @@ class Invoice extends Widget
     {
         $left = '';
         if ($this->isFilled($this->invoicePaymentMethod)) {
-            $left .= '<p class="lead">' . Html::encode(Yii::t('traits', 'Payment Methods')) . ':</p>'
+            $left .= '<p class="lead">' . Html::encode(Translation::t('Payment Methods')) . ':</p>'
                 . '<p>' . Html::encode($this->invoicePaymentMethod) . '</p>';
         }
         if ($this->isFilled($this->invoiceNotes)) {
@@ -573,24 +573,24 @@ class Invoice extends Widget
                 . nl2br(Html::encode($this->invoiceNotes), false) . '</p>';
         }
 
-        $amountDueLabel = Yii::t('traits', 'Amount Due');
+        $amountDueLabel = Translation::t('Amount Due');
         if ($this->isFilled($this->invoicePaymentDue)) {
             $amountDueLabel .= ' ' . $this->invoicePaymentDue;
         } elseif ($this->isFilled($this->invoicePaid)) {
-            $amountDueLabel = Yii::t('traits', 'Paid') . ' ' . $this->invoicePaid;
+            $amountDueLabel = Translation::t('Paid') . ' ' . $this->invoicePaid;
         }
 
-        $taxLabel = Html::encode(Yii::t('traits', 'Tax'));
+        $taxLabel = Html::encode(Translation::t('Tax'));
         if ($this->isFilled($this->invoiceTaxLabel)) {
             $taxLabel .= ' (' . Html::encode($this->invoiceTaxLabel) . ')';
         }
 
         $rows = '';
         foreach ([
-            [$this->invoiceSubtotal, Html::encode(Yii::t('traits', 'Subtotal'))],
+            [$this->invoiceSubtotal, Html::encode(Translation::t('Subtotal'))],
             [$this->invoiceTax, $taxLabel],
-            [$this->invoiceShipping, Html::encode(Yii::t('traits', 'Shipping'))],
-            [$this->invoiceTotal, Html::encode(Yii::t('traits', 'Total'))],
+            [$this->invoiceShipping, Html::encode(Translation::t('Shipping'))],
+            [$this->invoiceTotal, Html::encode(Translation::t('Total'))],
         ] as $row) {
             if ($this->isFilled($row[0])) {
                 $rows .= '<tr><th>' . $row[1] . ':</th><td>' . Html::encode($row[0]) . '</td></tr>';
@@ -644,7 +644,7 @@ class Invoice extends Widget
 
         $html = '<div class="row no-print"><div class="col-12">'
             . Html::a(
-                '<i class="fas fa-print"></i> ' . Html::encode(Yii::t('traits', 'Print')),
+                '<i class="fas fa-print"></i> ' . Html::encode(Translation::t('Print')),
                 $printUrl,
                 $printOptions
             );
@@ -656,7 +656,7 @@ class Invoice extends Widget
                 $pdfOptions = array_merge($pdfOptions, SafeHtml::externalLinkOptions('_blank'));
             }
             $html .= ' ' . Html::a(
-                '<i class="fas fa-download"></i> ' . Html::encode(Yii::t('traits', 'Generate PDF')),
+                '<i class="fas fa-download"></i> ' . Html::encode(Translation::t('Generate PDF')),
                 $pdfUrl,
                 $pdfOptions
             );
