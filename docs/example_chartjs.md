@@ -2,11 +2,14 @@
 
 `ChartJS` renders a deterministic canvas and JSON-encodes chart data/configuration into HTML data attributes. By default it registers the package's optional minified Chart.js asset only on pages where the widget is used.
 
+The default presentation mirrors the AdminLTE 3 ChartJS examples: a contextual card with header/title, collapse tool, card body, `.chart` wrapper, and a 250px responsive canvas. The fixed demo height is provided by package CSS rather than an inline `style` attribute. Set `card` to `false` for a bare chart, or customize `title`, `cardType`, `collapsible`, and `cardOptions` when composing a different AdminLTE card variant.
+
 ```php
 use cinghie\adminlte3\widgets\ChartJS;
 
 echo ChartJS::widget([
     'id' => 'orders-chart',
+    'title' => 'Orders Chart',
     'type' => 'line',
     'data' => [
         'labels' => ['Mon', 'Tue', 'Wed'],
