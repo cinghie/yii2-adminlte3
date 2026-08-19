@@ -1,37 +1,37 @@
 Navbar Button Example
-=======================
+=====================
 
-## Default Value
+## Default value
 
-```
+```php
 <?php use cinghie\adminlte3\widgets\NavbarButton; ?>
 
-<!-- logo -->
 <?= NavbarButton::widget() ?>
 ```
 
-## Custom Value to external link
+## External link
 
-```
-<?php use cinghie\adminlte3\widgets\NavbarButton; ?>
-
-<!-- navbar button to external link -->
+```php
 <?= NavbarButton::widget([
-    'title' => '<i class="fa fa-external-link"></i>',
-    'option' => ['class' => 'nav-link', 'target' => '_blank'],
-    'url' => 'https://www.google.com'
+    'title' => '<i class="fas fa-external-link-alt"></i>',
+    'options' => ['class' => 'nav-link'],
+    'target' => '_blank',
+    'url' => 'https://www.example.com',
 ]) ?>
 ```
 
-## Custom Value to url with method post
+`target="_blank"` is normalized by the package and receives `rel="noopener noreferrer"`.
 
-```
-<?php use cinghie\adminlte3\widgets\NavbarButton; ?>
+## POST action
 
-<!-- navbar button to url with method post -->
+```php
 <?= NavbarButton::widget([
-    'title' => '<i class="fa fa-power-off"></i>',
-    'option' => ['class' => 'nav-link','data-method' => 'post'],
-    'url' => Url::to(['/user/security/logout'])
+    'title' => '<i class="fas fa-power-off"></i>',
+    'options' => ['class' => 'nav-link', 'data-method' => 'post'],
+    'url' => ['/user/security/logout'],
 ]) ?>
 ```
+
+## Backward compatibility
+
+`option` remains available as a deprecated alias for `options`. When both are supplied, canonical `options` keys win while non-conflicting legacy keys are retained.
