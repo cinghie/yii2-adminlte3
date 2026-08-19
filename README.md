@@ -43,19 +43,25 @@ use cinghie\adminlte3\AdminLTEMinifyAsset;
 AdminLTEMinifyAsset::register($this);
 ```
 
-Both bundles register `cinghie\adminlte3\assets\AdminLTEThemeAsset`. Static GridView, DetailView and Invoice styles are shipped by the package under `assets/css/`, so they can be cached by the browser rather than emitted inline by each widget.
-
-Ionicons are not registered by the core AdminLTE asset bundle. The last published `cinghie/yii2-ionicons` release depends on Yii Bootstrap 3, so applications that need Ionicons should register a Bootstrap-4-compatible Ionicons asset separately rather than mixing Bootstrap generations.
+Both bundles register `cinghie\adminlte3\assets\AdminLTEThemeAsset`. Stable widget styles and package-owned behavior are shipped under `assets/css/` and `assets/js/`, allowing browsers to cache them rather than requiring repeated inline CSS/JavaScript from each widget.
 
 ## Security defaults
 
 `MailboxRead` HTML-encodes message bodies by default. To render an HTML email explicitly, set `encodeMailBody` to `false`; `purifyMailBody` remains enabled by default and passes the content through Yii's HTML purifier.
 
-Attachment icons are treated as CSS classes rather than arbitrary HTML, and dangerous attachment URL schemes are rejected.
+Attachment icons are treated as CSS classes rather than arbitrary HTML, and dangerous or unsupported explicit attachment URL schemes are rejected.
 
 `Invoice` validates website and email links. Remote company logos are disabled by default to avoid unintended third-party requests; set `allowRemoteCompanyLogo` to `true` only for trusted HTTP(S) logo URLs.
 
 `NavbarUser` renders the right footer action (normally logout) with `data-method="post"` by default. This preserves Yii's POST/CSRF logout semantics when Yii JavaScript is active; override `footerRightOptions` if the action is not a logout.
+
+Security-sensitive URL, HTTP(S), email, CSS-class, icon-class and external-link normalization is centralized in the package-internal `widgets/support/SafeHtml` helper. It is intentionally not a public extension API.
+
+## Content Security Policy
+
+Package-owned markup avoids inline JavaScript where practical. The default Invoice print action uses `data-cinghie-action="print"` and is handled by the published `assets/js/widgets.js` file; active SidebarMenu state uses AdminLTE classes instead of an inline display style. Static Navbar and Mailbox presentation is also kept in package CSS/Bootstrap utility classes.
+
+`InfoBox::$progress` currently retains one dynamic inline width so arbitrary progress values from 0–100 remain backward compatible. Applications enforcing `style-src-attr 'none'` can omit the progress indicator until a non-breaking alternative is introduced. Third-party AdminLTE/Kartik plugins may have additional CSP requirements and should be tested as part of the complete application asset stack.
 
 `Box` is retained for backward compatibility but is deprecated. Prefer `Card` for new code; `Box` remains useful where its legacy GridView/footer-button API is required.
 
@@ -68,7 +74,11 @@ composer install
 composer test
 ```
 
-CI also runs strict Composer validation and PHP syntax checks.
+CI also runs strict Composer validation and PHP syntax checks. Security/CSP and public-widget documentation guards are part of the normal regression suite.
+
+## Contributing
+
+Contributor-facing PHPDoc, Yii security, CSP, and PSR-12 conventions are documented in [docs/CODING_STYLE.md](docs/CODING_STYLE.md). Comments should explain public contracts, compatibility constraints, trust boundaries, and non-obvious behavior rather than restating straightforward code.
 
 ## Widgets Examples
 
