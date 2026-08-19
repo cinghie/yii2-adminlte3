@@ -25,6 +25,10 @@ composer require cinghie/yii2-adminlte3:^1.0
 
 For reproducible production deployments, commit the generated `composer.lock` in applications and deploy from the validated lock file. Development branches such as `dev-main` are not recommended for production use.
 
+## Versioning and releases
+
+The public API follows Semantic Versioning starting with 1.0.0. Deprecated public classes and properties remain supported for the complete current major series and are removed only in a later major release. See [`docs/VERSIONING.md`](docs/VERSIONING.md) for the compatibility/deprecation contract and [`RELEASE_CHECKLIST.md`](RELEASE_CHECKLIST.md) for the release procedure.
+
 ## Configuration
 
 ### Compatibility aggregate
@@ -49,7 +53,7 @@ The aggregate bundles include jQuery UI, Moment + Tempus Dominus, iCheck Bootstr
 
 ### Core-only bundle
 
-Pages that only need the AdminLTE shell can avoid loading optional plugin families:
+For pages that do not need the historical plugin set, register the smaller core bundle instead:
 
 ```php
 use cinghie\adminlte3\AdminLTECoreAsset;
@@ -57,13 +61,13 @@ use cinghie\adminlte3\AdminLTECoreAsset;
 AdminLTECoreAsset::register($this);
 ```
 
-The minified equivalent is `AdminLTECoreMinifyAsset`. The core bundle contains only AdminLTE `dist/css/adminlte*` and `dist/js/adminlte*` plus its Yii/Bootstrap/Font Awesome dependencies and `AdminLTEThemeAsset`.
+The core bundle keeps AdminLTE, Yii Bootstrap 4, Font Awesome, and the package theme assets, while leaving jQuery UI, date/time plugins, and iCheck out of the page.
+
+### Optional plugin bundles
 
 Optional plugin families can be registered independently when a page needs them:
 
 ```php
-use cinghie\adminlte3\AdminLTECalendarAsset;
-use cinghie\adminlte3\AdminLTEChartJSAsset;
 use cinghie\adminlte3\AdminLTEDateTimeAsset;
 use cinghie\adminlte3\AdminLTEIcheckAsset;
 use cinghie\adminlte3\AdminLTEJqueryUiAsset;
@@ -71,96 +75,64 @@ use cinghie\adminlte3\AdminLTEJqueryUiAsset;
 AdminLTEJqueryUiAsset::register($this);
 AdminLTEDateTimeAsset::register($this);
 AdminLTEIcheckAsset::register($this);
-AdminLTECalendarAsset::register($this);
-AdminLTEChartJSAsset::register($this);
 ```
 
-Minified equivalents are `AdminLTEJqueryUiMinifyAsset`, `AdminLTEDateTimeMinifyAsset`, `AdminLTEIcheckMinifyAsset`, `AdminLTECalendarMinifyAsset`, and `AdminLTEChartJSMinifyAsset`. Normal/minified bundle pairs are regression-tested for equivalent dependency graphs and corresponding source files.
+Minified equivalents are available as `AdminLTEJqueryUiMinifyAsset`, `AdminLTEDateTimeMinifyAsset`, and `AdminLTEIcheckMinifyAsset`.
 
-`Calendar` and `ChartJS` register their own minified plugin + initializer bundles by default only when those widgets are rendered. Set `registerAssets` to `false` if the application owns plugin registration. Neither FullCalendar nor Chart.js is added to the historical aggregate or core bundles.
+This lets applications reduce plugin payload on pages that do not use those features without changing the historical aggregate bundles for existing installations.
 
-Both core variants register `cinghie\adminlte3\assets\AdminLTEThemeAsset`. Stable widget styles and package-owned behavior are shipped under `assets/css/` and `assets/js/`, allowing browsers to cache them rather than requiring repeated inline CSS/JavaScript from each widget.
+FullCalendar and Chart.js follow the same page-scoped approach through `AdminLTECalendarAsset` / `AdminLTECalendarMinifyAsset` and `AdminLTEChartJSAsset` / `AdminLTEChartJSMinifyAsset`. The public `Calendar` and `ChartJS` widgets register their corresponding optional initializer/plugin assets only when they are rendered and `registerAssets` is enabled, so these plugin families are never added to the core or compatibility aggregate implicitly.
 
-### Script loading and `defer`
+### Script loading strategy
 
-The package intentionally does **not** add `defer`, preload hints, or a different script position by default. Yii already preserves AssetBundle dependency ordering, and these assets are normally registered near the end of the document where `defer` provides little parsing benefit. Applications that deliberately move scripts earlier in the page can use Yii's AssetBundle/`jsOptions` configuration to opt into `defer`, but should apply that policy coherently to the complete dependent script chain and verify third-party plugin behavior. Preload hints should only be introduced from application-level performance measurements because published asset URLs and page-critical resources vary by deployment.
+The package intentionally does not set global `defer`, preload hints, or a different script position. Yii preserves dependency order through `AssetBundle::$depends`, and AdminLTE/plugin scripts are normally registered near the end of the document, where adding `defer` has limited default value.
 
-## Security defaults
+Applications that deliberately move a complete dependency chain earlier in the document may opt in to script attributes through Yii asset configuration, for example by extending or configuring the relevant bundles and setting `jsOptions`. Apply the policy consistently to jQuery, Bootstrap, AdminLTE, and any dependent plugins, then verify those plugins in the target browsers. Preload decisions should remain application-level and measurement-driven because published asset URLs and critical resources vary by deployment.
 
-`MailboxRead` HTML-encodes message bodies by default. To render an HTML email explicitly, set `encodeMailBody` to `false`; `purifyMailBody` remains enabled by default and passes the content through Yii's HTML purifier.
+## Security and CSP
 
-Attachment icons are treated as CSS classes rather than arbitrary HTML, and dangerous or unsupported explicit attachment URL schemes are rejected.
+Widget values that become CSS classes, icons, links, external URLs, or email links are treated as trust boundaries. Package widgets normalize or validate these values before rendering them. User-controlled text should remain encoded unless a widget explicitly documents a trusted/purified HTML mode.
 
-`Invoice` validates website and email links. Remote company logos are disabled by default to avoid unintended third-party requests; set `allowRemoteCompanyLogo` to `true` only for trusted HTTP(S) logo URLs.
+Package-owned behavior avoids inline JavaScript where practical. For example, Invoice printing is bound by the package asset through a data attribute instead of an inline `onclick`, and static widget presentation is kept in cacheable CSS. `InfoBox` progress widths are represented by package-owned 0–100 CSS classes instead of inline `style` attributes, so package-owned InfoBox markup does not require `style-src-attr 'unsafe-inline'` for dynamic progress values.
 
-`NavbarUser` renders the right footer action (normally logout) with `data-method="post"` by default. This preserves Yii's POST/CSRF logout semantics when Yii JavaScript is active; override `footerRightOptions` if the action is not a logout.
+Calendar and ChartJS keep event, dataset, and configuration values as JSON data and initialize their browser plugins from package-owned external scripts. Their server-side APIs intentionally do not accept executable JavaScript callbacks; application-specific callback logic should live in application-owned JavaScript. Error404/Error500 encode public text and Error500 deliberately exposes no exception, stack trace, path, or debug context by default.
 
-`Calendar` and `ChartJS` serialize PHP arrays/scalars as JSON data attributes and initialize from package-owned external JavaScript. Their server-side APIs intentionally do not accept executable JavaScript callbacks. Dedicated `Error404` and `Error500` widgets HTML-encode user-facing text; `Error500` uses a generic default message and exposes no exception object, stack trace, path, or debug context.
+A full strict-CSP deployment still needs to account for AdminLTE, Kartik, Bootstrap plugins, and application code outside this package. Applications targeting strict CSP should validate the complete page under their actual policy.
 
-Security-sensitive URL, HTTP(S), email, CSS-class, icon-class and external-link normalization is centralized in the package-internal `widgets/support/SafeHtml` helper. It is intentionally not a public extension API.
+See [`docs/CODING_STYLE.md`](docs/CODING_STYLE.md) for the package coding, PHPDoc, security-boundary, and CSP conventions.
 
-## Content Security Policy
+## Additional widgets
 
-Package-owned markup avoids inline JavaScript and inline style attributes where package assets can express the same behavior safely. The default Invoice print action uses `data-cinghie-action="print"` and is handled by the published `assets/js/widgets.js` file; active SidebarMenu state uses AdminLTE classes instead of an inline display style. Static Navbar and Mailbox presentation is kept in package CSS/Bootstrap utility classes.
+The package includes optional public widgets for common AdminLTE pages without forcing their plugin assets onto unrelated pages:
 
-`InfoBox::$progress` keeps the existing integer 0–100 behavior without inline styles: normalized values map to package-owned `cinghie-progress-width-*` classes published through `AdminLTEThemeAsset`. This allows package-owned InfoBox markup to work with strict `style-src-attr 'none'` policies while preserving backward-compatible percentage semantics.
+- `Calendar` — FullCalendar-backed rendering with JSON-safe event/options data and optional asset registration. See [`docs/example_calendar.md`](docs/example_calendar.md).
+- `ChartJS` — Chart.js-backed canvas rendering with deterministic ids, JSON-safe datasets/options, responsive defaults, and optional asset registration. See [`docs/example_chartjs.md`](docs/example_chartjs.md).
+- `Error404` — encoded AdminLTE-style not-found page with an accessible home action. See [`docs/example_error404.md`](docs/example_error404.md).
+- `Error500` — encoded AdminLTE-style server-error page with generic non-diagnostic defaults. See [`docs/example_error500.md`](docs/example_error500.md).
 
-`Calendar` and `ChartJS` avoid inline initializer scripts by publishing dedicated `assets/js/calendar.js` and `assets/js/chartjs.js` files. Runtime configuration is read from HTML-encoded JSON data attributes.
+## Icon compatibility
 
-Third-party AdminLTE/Kartik plugins may have additional CSP requirements and should be tested as part of the complete application asset stack.
+The core AdminLTE 3 stack uses Font Awesome. Ionicons is not loaded or required by this package. Applications that need Ionicons should register a compatible icon asset explicitly at application level rather than relying on an implicit package dependency.
 
-`Box` is retained for backward compatibility but is deprecated. Prefer `Card` for new code; `Box` remains useful where its legacy GridView/footer-button API is required.
+## Testing
 
-## Tests and quality checks
-
-The repository includes PHPUnit tests and a GitHub Actions matrix for every supported PHP minor from 8.1 through 8.5. Locally:
+Install development dependencies and run:
 
 ```bash
-composer install
-composer test
+composer validate --strict
+vendor/bin/phpunit
+```
+
+CI runs Composer validation, clean dependency installation, PHP lint, and PHPUnit on PHP 8.1, 8.2, 8.3, 8.4, and 8.5. It also runs a separate PHP 8.1 `prefer-lowest` job that resolves the minimum declared dependency graph before attempting lint/tests; this job is intentionally non-blocking while legacy minimum-version package combinations continue to expose upstream Composer extraction instability. A successful lowest-version resolution is therefore not advertised as full minimum-runtime certification.
+
+Static quality checks are available through:
+
+```bash
 composer analyse
 composer cs
-# or run both static checks
 composer quality
 ```
 
-CI also runs strict Composer validation and PHP syntax checks. Security/CSP, Yii/PSR source-hygiene, asset parity/order, source-metadata, and public-widget documentation guards are part of the normal regression suite. Complex rendering tests use `DOMDocument`/`DOMXPath` for structural assertions around classes, links, `rel`, `target`, `data-method`, ARIA attributes, and encoded text instead of relying only on serialized attribute ordering. A separate blocking PHP 8.3 quality workflow runs PHPStan level 5 and PHP_CodeSniffer with PSR-12.
+`composer analyse` runs PHPStan at level 5 over the supported package surface. `composer cs` runs PHP_CodeSniffer with the project PSR-12 ruleset. GitHub Actions runs both checks in a dedicated blocking quality job on PHP 8.3.
 
-A separate PHP 8.1 `prefer-lowest` job resolves the minimum dependency set with `composer update --prefer-lowest --prefer-stable` and then attempts a clean install and test run. It is intentionally non-blocking while legacy lowest-version package combinations exhibit upstream Composer/package extraction noise; a successful resolution alone is not treated as proof that the complete minimum dependency set is runtime-compatible.
-
-`Timeline` is intentionally outside the initial PHPStan/PHPCS scope because it integrates optional external domain model packages that are not runtime dependencies of this package. The exclusion is explicit and should be removed only when that legacy integration boundary is redesigned or its optional dependencies can be modelled safely.
-
-## Contributing
-
-Contributor-facing PHPDoc, Yii security, CSP, and PSR-12 conventions are documented in [docs/CODING_STYLE.md](docs/CODING_STYLE.md). Comments should explain public contracts, compatibility constraints, trust boundaries, and non-obvious behavior rather than restating straightforward code.
-
-## Widgets Examples
-
-| Widget                                          | Guide                                                |
-| ----------------------------------------------- | ---------------------------------------------------- |
-| [Alert](docs/example_alert.md)                  | Alert messages                                       |
-| [Box](docs/example_box.md)                      | Legacy card with GridView/footer helpers             |
-| [Breadcrumbs](docs/example_breadcrumbs.md)      | Navigation breadcrumbs                               |
-| [Calendar](docs/example_calendar.md)            | Optional FullCalendar integration                    |
-| [Card](docs/example_card.md)                    | Card (header, tools, body, footer; begin/end)        |
-| [ChartJS](docs/example_chartjs.md)              | Optional Chart.js canvas integration                 |
-| [Content Header](docs/example_contentheader.md) | Page title and breadcrumbs                           |
-| [DataColumn](docs/example_datacolumn.md)        | GridView column class (sorting header)               |
-| [DetailView](docs/example_detailview.md)        | Kartik DetailView styled as AdminLTE 3 card          |
-| [Error404](docs/example_error404.md)            | Safe AdminLTE 404 page                               |
-| [Error500](docs/example_error500.md)            | Safe AdminLTE 500 page                               |
-| [Footer](docs/example_footer.md)                | Layout footer                                        |
-| [GridView](docs/example_gridview.md)            | Data grid in AdminLTE 3 card                         |
-| [InfoBox](docs/example_infobox.md)              | Info box (icon, text, number, optional progress)     |
-| [Invoice](docs/example_invoice.md)              | Invoice layout (Bootstrap 4)                         |
-| [MailboxRead](docs/example_mailboxread.md)      | Read-mail card (subject, body, attachments)          |
-| [NavTabs](docs/example_navtabs.md)              | Nav tabs with tab panes (Bootstrap 4)                |
-| [Navbar Button](docs/example_navbarbutton.md)   | Navbar link button                                   |
-| [Navbar Logo](docs/example_navbarlogo.md)       | Navbar brand/logo                                    |
-| [Navbar User](docs/example_navbaruser.md)       | Navbar user dropdown                                 |
-| [Sidebar Menu](docs/example_sidebarmenu.md)     | Sidebar navigation menu                              |
-| [Sidebar Search](docs/example_sidebarsearch.md) | Sidebar search form                                  |
-| [Sidebar Toggle](docs/example_sidebartoggle.md) | Sidebar toggle button                                |
-| [Sidebar User](docs/example_sidebaruser.md)     | Sidebar user panel                                   |
-| [SmallBox](docs/example_smallbox.md)            | Small stat box with optional footer link             |
-| [Timeline](docs/example_timeline.md)            | Timeline (days and items)                            |
+The package also carries regression tests for rendering security, shared URL/class normalization, strict-CSP-compatible package markup, formatter isolation, asset dependency/order/source-minified parity, package translation ownership, canonical-vs-legacy widget option semantics, and public widget smoke coverage. Complex widget markup is additionally checked through DOM/XPath structural assertions for classes, links, `rel`, `target`, `data-method`, ARIA attributes, and encoded text. Calendar/ChartJS/Error404/Error500 add dedicated smoke, JSON round-trip, security/disclosure, accessibility, and optional-asset isolation checks. Source-level guards cover public class PHPDoc, Yii/PSR import hygiene, and obsolete package/license/version metadata.
