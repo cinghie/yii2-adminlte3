@@ -12,7 +12,7 @@
 
 namespace cinghie\adminlte3\widgets;
 
-use Yii;
+use cinghie\adminlte3\widgets\support\Translation;
 use yii\bootstrap4\Widget;
 use yii\helpers\Html;
 
@@ -28,44 +28,28 @@ use yii\helpers\Html;
  */
 class SidebarUser extends Widget
 {
-    /**
-     * @var string Username or display name
-     */
+    /** @var string Username or display name. */
     public $username;
 
-    /**
-     * @var string URL of the user avatar image
-     */
+    /** @var string URL of the user avatar image. */
     public $userimg;
 
-    /**
-     * @var string URL for the username link (use '#' or null for no link)
-     */
+    /** @var string URL for the username link (use '#' or null for no link). */
     public $userUrl = '#';
 
-    /**
-     * @var string Alt text for the user image
-     */
+    /** @var string Alt text for the user image. */
     public $imageAlt;
 
-    /**
-     * @var array HTML attributes for the wrapper div (user-panel)
-     */
+    /** @var array HTML attributes for the wrapper div. */
     public $options = [];
 
-    /**
-     * @var array HTML attributes for the image
-     */
+    /** @var array HTML attributes for the image. */
     public $imageOptions = [];
 
-    /**
-     * @var array HTML attributes for the username link
-     */
+    /** @var array HTML attributes for the username link. */
     public $linkOptions = [];
 
-    /**
-     * @var string Default avatar URL when none provided
-     */
+    /** @var string Default avatar URL when none provided. */
     public static $defaultAvatarUrl = 'https://cdn0.iconfinder.com/data/icons/user-pictures/100/matureman1-2-128.png';
 
     /**
@@ -74,7 +58,7 @@ class SidebarUser extends Widget
     public function init()
     {
         if ($this->username === null) {
-            $this->username = Yii::t('app', 'User');
+            $this->username = Translation::t('User');
         }
         if ($this->userimg === null) {
             $this->userimg = static::$defaultAvatarUrl;
