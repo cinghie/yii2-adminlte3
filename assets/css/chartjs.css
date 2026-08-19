@@ -1,0 +1,12 @@
+/* AdminLTE 3 ChartJS example dimensions without inline styles. */
+.cinghie-chartjs {
+  position: relative;
+  min-height: 250px;
+  height: 250px;
+  max-height: 250px;
+  max-width: 100%;
+}
+
+.cinghie-chartjs-canvas {
+  max-width: 100%;
+}
