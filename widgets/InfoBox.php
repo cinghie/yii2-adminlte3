@@ -8,6 +8,11 @@ use yii\helpers\Html;
 
 /**
  * Renders an AdminLTE 3 information box with optional progress indicator.
+ *
+ * Progress values are normalized to an integer from 0 through 100 and mapped
+ * to package-owned CSS classes. This preserves the historical percentage
+ * precision without emitting inline style attributes, including under strict
+ * `style-src-attr 'none'` Content Security Policy deployments.
  */
 class InfoBox extends Widget
 {
@@ -68,8 +73,7 @@ class InfoBox extends Widget
             $contentParts[] = Html::tag(
                 'div',
                 Html::tag('div', '', [
-                    'class' => 'progress-bar ' . $iconBgClass,
-                    'style' => 'width: ' . $pct . '%',
+                    'class' => 'progress-bar ' . $iconBgClass . ' cinghie-progress-width-' . $pct,
                     'role' => 'progressbar',
                     'aria-valuenow' => $pct,
                     'aria-valuemin' => '0',
