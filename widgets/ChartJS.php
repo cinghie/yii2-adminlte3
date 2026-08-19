@@ -75,10 +75,20 @@ class ChartJS extends Widget
      */
     protected function normalizeType($type): string
     {
-        $type = strtolower(trim((string) $type));
-        $allowed = ['bar', 'bubble', 'doughnut', 'horizontalbar', 'line', 'pie', 'polararea', 'radar', 'scatter'];
+        $types = [
+            'bar' => 'bar',
+            'bubble' => 'bubble',
+            'doughnut' => 'doughnut',
+            'horizontalbar' => 'horizontalBar',
+            'line' => 'line',
+            'pie' => 'pie',
+            'polararea' => 'polarArea',
+            'radar' => 'radar',
+            'scatter' => 'scatter',
+        ];
+        $normalized = strtolower(trim((string) $type));
 
-        return in_array($type, $allowed, true) ? $type : 'line';
+        return $types[$normalized] ?? 'line';
     }
 
     /**
