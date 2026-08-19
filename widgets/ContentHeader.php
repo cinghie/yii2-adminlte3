@@ -12,6 +12,7 @@
 
 namespace cinghie\adminlte3\widgets;
 
+use cinghie\adminlte3\widgets\support\Translation;
 use Yii;
 use yii\bootstrap4\Widget;
 use yii\helpers\Html;
@@ -58,7 +59,7 @@ class ContentHeader extends Widget
     public function init()
     {
         if ($this->title === null) {
-            $this->title = Yii::t('app', 'Dashboard');
+            $this->title = Translation::t('Dashboard');
         }
 
         if ($this->subtitle === null) {
@@ -114,7 +115,7 @@ class ContentHeader extends Widget
         if ($isEmpty) {
             $homeUrl = is_array(Yii::$app->homeUrl) ? Url::to(Yii::$app->homeUrl) : Yii::$app->homeUrl;
             return '<ol class="breadcrumb float-sm-right">' .
-                '<li class="breadcrumb-item"><a href="' . Html::encode($homeUrl) . '">' . Html::encode(Yii::t('yii', 'Home')) . '</a></li>' .
+                '<li class="breadcrumb-item"><a href="' . Html::encode($homeUrl) . '">' . Html::encode(Translation::t('Home')) . '</a></li>' .
                 '<li class="breadcrumb-item active" aria-current="page">' . Html::encode($this->title) . '</li>' .
                 '</ol>';
         }
