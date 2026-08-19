@@ -18,8 +18,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 ## Priority list
 
-1. Normalize source-file metadata and license headers across the package — **Low**.
-2. Add static analysis and coding-standard automation after the current runtime baseline is stable — **Low**.
+No open priority item is currently promoted above the detailed Low roadmap items below.
 
 ---
 
@@ -53,7 +52,6 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 |---------|------|-----|--------------------|
 | **Low** | Add DOM/XPath assertions for complex widgets | String assertions are useful but can become brittle when harmless markup ordering changes. | Use `DOMDocument`/XPath for structural assertions around classes, links, `rel`, `data-method`, ARIA attributes, and encoded text. |
 | **Low** | Add Composer lowest-dependency validation | CI validates supported PHP versions against normal dependency resolution, but minimum declared dependency versions are not independently exercised. | Add a separate `composer update --prefer-lowest --prefer-stable` job where dependency ecosystems permit it; keep it non-blocking initially if upstream constraints are noisy. |
-| **Low** | Add static analysis and coding standards | Runtime tests catch behaviour but not all dead imports, type mismatches, duplicated branches, or style drift. | Introduce PHPStan/Psalm at a realistic initial level and a PSR-12-compatible coding-standard tool in separate CI jobs; ratchet strictness gradually. |
 
 ---
 
@@ -61,7 +59,6 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| **Low** | Normalize source-file headers | Several untouched files still contain historical package names, hardcoded versions, outdated license labels, or duplicated metadata despite Composer and the repository license being aligned to MIT. | Remove hardcoded version tags and obsolete package/license metadata from source headers, or replace them with a minimal consistent copyright/license notice. Keep versioning in Git tags / Composer metadata. |
 | **Low** | Define a public deprecation policy | `Box` remains deprecated as a public compatibility facade and historical widget property aliases remain available. | Document how long deprecated classes/properties remain available and reserve removals for a major release. |
 | **Low** | Add release checklist | Asset packages are sensitive to dependency and browser regressions. | Document a release checklist: Composer validation, full CI, asset graph check, README/CHANGELOG/UPDATE sync, compatibility notes, and tagged release smoke install. |
 | **Low** | Clarify semantic-versioning expectations | Security-safe defaults and runtime baseline changes can be breaking even when APIs remain callable. | Document which changes require major/minor releases, especially runtime minimums, implicit asset removal, default encoding, and deprecated widget removal. |
@@ -123,7 +120,8 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Missing Kartik dependencies in Composer | Runtime packages used by public widgets are declared explicitly. |
 | Broad `@dev` runtime dependencies | Runtime dependency declarations were stabilized/removed as appropriate. |
 | Bootstrap version ambiguity | Yii Bootstrap 4 is explicit and the runtime baseline is PHP 8.1+ / Yii 2.0.54+. |
-| License metadata mismatch | Composer metadata matches the repository MIT license. Source header cleanup remains an open documentation task. |
+| License metadata mismatch | Composer metadata matches the repository MIT license; historical per-file GPL/package/version/company headers were removed so `LICENSE` and Composer are the authoritative license/package metadata sources. |
+| Source-file metadata regression | `SourceMetadataTest` prevents obsolete `@package`, hardcoded version, historical company metadata, and GPL header text from being reintroduced. |
 | Ionicons dependency / compatibility | Ionicons has been removed from the package dependency and asset graph. AdminLTE3 uses its Font Awesome icon stack; no Ionicons compatibility layer is planned for this package. |
 
 ### Tests, code comments & CI
@@ -136,7 +134,8 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Public widgets lacked broad smoke coverage | Public widget classes have package-level smoke/load coverage, with dedicated behavioural/security tests retained for complex widgets. |
 | SidebarMenu route matrix was narrow | Regression coverage includes trailing default actions, module default routes, query parameters, active parents, invisible items, headers, and similarly named non-matching routes. |
 | Comment/PHPDoc conventions were implicit | `docs/CODING_STYLE.md` records Yii-oriented output encoding/trust-boundary rules, useful PHPDoc expectations, PSR-12 formatting, CSP conventions, and public-package documentation restrictions. A regression test requires every public widget class to retain class-level PHPDoc. |
-| Source-level Yii/PSR hygiene was implicit | `Yii2BestPracticesTest` guards valid/used `Yii` imports and the normative PSR-12 ordering of class/function/constant import groups without inventing an alphabetical requirement that PSR-12 does not define. Broad formatting enforcement remains part of the separate coding-standard roadmap item. |
+| Source-level Yii/PSR hygiene was implicit | `Yii2BestPracticesTest` guards valid/used `Yii` imports and the normative PSR-12 ordering of class/function/constant import groups without inventing an alphabetical requirement that PSR-12 does not define. |
+| Static analysis and coding-standard automation | Added PHPStan 2.x at level 5 and PHP_CodeSniffer 4 with PSR-12 in a dedicated blocking PHP 8.3 `quality` workflow. `Timeline` remains an explicit legacy exclusion because it imports optional external model packages; two narrow pre-existing control-structure formatting exceptions are documented for Invoice/SidebarMenu while the rest of those files remains scanned. |
 | Option alias and translation ownership regressions | Dedicated tests cover canonical-vs-legacy option precedence, legacy-only rendering, lazy package translation registration, application overrides, and accidental reintroduction of legacy UI translation categories. |
 | Asset graph regressions | Dedicated tests now cover core-vs-aggregate payload, plugin ordering, source/minified parity, dependency equivalence, timestamp parity, and declared vendor-file existence. |
 
@@ -218,5 +217,7 @@ These are **not current defects**. They are public-package evolution ideas that 
 - Moved static package-owned widget strings to the internal `adminlte3` translation category with application override support; retained only Timeline's dynamic domain-action translation as an explicit legacy fallback.
 - Split optional AdminLTE plugin assets from a new core-only bundle while preserving the historical aggregate bundle, and added source/minified parity, vendor-file existence, bundle-size, and asset-order regression coverage.
 - Evaluated script preloading/defer and kept it opt-in/application-owned rather than changing package defaults without measured benefit.
-- Added public coding/PHPDoc conventions, class-level documentation guards, source-level Yii/PSR best-practice tests, option-alias regression tests, translation-ownership guards, and asset-graph regression tests.
-- Remaining roadmap work is intentionally low-risk: source metadata/header cleanup, static analysis/coding standards, incremental release/documentation hygiene, and optional browser-level verification of the complete third-party CSP stack.
+- Normalized source-file metadata so the repository MIT `LICENSE` and Composer metadata are authoritative, and added a regression guard against stale per-file package/version/license headers.
+- Added PHPStan level 5 and PHP_CodeSniffer/PSR-12 as a dedicated blocking quality workflow, alongside the existing PHP 8.1–8.5 runtime matrix.
+- Added public coding/PHPDoc conventions, class-level documentation guards, source-level Yii/PSR best-practice tests, option-alias regression tests, translation-ownership guards, asset-graph regression tests, and source-metadata guards.
+- Remaining roadmap work is intentionally low-risk: DOM/XPath structural tests, lowest-dependency validation, deprecation/release/semantic-versioning documentation, and optional browser-level verification of the complete third-party CSP stack.
