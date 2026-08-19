@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace cinghie\adminlte3\tests;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
