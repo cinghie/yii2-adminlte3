@@ -1,0 +1,72 @@
+<?php
+
+declare(strict_types=1);
+
+namespace cinghie\adminlte3\tests;
+
+use cinghie\adminlte3\widgets\Invoice;
+use cinghie\adminlte3\widgets\MailboxRead;
+use cinghie\adminlte3\widgets\SidebarMenu;
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Guards package-owned markup against avoidable inline script/style patterns.
+ */
+final class CspCompatibilityTest extends TestCase
+{
+    public function testInvoiceDefaultPrintActionHasNoInlineHandler(): void
+    {
+        $html = Invoice::widget([
+            'companyName' => 'Example',
+            'invoiceNumber' => 'INV-1',
+            'showActions' => true,
+        ]);
+
+        self::assertStringContainsString('data-cinghie-action="print"', $html);
+        self::assertStringNotContainsString('onclick=', $html);
+        self::assertStringNotContainsString('javascript:', $html);
+        self::assertStringNotContainsString('style=', $html);
+    }
+
+    public function testMailboxAttachmentsDoNotUseInlineStyle(): void
+    {
+        $html = MailboxRead::widget([
+            'mailAttachments' => [[
+                'url' => '/files/report.pdf',
+                'filename' => 'report.pdf',
+                'size' => '10 KB',
+            ]],
+        ]);
+
+        self::assertStringNotContainsString('style=', $html);
+        self::assertStringNotContainsString('onclick=', $html);
+    }
+
+    public function testActiveSidebarUsesMenuClassInsteadOfInlineDisplayStyle(): void
+    {
+        $html = SidebarMenu::widget([
+            'route' => 'site/index',
+            'params' => [],
+            'items' => [[
+                'label' => 'Parent',
+                'items' => [[
+                    'label' => 'Dashboard',
+                    'url' => ['/site/index'],
+                ]],
+            ]],
+        ]);
+
+        self::assertStringContainsString('menu-open', $html);
+        self::assertStringNotContainsString('style="display:', $html);
+        self::assertStringNotContainsString('onclick=', $html);
+    }
+
+    public function testExternalWidgetScriptContainsPrintDelegation(): void
+    {
+        $script = file_get_contents(dirname(__DIR__) . '/assets/js/widgets.js');
+
+        self::assertIsString($script);
+        self::assertStringContainsString('data-cinghie-action="print"', $script);
+        self::assertStringContainsString('window.print()', $script);
+    }
+}
