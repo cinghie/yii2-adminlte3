@@ -1,0 +1,255 @@
+/* Stable widget styles for cinghie/yii2-adminlte3. */
+
+/* GridView */
+.kv-grid-table thead th a,
+.kv-grid-table thead th a:hover,
+.kv-grid-table thead th a:focus,
+.kv-grid-table thead th a:active,
+.card .table thead th a,
+.card .table thead th a:hover,
+.card .table thead th a:focus,
+.card .table thead th a:active {
+  color: inherit !important;
+  text-decoration: none;
+}
+
+.kv-grid-table thead th a .fas,
+.kv-grid-table thead th a .fa,
+.kv-grid-table thead th a .glyphicon,
+.card .table thead th a .fas,
+.card .table thead th a .fa {
+  opacity: 0.55;
+  margin-left: 0.35rem;
+  font-size: 0.85em;
+}
+
+.kv-grid-panel > .card-header,
+.kv-detail-view .card-header,
+.card.kv-detail-view > .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.kv-grid-panel > .card-header::after {
+  display: none;
+}
+
+.kv-grid-panel > .card-header .card-title,
+.kv-detail-view .card-header .card-title,
+.card.kv-detail-view > .card-header .card-title {
+  float: none;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.kv-grid-panel > .card-header .card-title {
+  display: inline-flex;
+  align-items: center;
+}
+
+.kv-grid-panel > .card-header .card-tools {
+  float: none;
+  margin: 0 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.kv-grid-panel > .card-header .card-tools .dt-buttons {
+  position: initial;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.kv-grid-panel > .card-header .card-tools .dt-buttons > .btn-group {
+  margin: 0;
+}
+
+.kv-grid-panel > .card-header .card-tools .dt-buttons .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.kv-grid-panel .card-body {
+  padding: 1.25rem;
+}
+
+.kv-grid-panel .card-footer {
+  background-color: #fff !important;
+  background-image: none !important;
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.kv-grid-panel .card-footer .pagination {
+  margin-bottom: 0;
+}
+
+.kv-grid-panel .kv-table-footer,
+.kv-grid-panel .kv-grid-table > tfoot > tr > th,
+.kv-grid-panel .kv-grid-table > tfoot > tr > td {
+  background-color: #fff !important;
+  background-image: none !important;
+}
+
+.kv-grid-panel .kv-grid-table,
+.kv-grid-bs4 .card .kv-grid-table {
+  margin-bottom: 0;
+  border: 1px solid #dee2e6;
+}
+
+.kv-grid-panel .kv-grid-table > thead.kv-table-header > tr > th,
+.kv-grid-panel .kv-grid-table > thead.kv-table-header > tr > td,
+.kv-grid-panel .kv-table-header > tr > th,
+.kv-grid-panel .kv-table-header > tr > td,
+.kv-grid-panel .table-bordered > thead.kv-table-header > tr,
+.kv-grid-panel .table-bordered > thead.kv-table-header > tr > th,
+.kv-grid-panel .table-bordered > thead.kv-table-header > tr > td,
+.card .kv-grid-table > thead > tr > th,
+.card .table > thead > tr > th {
+  background-color: #fff !important;
+  background-image: none !important;
+  border-top: 1px solid #dee2e6 !important;
+  border-bottom: 1px solid #dee2e6 !important;
+  padding: 0.5rem 0.75rem;
+  vertical-align: middle;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.kv-grid-panel .kv-grid-table > thead > tr.filters > td,
+.kv-grid-panel .table > thead > tr.filters > td {
+  background-color: #fff;
+  border-top: 0 !important;
+  padding: 0.4rem 0.75rem;
+  vertical-align: middle;
+}
+
+.kv-grid-panel .kv-grid-table > tbody > tr > td,
+.kv-grid-panel .kv-grid-table > tbody > tr > th,
+.kv-detail-view .table > tbody > tr > th,
+.kv-detail-view .table > tbody > tr > td {
+  padding: 0.5rem 0.75rem;
+  vertical-align: middle;
+}
+
+.kv-grid-panel .kv-sort-link .kv-sort-icon {
+  margin-left: 0.25rem;
+  font-size: 0.75em;
+  line-height: 1;
+}
+
+/* Invoice */
+.cinghie-invoice.invoice {
+  position: relative;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  margin-bottom: 1rem;
+  padding: 1.75rem;
+}
+
+.cinghie-invoice .invoice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0 0 1.5rem;
+  padding: 0 0 0.85rem;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.cinghie-invoice .invoice-header .invoice-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cinghie-invoice .invoice-header .invoice-brand img {
+  max-height: 40px;
+  width: auto;
+}
+
+.cinghie-invoice .invoice-header .invoice-date {
+  margin-left: auto;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+.cinghie-invoice .invoice-info,
+.cinghie-invoice .invoice-items {
+  margin-bottom: 1.5rem;
+}
+
+.cinghie-invoice .invoice-col {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.cinghie-invoice .invoice-col > .invoice-col-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #6c757d;
+}
+
+.cinghie-invoice address {
+  margin-bottom: 0;
+  font-style: normal;
+  line-height: 1.65;
+}
+
+.cinghie-invoice .invoice-extra {
+  color: #495057;
+}
+
+.cinghie-invoice .invoice-items .table,
+.cinghie-invoice .invoice-totals .table {
+  margin-bottom: 0;
+}
+
+.cinghie-invoice .invoice-items .table th,
+.cinghie-invoice .invoice-items .table td {
+  text-align: center;
+}
+
+.cinghie-invoice .table th,
+.cinghie-invoice .table td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+
+.cinghie-invoice .invoice-notes {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  padding: 0.85rem 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.25rem;
+  color: #6c757d;
+}
+
+.cinghie-invoice .no-print {
+  margin-top: 1.5rem;
+  padding-top: 0.25rem;
+}
+
+@media print {
+  .cinghie-invoice .no-print {
+    display: none !important;
+  }
+
+  .cinghie-invoice.invoice {
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
