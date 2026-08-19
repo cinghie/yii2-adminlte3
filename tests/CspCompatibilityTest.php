@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace cinghie\adminlte3\tests;
 
+use cinghie\adminlte3\widgets\InfoBox;
 use cinghie\adminlte3\widgets\Invoice;
 use cinghie\adminlte3\widgets\MailboxRead;
 use cinghie\adminlte3\widgets\SidebarMenu;
@@ -40,6 +41,32 @@ final class CspCompatibilityTest extends TestCase
 
         self::assertStringNotContainsString('style=', $html);
         self::assertStringNotContainsString('onclick=', $html);
+    }
+
+    public function testInfoBoxProgressUsesStaticWidthClassWithoutInlineStyle(): void
+    {
+        $html = InfoBox::widget([
+            'text' => 'Progress',
+            'number' => '37%',
+            'progress' => 37,
+        ]);
+
+        self::assertStringContainsString('cinghie-progress-width-37', $html);
+        self::assertStringContainsString('aria-valuenow="37"', $html);
+        self::assertStringNotContainsString('style=', $html);
+    }
+
+    public function testInfoBoxProgressStillClampsToSupportedRange(): void
+    {
+        $below = InfoBox::widget(['progress' => -10]);
+        $above = InfoBox::widget(['progress' => 150]);
+
+        self::assertStringContainsString('cinghie-progress-width-0', $below);
+        self::assertStringContainsString('aria-valuenow="0"', $below);
+        self::assertStringContainsString('cinghie-progress-width-100', $above);
+        self::assertStringContainsString('aria-valuenow="100"', $above);
+        self::assertStringNotContainsString('style=', $below);
+        self::assertStringNotContainsString('style=', $above);
     }
 
     public function testActiveSidebarUsesMenuClassInsteadOfInlineDisplayStyle(): void
