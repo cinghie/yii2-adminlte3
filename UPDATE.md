@@ -50,8 +50,7 @@ No open priority item is currently promoted above the detailed Low roadmap items
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| **Low** | Add DOM/XPath assertions for complex widgets | String assertions are useful but can become brittle when harmless markup ordering changes. | Use `DOMDocument`/XPath for structural assertions around classes, links, `rel`, `data-method`, ARIA attributes, and encoded text. |
-| **Low** | Add Composer lowest-dependency validation | CI validates supported PHP versions against normal dependency resolution, but minimum declared dependency versions are not independently exercised. | Add a separate `composer update --prefer-lowest --prefer-stable` job where dependency ecosystems permit it; keep it non-blocking initially if upstream constraints are noisy. |
+| — | No known open QA item from the current package-level hardening pass | Runtime coverage now spans PHP 8.1–8.5, complex markup has DOM/XPath structural assertions, static quality gates are blocking, and a separate prefer-lowest job exposes minimum-dependency behavior without weakening the main matrix. | Keep the normal runtime/quality gates blocking; promote the prefer-lowest job only after the legacy minimum dependency set installs and executes reliably. |
 
 ---
 
@@ -136,6 +135,8 @@ No open priority item is currently promoted above the detailed Low roadmap items
 | Comment/PHPDoc conventions were implicit | `docs/CODING_STYLE.md` records Yii-oriented output encoding/trust-boundary rules, useful PHPDoc expectations, PSR-12 formatting, CSP conventions, and public-package documentation restrictions. A regression test requires every public widget class to retain class-level PHPDoc. |
 | Source-level Yii/PSR hygiene was implicit | `Yii2BestPracticesTest` guards valid/used `Yii` imports and the normative PSR-12 ordering of class/function/constant import groups without inventing an alphabetical requirement that PSR-12 does not define. |
 | Static analysis and coding-standard automation | Added PHPStan 2.x at level 5 and PHP_CodeSniffer 4 with PSR-12 in a dedicated blocking PHP 8.3 `quality` workflow. `Timeline` remains an explicit legacy exclusion because it imports optional external model packages; two narrow pre-existing control-structure formatting exceptions are documented for Invoice/SidebarMenu while the rest of those files remains scanned. |
+| DOM/XPath structural widget assertions | Added reusable `HtmlDomTestCase` support around `DOMDocument`/`DOMXPath`; complex rendering tests now assert classes, URLs, `rel`, `target`, `data-method`, ARIA attributes, absence of injected nodes/attributes, and encoded text structurally while retaining targeted raw-string security assertions where useful. |
+| Lowest-dependency validation | Added a separate PHP 8.1 `prefer-lowest` CI job. It resolves the minimum dependency graph independently, then attempts install/lint/tests. The job remains non-blocking because legacy minimum-version combinations currently trigger upstream Composer/package extraction noise; resolution success is not treated as runtime-compatibility certification. |
 | Option alias and translation ownership regressions | Dedicated tests cover canonical-vs-legacy option precedence, legacy-only rendering, lazy package translation registration, application overrides, and accidental reintroduction of legacy UI translation categories. |
 | Asset graph regressions | Dedicated tests now cover core-vs-aggregate payload, plugin ordering, source/minified parity, dependency equivalence, timestamp parity, and declared vendor-file existence. |
 
@@ -219,5 +220,7 @@ These are **not current defects**. They are public-package evolution ideas that 
 - Evaluated script preloading/defer and kept it opt-in/application-owned rather than changing package defaults without measured benefit.
 - Normalized source-file metadata so the repository MIT `LICENSE` and Composer metadata are authoritative, and added a regression guard against stale per-file package/version/license headers.
 - Added PHPStan level 5 and PHP_CodeSniffer/PSR-12 as a dedicated blocking quality workflow, alongside the existing PHP 8.1–8.5 runtime matrix.
-- Added public coding/PHPDoc conventions, class-level documentation guards, source-level Yii/PSR best-practice tests, option-alias regression tests, translation-ownership guards, asset-graph regression tests, and source-metadata guards.
-- Remaining roadmap work is intentionally low-risk: DOM/XPath structural tests, lowest-dependency validation, deprecation/release/semantic-versioning documentation, and optional browser-level verification of the complete third-party CSP stack.
+- Added DOM/XPath structural assertions for complex widget markup, including link/security attributes and Card tool accessibility semantics.
+- Added a separate non-blocking PHP 8.1 prefer-lowest workflow path; minimum dependency resolution succeeds, while install/test remains observational until upstream legacy-package extraction behavior is stable enough to certify the full minimum set.
+- Added public coding/PHPDoc conventions, class-level documentation guards, source-level Yii/PSR best-practice tests, option-alias regression tests, translation-ownership guards, asset-graph regression tests, source-metadata guards, and structural DOM assertions.
+- Remaining roadmap work is intentionally low-risk: deprecation/release/semantic-versioning documentation and optional browser-level verification of the complete third-party CSP stack.
