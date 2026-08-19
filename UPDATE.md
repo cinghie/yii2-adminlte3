@@ -35,8 +35,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| **Low** | Normalize shared widget option semantics | Similar concepts (`type`, `icon`, `url`, link options, outline, encode flags) are not always named identically across historical widgets. | Gradually align property names/defaults in backward-compatible releases; use deprecation aliases before removals in a major release. |
-| **Low** | Review translation categories owned by external/legacy packages | Some widgets still reference translation categories historically supplied by other modules/packages. That makes standalone rendering less predictable. | Move package-owned user-facing strings to an `adminlte3` translation category, leaving compatibility fallbacks only where needed. |
+| — | No known open correctness item from the widget-option/translation normalization pass | Shared `icon`, `url`, and `options` semantics now have canonical names with backward-compatible aliases, and package-owned UI strings use the package translation category. | Keep aliases covered until a major release, make canonical properties win when both names are configured, and keep new package-owned UI strings in `adminlte3`. |
 
 ---
 
@@ -101,6 +100,8 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Grid export dependency failure was silently hidden | Explicit export configuration now fails fast with `InvalidConfigException` when the required dropdown package is unavailable. |
 | Redundant empty `init()` overrides | Removed from simple widgets where they added no behaviour. |
 | `NavTabs` duplicate/ineffective link options | Link construction was simplified. |
+| Shared widget option semantics | Canonical `icon`, `url`, and `options` names are used where the underlying concept is genuinely equivalent. `titleIcon`, `searchIconClass`, `iconClass`, `link`, and `option` remain backward-compatible deprecated aliases; canonical values win when both forms are configured. Role-specific URLs such as profile/logout/footer actions remain explicitly named because they are not semantically interchangeable. |
+| Package-owned translation categories | Added internal `Translation` support for the `adminlte3` category. Card, Box, ContentHeader, SidebarSearch, SidebarToggle, SidebarUser, and Invoice no longer depend on unrelated `app`, `traits`, or `crm` categories for static UI. Host applications may override `adminlte3`; Timeline keeps only its dynamic domain-action `traits` lookup as an explicit compatibility fallback. |
 
 ### Assets & performance
 
@@ -135,6 +136,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | SidebarMenu route matrix was narrow | Regression coverage includes trailing default actions, module default routes, query parameters, active parents, invisible items, headers, and similarly named non-matching routes. |
 | Comment/PHPDoc conventions were implicit | `docs/CODING_STYLE.md` records Yii-oriented output encoding/trust-boundary rules, useful PHPDoc expectations, PSR-12 formatting, CSP conventions, and public-package documentation restrictions. A regression test requires every public widget class to retain class-level PHPDoc. |
 | Source-level Yii/PSR hygiene was implicit | `Yii2BestPracticesTest` guards valid/used `Yii` imports and the normative PSR-12 ordering of class/function/constant import groups without inventing an alphabetical requirement that PSR-12 does not define. Broad formatting enforcement remains part of the separate coding-standard roadmap item. |
+| Option alias and translation ownership regressions | Dedicated tests cover canonical-vs-legacy option precedence, legacy-only rendering, lazy package translation registration, application overrides, and accidental reintroduction of legacy UI translation categories. |
 
 ---
 
@@ -210,5 +212,7 @@ These are **not current defects**. They are public-package evolution ideas that 
 - Removed Ionicons from the package dependency and asset graph permanently; the package standard icon stack is Font Awesome.
 - Centralized URL, HTTP(S), email, CSS-class, icon-class, and external-link safety policy in internal `SafeHtml`; migrated the main security-sensitive widgets to it.
 - Completed the package-owned CSP pass: Invoice print behavior moved to an external asset script, SidebarMenu active state no longer requires inline display styles, static Navbar/Mailbox/Invoice styles moved into package CSS/utility classes, and InfoBox progress widths now use bounded package CSS classes instead of inline styles.
-- Added public coding/PHPDoc conventions, class-level documentation guards, and source-level Yii/PSR best-practice tests. Comments focus on public contracts, compatibility and trust boundaries rather than duplicating obvious code.
+- Normalized genuinely shared widget options around canonical `icon`, `url`, and `options` names while keeping deprecated aliases backward compatible and covered by tests.
+- Moved static package-owned widget strings to the internal `adminlte3` translation category with application override support; retained only Timeline's dynamic domain-action translation as an explicit legacy fallback.
+- Added public coding/PHPDoc conventions, class-level documentation guards, source-level Yii/PSR best-practice tests, option-alias regression tests, and translation-ownership guards.
 - Remaining roadmap work is intentionally low-risk: source metadata/header cleanup, static analysis/coding standards, incremental release/documentation hygiene, and optional browser-level verification of the complete third-party CSP stack.
