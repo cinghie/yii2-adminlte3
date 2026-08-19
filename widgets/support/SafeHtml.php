@@ -63,8 +63,9 @@ final class SafeHtml
      * Normalizes a general link target used by widgets.
      *
      * Route arrays are resolved through Yii's URL helper. Relative URLs,
-     * fragments and HTTP(S) URLs are allowed. Other explicit schemes are
-     * rejected unless explicitly listed in $allowedSchemes.
+     * fragments and valid absolute HTTP(S) URLs are allowed. Protocol-relative
+     * URLs and unsupported explicit schemes are rejected unless a scheme is
+     * explicitly listed in $allowedSchemes.
      *
      * @param mixed $url String URL or Yii route array.
      * @param string $fallback Safe fallback used for rejected targets.
@@ -82,13 +83,16 @@ final class SafeHtml
         }
 
         $url = trim((string) $url);
-        if ($url === '' || self::hasDangerousScheme($url)) {
+        if ($url === '' || self::hasDangerousScheme($url) || str_starts_with($url, '//')) {
             return $fallback;
         }
 
         if (preg_match('#^([a-z][a-z0-9+.-]*):#i', $url, $matches) === 1) {
             $scheme = strtolower($matches[1]);
-            if (!in_array($scheme, array_merge(['http', 'https'], $allowedSchemes), true)) {
+            if (in_array($scheme, ['http', 'https'], true)) {
+                return self::httpUrl($url) ?? $fallback;
+            }
+            if (!in_array($scheme, $allowedSchemes, true)) {
                 return $fallback;
             }
         }
