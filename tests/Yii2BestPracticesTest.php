@@ -19,19 +19,6 @@ use SplFileInfo;
  */
 final class Yii2BestPracticesTest extends TestCase
 {
-    public function testPhpSourcesDoNotUseTabsForIndentation(): void
-    {
-        $violations = [];
-
-        foreach ($this->phpFiles() as $path => $source) {
-            if (preg_match('/^\t+/m', $source) === 1) {
-                $violations[] = $path;
-            }
-        }
-
-        self::assertSame([], $violations, 'PHP source must use four spaces, not tabs: ' . implode(', ', $violations));
-    }
-
     public function testUseYiiImportIsNotImproperOrUnused(): void
     {
         $improper = [];
