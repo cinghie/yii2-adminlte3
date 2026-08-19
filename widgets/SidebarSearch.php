@@ -12,7 +12,8 @@
 
 namespace cinghie\adminlte3\widgets;
 
-use Yii;
+use cinghie\adminlte3\widgets\support\SafeHtml;
+use cinghie\adminlte3\widgets\support\Translation;
 use yii\bootstrap4\Widget;
 use yii\helpers\Html;
 
@@ -27,35 +28,29 @@ use yii\helpers\Html;
  */
 class SidebarSearch extends Widget
 {
-    /**
-     * @var string Placeholder for the search input
-     */
+    /** @var string Placeholder for the search input. */
     public $placeholder;
 
-    /**
-     * @var string|null Search form action URL (null = no form, just input group for AdminLTE JS)
-     */
+    /** @var string|null Search form action URL (reserved for compatibility). */
     public $action;
 
-    /**
-     * @var string Name of the search input (for form submission)
-     */
+    /** @var string Name of the search input. */
     public $name = 'q';
 
-    /**
-     * @var array HTML attributes for the wrapper div (form-inline)
-     */
+    /** @var array HTML attributes for the wrapper div. */
     public $wrapperOptions = [];
 
-    /**
-     * @var array HTML attributes for the input
-     */
+    /** @var array HTML attributes for the input. */
     public $inputOptions = [];
 
+    /** @var string Font Awesome icon class list. */
+    public $icon = 'fas fa-search fa-fw';
+
     /**
-     * @var string Icon class for the search button (Font Awesome 5)
+     * @var string|null Legacy search icon class list.
+     * @deprecated Use {@see $icon}.
      */
-    public $searchIconClass = 'fas fa-search fa-fw';
+    public $searchIconClass;
 
     /**
      * @inheritdoc
@@ -63,7 +58,7 @@ class SidebarSearch extends Widget
     public function init()
     {
         if ($this->placeholder === null) {
-            $this->placeholder = Yii::t('app', 'Search');
+            $this->placeholder = Translation::t('Search');
         }
         parent::init();
     }
@@ -82,9 +77,13 @@ class SidebarSearch extends Widget
         ], $this->inputOptions);
 
         $input = Html::input('search', $this->name, null, $inputOptions);
+        $icon = $this->searchIconClass !== null && $this->searchIconClass !== ''
+            ? $this->searchIconClass
+            : $this->icon;
+        $icon = SafeHtml::iconClass($icon, 'fas fa-search fa-fw');
 
         $button = Html::button(
-            Html::tag('i', '', ['class' => $this->searchIconClass]),
+            Html::tag('i', '', ['class' => $icon]),
             ['class' => 'btn btn-sidebar', 'type' => 'button', 'aria-label' => $placeholder]
         );
 
