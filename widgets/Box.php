@@ -3,7 +3,7 @@
 namespace cinghie\adminlte3\widgets;
 
 use cinghie\adminlte3\widgets\support\SafeHtml;
-use Yii;
+use cinghie\adminlte3\widgets\support\Translation;
 use yii\helpers\Html;
 
 /**
@@ -86,7 +86,7 @@ class Box extends Card
         $this->type = $this->normalizeType($this->type) ?: self::TYPE_INFO;
 
         if ($this->title === null) {
-            $this->title = Yii::t('app', 'Card');
+            $this->title = Translation::t('Card');
         }
 
         if ($this->footerLeftTitle === null && $this->buttonLeftTitle !== null) {
@@ -151,7 +151,7 @@ class Box extends Card
             return $this->renderGrid($this->dataProvider, $this->columns);
         }
 
-        return Html::tag('p', Html::encode(Yii::t('app', 'No content.')), ['class' => 'card-text text-muted']);
+        return Html::tag('p', Html::encode(Translation::t('No content.')), ['class' => 'card-text text-muted']);
     }
 
     /**
