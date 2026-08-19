@@ -62,6 +62,26 @@ final class AdditionalWidgetsTest extends HtmlDomTestCase
         self::assertSame(0, $xpath->query('//*[@id="team-calendar"]//*')->length);
     }
 
+    public function testCalendarRejectsDangerousEventUrls(): void
+    {
+        $html = Calendar::widget([
+            'id' => 'safe-calendar',
+            'card' => false,
+            'events' => [[
+                'title' => 'Unsafe navigation',
+                'start' => '2026-08-20',
+                'url' => 'javascript:alert(1)',
+            ]],
+            'registerAssets' => false,
+        ]);
+        $xpath = $this->xpath($html);
+        $calendar = $this->one($xpath, '//*[@id="safe-calendar"]');
+        $events = Json::decode($calendar->getAttribute('data-cinghie-calendar-events'));
+
+        self::assertSame('#', $events[0]['url']);
+        self::assertStringNotContainsString('javascript:', $html);
+    }
+
     public function testCalendarCanRenderBareForCustomComposition(): void
     {
         $html = Calendar::widget([
@@ -153,7 +173,8 @@ final class AdditionalWidgetsTest extends HtmlDomTestCase
         self::assertSame('500', trim($headline500->textContent));
         self::assertTrue($this->hasClass($headline500, 'text-danger'));
         self::assertTrue($this->hasClass($icon500, 'text-danger'));
-        self::assertStringContainsString('unexpected error', strtolower($xpath500->document->textContent));
+        self::assertStringContainsString('Oops! Something went wrong.', $xpath500->document->textContent);
+        self::assertStringContainsString('fixing that right away', $xpath500->document->textContent);
 
         $unsafeXpath = $this->xpath($unsafe);
         $unsafeHome = $this->one($unsafeXpath, '//a[@aria-label="Unsafe home"]');
