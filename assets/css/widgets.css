@@ -1,5 +1,10 @@
 /* Stable widget styles for cinghie/yii2-adminlte3. */
 
+/* Navbar */
+.cinghie-brand-image {
+  opacity: 0.8;
+}
+
 /* GridView */
 .kv-grid-table thead th a,
 .kv-grid-table thead th a:hover,
