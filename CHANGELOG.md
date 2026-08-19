@@ -25,6 +25,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added CSP regression coverage for Invoice printing, MailboxRead attachments, SidebarMenu active submenus, InfoBox progress rendering, and the external widget behavior script.
 - Added focused `SafeHtml` regression tests covering dangerous/unknown schemes, malformed and protocol-relative absolute targets, HTTP(S), email validation, CSS-class normalization, and external-link attributes.
 
+#### Translation ownership
+- Added the internal `widgets/support/Translation` helper and package-owned `adminlte3` message catalog.
+- The `adminlte3` source is registered lazily only when the host application has not already configured that category, so application-level translation overrides remain authoritative.
+
 #### Code documentation
 - Added `docs/CODING_STYLE.md` with public Yii/PHPDoc, trust-boundary, security, CSP, and PSR-12 conventions for contributors.
 - Clarified that PSR-12 defines import-block ordering but does not mandate alphabetical sorting within each import group.
@@ -36,6 +40,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added regression coverage for `MailboxRead` HTML/XSS handling, attachment icon normalization, widget rendering hardening, `Invoice` URL policy, formatter isolation, AdminLTE asset dependencies, and CSP-safe InfoBox progress clamping/rendering.
 - Added public-widget smoke coverage across the package and explicit backward-compatibility coverage for the legacy `Box` API.
 - Added `Yii2BestPracticesTest` to guard valid/used `Yii` imports and the normative PSR-12 class/function/constant import-group order without imposing a non-standard alphabetical rule.
+- Added `WidgetOptionSemanticsTest` for canonical-vs-legacy option precedence and legacy-only rendering.
+- Added `TranslationTest` for lazy `adminlte3` registration, host override preservation, and prevention of accidental package UI dependencies on legacy `app`, `crm`, or `traits` categories.
 - Expanded `SidebarMenu` regression coverage for trailing default actions, module default routes, query-parameter matching, active parents, invisible items, headers, and similarly named non-matching routes.
 - Expanded GitHub Actions validation to every PHP minor from 8.1 through 8.5 with strict Composer validation, clean dependency resolution, PHP syntax linting, and PHPUnit execution.
 - Added test-only Asset Packagist aliases, runtime asset directories, request context, GridView module configuration, Bootstrap 4 configuration, and local translation sources required by Kartik widgets under CLI.
@@ -44,12 +50,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 #### Shared rendering safety
 - `Card`, `Box`, `MailboxRead`, `SidebarMenu`, `InfoBox`, `SmallBox`, `NavbarButton`, `NavbarLogo`, `NavbarUser`, and `Invoice` reuse the internal `SafeHtml` normalization policy instead of maintaining independent URL/class validation branches.
-- `SafeHtml::linkUrl()` now validates absolute HTTP(S) URLs through the strict HTTP helper and rejects protocol-relative URLs instead of treating them as ordinary relative links.
+- `SafeHtml::linkUrl()` validates absolute HTTP(S) URLs through the strict HTTP helper and rejects protocol-relative URLs instead of treating them as ordinary relative links.
 - `NavbarLogo` and `NavbarUser` static image presentation moved from inline `style` attributes to package CSS classes.
 - `MailboxRead` attachment truncation moved from an inline style declaration to Bootstrap utility classes.
 - `SidebarMenu` active submenus rely on AdminLTE's `menu-open` state instead of emitting an inline `display` style.
 - `Invoice` no longer emits an inline `onclick` handler for browser printing and no longer uses an inline margin style on the PDF action.
-- `InfoBox::$progress` now maps its existing integer 0–100 normalized value to `cinghie-progress-width-*` package CSS classes instead of generating a `style="width: ...%"` attribute.
+- `InfoBox::$progress` maps its existing integer 0–100 normalized value to `cinghie-progress-width-*` package CSS classes instead of generating a `style="width: ...%"` attribute.
 
 #### Runtime requirements and package dependencies
 - Raised the supported runtime baseline to PHP 8.1+ and Yii 2.0.54+.
@@ -67,22 +73,29 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `AdminLTEThemeAsset` publishes package-owned `js/*` and the CSP-safe progress width stylesheet in addition to the existing theme/widget CSS.
 
 #### Widget architecture and behaviour
-- Converted legacy `Box` into a backward-compatible facade/subclass over `Card`, so card class resolution, header rendering, body markup, tool buttons, and class sanitization now have a single implementation path.
+- Converted legacy `Box` into a backward-compatible facade/subclass over `Card`, so card class resolution, header rendering, body markup, tool buttons, and class sanitization have a single implementation path.
 - Preserved `Box` defaults, GridView body support, footer action buttons, and historical property aliases while keeping the class deprecated for new code.
+- Normalized genuinely shared option names: `Card::$icon` replaces `titleIcon`, `SmallBox::$url` replaces `link`, `NavbarButton::$options` replaces `option`, and sidebar icon options converge on `$icon`. Historical names remain deprecated aliases and canonical values win when both are configured.
+- Kept role-specific URLs such as profile/logout/footer actions explicitly named rather than forcing unrelated targets into a generic alias.
 - Removed redundant no-op `init()` implementations from simple widgets.
 - Simplified `NavTabs` link generation by removing duplicate `href` handling and the ineffective `encode` HTML option.
+
+#### Translation categories
+- Card, Box, ContentHeader, SidebarSearch, SidebarToggle, SidebarUser, and Invoice now use the package-owned `adminlte3` category for static UI strings instead of relying on unrelated `app`, `traits`, or `crm` catalogs.
+- `Timeline` retains its dynamic `traits` lookup only for externally supplied action keys; this is an explicit compatibility fallback rather than a package-owned UI dependency.
 
 #### Documentation
 - Updated README requirements, installation guidance, security defaults, asset behaviour, test instructions, and compatibility notes.
 - Removed the recommendation to install the package with a broad `@dev` stability flag.
 - Streamlined `UPDATE.md` so the dated processed section does not repeat “Processed” in every subsection/result.
 - Closed the remaining package-owned InfoBox `style-src-attr 'none'` CSP roadmap item after replacing inline progress widths with bounded package CSS classes.
+- Marked shared widget option semantics and package translation ownership as processed after adding aliases, `adminlte3`, and regression coverage.
 - Added future widget candidates for Calendar, ChartJS, dedicated 404, and dedicated 500 rendering, with security/test expectations recorded before public implementation.
 
 ### Fixed
 
 #### Mail rendering security
-- `MailboxRead` now HTML-encodes message bodies by default.
+- `MailboxRead` HTML-encodes message bodies by default.
 - HTML mail rendering is explicit (`encodeMailBody=false`) and remains purified by default through Yii HTML Purifier.
 - Attachment icons are treated as validated CSS icon classes instead of arbitrary HTML fragments.
 - Dangerous attachment and image URL schemes are rejected.
@@ -115,7 +128,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Reduced repeated inline CSS output by moving stable widget styles into cacheable package assets.
 - Kept InfoBox progress handling cacheable and JavaScript-free by using one bounded static stylesheet instead of per-instance generated CSS or runtime DOM mutation.
 - Reduced redundant asset dependencies in the main AdminLTE bundles.
-- Reduced maintenance duplication by routing legacy `Box` card rendering through `Card` and shared safety normalization through one internal helper.
+- Reduced maintenance duplication by routing legacy `Box` card rendering through `Card`, shared safety normalization through one internal helper, and package UI translation through one internal category helper.
 
 ### Validation
 
