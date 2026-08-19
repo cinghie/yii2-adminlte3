@@ -101,13 +101,12 @@ final class AdditionalWidgetsTest extends HtmlDomTestCase
             'homeUrl' => ['/site/index'],
             'homeLabel' => 'Back home',
         ]);
-        $html500 = Error500::widget([
-            'message' => "RuntimeException\n/private/path/secret.php:42",
-        ]);
+        $html500 = Error500::widget();
 
         self::assertStringNotContainsString('<b>Missing</b>', $html404);
         self::assertStringNotContainsString('<script>', $html404);
-        self::assertStringNotContainsString('<pre>', $html500);
+        self::assertStringNotContainsString('RuntimeException', $html500);
+        self::assertStringNotContainsString('/private/', $html500);
 
         $xpath404 = $this->xpath($html404);
         $headline404 = $this->one($xpath404, '//*[contains(concat(" ", normalize-space(@class), " "), " headline ")]');
@@ -120,6 +119,6 @@ final class AdditionalWidgetsTest extends HtmlDomTestCase
         $headline500 = $this->one($xpath500, '//*[contains(concat(" ", normalize-space(@class), " "), " headline ")]');
         self::assertSame('500', trim($headline500->textContent));
         self::assertTrue($this->hasClass($headline500, 'text-danger'));
-        self::assertStringContainsString('/private/path/secret.php:42', $xpath500->document->textContent);
+        self::assertStringContainsString('unexpected error', strtolower($xpath500->document->textContent));
     }
 }
