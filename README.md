@@ -27,7 +27,9 @@ For production deployments, prefer a tagged stable release when available, or pi
 
 ## Configuration
 
-Register the normal CSS and JavaScript bundle in your view/layout:
+### Compatibility aggregate
+
+The historical bundles remain available and keep the previous complete plugin set and ordering:
 
 ```php
 use cinghie\adminlte3\AdminLTEAsset;
@@ -35,7 +37,7 @@ use cinghie\adminlte3\AdminLTEAsset;
 AdminLTEAsset::register($this);
 ```
 
-Or use the minified bundle:
+or, for minified vendor files:
 
 ```php
 use cinghie\adminlte3\AdminLTEMinifyAsset;
@@ -43,7 +45,39 @@ use cinghie\adminlte3\AdminLTEMinifyAsset;
 AdminLTEMinifyAsset::register($this);
 ```
 
-Both bundles register `cinghie\adminlte3\assets\AdminLTEThemeAsset`. Stable widget styles and package-owned behavior are shipped under `assets/css/` and `assets/js/`, allowing browsers to cache them rather than requiring repeated inline CSS/JavaScript from each widget.
+The aggregate bundles include jQuery UI, Moment + Tempus Dominus, iCheck Bootstrap, AdminLTE core, Yii Bootstrap 4, Font Awesome, and the package theme assets. Existing applications can therefore keep their current registration unchanged.
+
+### Core-only bundle
+
+Pages that only need the AdminLTE shell can avoid loading optional plugin families:
+
+```php
+use cinghie\adminlte3\AdminLTECoreAsset;
+
+AdminLTECoreAsset::register($this);
+```
+
+The minified equivalent is `AdminLTECoreMinifyAsset`. The core bundle contains only AdminLTE `dist/css/adminlte*` and `dist/js/adminlte*` plus its Yii/Bootstrap/Font Awesome dependencies and `AdminLTEThemeAsset`.
+
+Optional plugin families can be registered independently when a page needs them:
+
+```php
+use cinghie\adminlte3\AdminLTEDateTimeAsset;
+use cinghie\adminlte3\AdminLTEIcheckAsset;
+use cinghie\adminlte3\AdminLTEJqueryUiAsset;
+
+AdminLTEJqueryUiAsset::register($this);
+AdminLTEDateTimeAsset::register($this);
+AdminLTEIcheckAsset::register($this);
+```
+
+Minified equivalents are `AdminLTEJqueryUiMinifyAsset`, `AdminLTEDateTimeMinifyAsset`, and `AdminLTEIcheckMinifyAsset`. Normal/minified bundle pairs are regression-tested for equivalent dependency graphs and corresponding source files.
+
+Both core variants register `cinghie\adminlte3\assets\AdminLTEThemeAsset`. Stable widget styles and package-owned behavior are shipped under `assets/css/` and `assets/js/`, allowing browsers to cache them rather than requiring repeated inline CSS/JavaScript from each widget.
+
+### Script loading and `defer`
+
+The package intentionally does **not** add `defer`, preload hints, or a different script position by default. Yii already preserves AssetBundle dependency ordering, and these assets are normally registered near the end of the document where `defer` provides little parsing benefit. Applications that deliberately move scripts earlier in the page can use Yii's AssetBundle/`jsOptions` configuration to opt into `defer`, but should apply that policy coherently to the complete dependent script chain and verify third-party plugin behavior. Preload hints should only be introduced from application-level performance measurements because published asset URLs and page-critical resources vary by deployment.
 
 ## Security defaults
 
@@ -76,7 +110,7 @@ composer install
 composer test
 ```
 
-CI also runs strict Composer validation and PHP syntax checks. Security/CSP, Yii/PSR source-hygiene, and public-widget documentation guards are part of the normal regression suite.
+CI also runs strict Composer validation and PHP syntax checks. Security/CSP, Yii/PSR source-hygiene, asset parity/order, and public-widget documentation guards are part of the normal regression suite.
 
 ## Contributing
 
