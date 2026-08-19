@@ -134,7 +134,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 | Public widgets lacked broad smoke coverage | Public widget classes have package-level smoke/load coverage, with dedicated behavioural/security tests retained for complex widgets. |
 | SidebarMenu route matrix was narrow | Regression coverage includes trailing default actions, module default routes, query parameters, active parents, invisible items, headers, and similarly named non-matching routes. |
 | Comment/PHPDoc conventions were implicit | `docs/CODING_STYLE.md` records Yii-oriented output encoding/trust-boundary rules, useful PHPDoc expectations, PSR-12 formatting, CSP conventions, and public-package documentation restrictions. A regression test requires every public widget class to retain class-level PHPDoc. |
-| Source-level Yii/PSR hygiene was implicit | `Yii2BestPracticesTest` guards four-space indentation, valid/used `Yii` imports, and the normative PSR-12 ordering of class/function/constant import groups without inventing an alphabetical requirement that PSR-12 does not define. |
+| Source-level Yii/PSR hygiene was implicit | `Yii2BestPracticesTest` guards valid/used `Yii` imports and the normative PSR-12 ordering of class/function/constant import groups without inventing an alphabetical requirement that PSR-12 does not define. Broad formatting enforcement remains part of the separate coding-standard roadmap item. |
 
 ---
 
