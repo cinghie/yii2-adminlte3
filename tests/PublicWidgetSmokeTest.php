@@ -131,10 +131,9 @@ final class PublicWidgetSmokeTest extends TestCase
             '/<li class="nav-item active">.*?<p>Site<\/p>.*?<\/li>/s',
             $html
         );
-        self::assertDoesNotMatchRegularExpression(
-            '/<li class="nav-item active">.*?<p>False positive<\/p>.*?<\/li>/s',
-            $html
-        );
+        // Exactly one active nav item proves the similarly named route did not
+        // become a false positive without relying on URL-manager formatting.
+        self::assertSame(1, substr_count($html, 'nav-item active'));
         self::assertSame(1, substr_count($html, 'nav-link active'));
     }
 
