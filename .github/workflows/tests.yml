@@ -40,3 +40,33 @@ jobs:
 
       - name: Run tests
         run: composer test
+
+  prefer-lowest:
+    name: prefer-lowest (PHP 8.1)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate Composer metadata
+        run: composer validate --strict --no-check-publish
+
+      - name: Configure Asset Packagist
+        run: composer config repositories.asset-packagist composer https://asset-packagist.org
+
+      - name: Resolve lowest declared dependencies
+        run: composer update --prefer-lowest --prefer-stable --no-interaction --prefer-dist --no-progress
+
+      - name: PHP syntax check
+        run: find . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Run tests
+        run: composer test
