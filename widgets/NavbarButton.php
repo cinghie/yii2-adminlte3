@@ -1,75 +1,37 @@
 <?php
 
-/**
- * @copyright Copyright &copy; Gogodigital Srls
- * @company Gogodigital Srls - Wide ICT Solutions
- * @website http://www.gogodigital.it
- * @github https://github.com/cinghie/yii2-adminlte3
- * @license GNU GENERAL PUBLIC LICENSE VERSION 3
- * @package yii2-AdminLTE
- * @version 0.1.0
- */
-
 namespace cinghie\adminlte3\widgets;
 
+use cinghie\adminlte3\widgets\support\SafeHtml;
 use yii\bootstrap4\Widget;
 use yii\helpers\Html;
-use yii\helpers\Url;
 
 /**
- * NavbarButton widget for AdminLTE 3 with Bootstrap 4.
+ * Renders a single AdminLTE 3 navbar link.
  *
- * Renders a single navbar link (nav-item > nav-link).
- * URL is validated: javascript: and data: are replaced with '#' to prevent XSS/open redirect.
- * Use inside: <ul class="navbar-nav"> ... </ul>
- *
- * @see https://adminlte.io/docs/3.1/components/navbar.html
+ * The widget keeps HTML content in {@see $title} for backward compatibility,
+ * while the link target is normalized through the package's internal URL
+ * policy. Applications should pass trusted markup only in {@see $title}.
  */
 class NavbarButton extends Widget
 {
-    /**
-     * Validates URL for use in href: rejects javascript:, data: and other dangerous schemes. Returns '#' if unsafe.
-     * @param string $url
-     * @return string
-     */
-    protected static function safeLinkUrl($url)
-    {
-        if ($url === null || $url === '' || $url === '#') {
-            return '#';
-        }
-        $url = (string) $url;
-        if (preg_match('#^\s*javascript:#i', $url) || preg_match('#^\s*data:#i', $url) || preg_match('#^\s*vbscript:#i', $url)) {
-            return '#';
-        }
-        return $url;
-    }
-    /**
-     * @var string Link content (HTML allowed, e.g. icon + text). Default: icon only.
-     */
+    /** @var string Trusted link content. */
     public $title;
 
-    /**
-     * @var string|array Link URL (array will be passed to Url::to())
-     */
+    /** @var string|array Link URL or Yii route array. */
     public $url = '#';
 
-    /**
-     * @var string|null Target attribute (e.g. '_blank'). Null = not set.
-     */
+    /** @var string|null Optional anchor target, for example `_blank`. */
     public $target;
 
-    /**
-     * @var array HTML options for the anchor (class => 'nav-link' is merged by default)
-     */
+    /** @var array HTML options merged into the anchor element. */
     public $option = [];
 
-    /**
-     * @var bool Whether to wrap in <li class="nav-item">
-     */
+    /** @var bool Whether to wrap the anchor in `<li class="nav-item">`. */
     public $renderAsLi = true;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function init()
     {
@@ -79,31 +41,22 @@ class NavbarButton extends Widget
         if ($this->option === null) {
             $this->option = [];
         }
+
         parent::init();
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function run()
     {
-        $url = is_array($this->url) ? Url::to($this->url) : $this->url;
-        $url = self::safeLinkUrl($url);
-
         $options = array_merge(['class' => 'nav-link'], $this->option);
-        if ($this->target !== null && $this->target !== '') {
-            $options['target'] = $this->target;
-            if ($this->target === '_blank') {
-                $options['rel'] = 'noopener noreferrer';
-            }
-        }
+        $options = array_merge($options, SafeHtml::externalLinkOptions($this->target));
 
-        $link = Html::a($this->title, $url, $options);
+        $link = Html::a($this->title, SafeHtml::linkUrl($this->url, '#'), $options);
 
-        if ($this->renderAsLi) {
-            return Html::tag('li', $link, ['class' => 'nav-item']);
-        }
-
-        return $link;
+        return $this->renderAsLi
+            ? Html::tag('li', $link, ['class' => 'nav-item'])
+            : $link;
     }
 }
