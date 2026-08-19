@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace cinghie\adminlte3\tests;
 
 use cinghie\adminlte3\widgets\Box;
+use cinghie\adminlte3\widgets\Card;
 use cinghie\adminlte3\widgets\NavbarUser;
 use cinghie\adminlte3\widgets\NavTabs;
 use cinghie\adminlte3\widgets\SidebarMenu;
-use PHPUnit\Framework\TestCase;
 
-final class RenderingHardeningTest extends TestCase
+final class RenderingHardeningTest extends HtmlDomTestCase
 {
     public function testSidebarIconAndBadgeAreEncoded(): void
     {
@@ -23,9 +23,15 @@ final class RenderingHardeningTest extends TestCase
             ]],
         ]);
 
-        $this->assertStringNotContainsString('onclick=', $html);
-        $this->assertStringNotContainsString('<img', $html);
-        $this->assertStringContainsString('&lt;img', $html);
+        $xpath = $this->xpath($html);
+        $icon = $this->one($xpath, "//*[@id='test-root']//a[contains(concat(' ', normalize-space(@class), ' '), ' nav-link ')]/i");
+        $badge = $this->one($xpath, "//*[@id='test-root']//span[contains(concat(' ', normalize-space(@class), ' '), ' badge ')]");
+
+        self::assertTrue($this->hasClass($icon, 'fas'));
+        self::assertTrue($this->hasClass($icon, 'fa-home'));
+        self::assertFalse($icon->hasAttribute('onclick'));
+        self::assertSame('<img src=x onerror=alert(1)>', $badge->textContent);
+        self::assertSame(0, $xpath->query("//*[@id='test-root']//img")->length);
     }
 
     public function testBoxSanitizesClassAndRejectsDangerousFooterUrl(): void
@@ -38,9 +44,14 @@ final class RenderingHardeningTest extends TestCase
             'footerLeftType' => 'danger" onclick="alert(1)',
         ]);
 
-        $this->assertStringNotContainsString('onclick=', $html);
-        $this->assertStringNotContainsString('javascript:', $html);
-        $this->assertStringContainsString('href="#"', $html);
+        $xpath = $this->xpath($html);
+        $wrapper = $this->one($xpath, "//*[@id='test-root']/div");
+        $footerLink = $this->one($xpath, "//*[@id='test-root']//div[contains(concat(' ', normalize-space(@class), ' '), ' card-footer ')]//a");
+
+        self::assertTrue($this->hasClass($wrapper, 'col-12'));
+        self::assertFalse($wrapper->hasAttribute('onclick'));
+        self::assertSame('#', $footerLink->getAttribute('href'));
+        self::assertFalse($footerLink->hasAttribute('onclick'));
     }
 
     public function testNavbarLogoutUsesPostAndRejectsDangerousUrl(): void
@@ -49,8 +60,29 @@ final class RenderingHardeningTest extends TestCase
             'userfooterlink2' => 'javascript:alert(1)',
         ]);
 
-        $this->assertStringNotContainsString('javascript:', $html);
-        $this->assertStringContainsString('data-method="post"', $html);
+        $xpath = $this->xpath($html);
+        $logout = $this->one($xpath, "//*[@id='test-root']//a[@data-method='post']");
+
+        self::assertSame('post', $logout->getAttribute('data-method'));
+        self::assertSame('#', $logout->getAttribute('href'));
+        self::assertStringNotContainsString('javascript:', $logout->getAttribute('href'));
+    }
+
+    public function testCardToolExposesAdminLteAndAriaAttributes(): void
+    {
+        $html = Card::widget([
+            'title' => 'Tools',
+            'collapsible' => true,
+        ]);
+
+        $xpath = $this->xpath($html);
+        $button = $this->one($xpath, "//*[@id='test-root']//button[@data-card-widget='collapse']");
+        $icon = $this->one($xpath, "//*[@id='test-root']//button[@data-card-widget='collapse']/i");
+
+        self::assertSame('Collapse', $button->getAttribute('aria-label'));
+        self::assertSame('Collapse', $button->getAttribute('title'));
+        self::assertTrue($this->hasClass($button, 'btn-tool'));
+        self::assertTrue($this->hasClass($icon, 'fa-minus'));
     }
 
     public function testNavTabsSanitizesIds(): void
@@ -64,8 +96,12 @@ final class RenderingHardeningTest extends TestCase
             ]],
         ]);
 
-        $this->assertStringNotContainsString('onclick=', $html);
-        $this->assertStringNotContainsString('<script>', $html);
-        $this->assertStringContainsString('&lt;script&gt;', $html);
+        $xpath = $this->xpath($html);
+        self::assertSame(0, $xpath->query("//*[@id='test-root']//*[@onclick]")->length);
+        self::assertSame(0, $xpath->query("//*[@id='test-root']//script")->length);
+        self::assertStringContainsString('<script>alert(1)</script>', $this->one(
+            $xpath,
+            "//*[@id='test-root']//div[contains(concat(' ', normalize-space(@class), ' '), ' tab-pane ')]"
+        )->textContent);
     }
 }
