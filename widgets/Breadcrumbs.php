@@ -12,7 +12,6 @@
 
 namespace cinghie\adminlte3\widgets;
 
-use Yii;
 use yii\widgets\Breadcrumbs as BaseBreadcrumbs;
 
 /**
@@ -44,5 +43,4 @@ class Breadcrumbs extends BaseBreadcrumbs
      * @var string the template used to render each active item (Bootstrap 4 breadcrumb-item active)
      */
     public $activeItemTemplate = "<li class=\"breadcrumb-item active\" aria-current=\"page\">{link}</li>\n";
-
 }
