@@ -12,9 +12,7 @@ class AdminLTEChartJSAsset extends AssetBundle
     public $sourcePath = '@vendor/almasaeed2010/adminlte/';
     public $appendTimestamp = true;
 
-    public $css = [
-        'plugins/chart.js/Chart.css',
-    ];
+    public $css = [];
 
     public $js = [
         'plugins/chart.js/Chart.js',
