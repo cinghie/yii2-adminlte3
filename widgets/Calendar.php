@@ -3,6 +3,7 @@
 namespace cinghie\adminlte3\widgets;
 
 use cinghie\adminlte3\assets\CalendarWidgetAsset;
+use cinghie\adminlte3\widgets\support\SafeHtml;
 use yii\bootstrap4\Widget;
 use yii\helpers\Html;
 use yii\helpers\Json;
@@ -51,7 +52,7 @@ class Calendar extends Widget
         $htmlOptions = $this->options;
         $htmlOptions['id'] = $this->getId();
         $htmlOptions['data-cinghie-calendar'] = '1';
-        $htmlOptions['data-cinghie-calendar-events'] = Json::encode($this->events);
+        $htmlOptions['data-cinghie-calendar-events'] = Json::encode($this->normalizeEvents($this->events));
         $htmlOptions['data-cinghie-calendar-options'] = Json::encode($this->calendarOptions);
         Html::addCssClass($htmlOptions, 'cinghie-calendar');
 
@@ -67,5 +68,27 @@ class Calendar extends Widget
             'bodyOptions' => ['class' => 'p-0'],
             'options' => $this->cardOptions,
         ]);
+    }
+
+    /**
+     * Normalizes security-sensitive event fields before JSON serialization.
+     *
+     * FullCalendar renders event URLs as navigation targets. JSON/HTML encoding
+     * protects the surrounding markup but does not validate the URL scheme, so
+     * explicit event URLs must pass the same package policy as other links.
+     *
+     * @param array<int,array<string,mixed>> $events Calendar event definitions.
+     * @return array<int,array<string,mixed>>
+     */
+    protected function normalizeEvents(array $events): array
+    {
+        foreach ($events as &$event) {
+            if (array_key_exists('url', $event) && $event['url'] !== null && $event['url'] !== '') {
+                $event['url'] = SafeHtml::linkUrl($event['url'], '#');
+            }
+        }
+        unset($event);
+
+        return $events;
     }
 }
