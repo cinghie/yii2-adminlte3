@@ -2,46 +2,80 @@
 
 namespace cinghie\adminlte3\widgets;
 
+use cinghie\adminlte3\widgets\support\SafeHtml;
 use Yii;
 use yii\helpers\Html;
-use yii\helpers\Url;
 
 /**
  * Legacy AdminLTE 3 card widget.
  *
- * Box is now a backward-compatible facade over {@see Card}. New code should
- * use Card directly; Box keeps its historical GridView and footer-button API.
+ * Box is a backward-compatible facade over {@see Card}. New code should use
+ * Card directly; Box keeps its historical GridView and footer-button API.
  *
  * @deprecated Prefer {@see Card}.
  */
 class Box extends Card
 {
+    /** @var string|null Historical wrapper grid classes. */
     public $wrapperClass = 'col-lg-6';
+
+    /** @var string|null Historical default contextual type. */
     public $type = self::TYPE_INFO;
+
+    /** @var bool Historical default: show collapse tool. */
     public $collapsible = true;
+
+    /** @var bool Historical default: show remove tool. */
     public $removable = true;
 
+    /** @var mixed Optional GridView data provider. */
     public $dataProvider;
+
+    /** @var array|null Optional GridView column configuration. */
     public $columns;
+
+    /** @var string|null Left footer action label. */
     public $footerLeftTitle;
+
+    /** @var string|array|null Left footer action target. */
     public $footerLeftUrl;
+
+    /** @var string Left footer Bootstrap button type. */
     public $footerLeftType = 'primary';
+
+    /** @var string|null Right footer action label. */
     public $footerRightTitle;
+
+    /** @var string|array|null Right footer action target. */
     public $footerRightUrl;
+
+    /** @var string Right footer Bootstrap button type. */
     public $footerRightType = 'secondary';
 
-    // Backward-compatible aliases.
+    /** @var string|null Legacy alias for {@see $wrapperClass}. */
     public $class;
+
+    /** @var string|null Legacy alias for {@see $footerLeftTitle}. */
     public $buttonLeftTitle;
+
+    /** @var string|array|null Legacy alias for {@see $footerLeftUrl}. */
     public $buttonLeftLink;
+
+    /** @var string|null Legacy alias for {@see $footerLeftType}. */
     public $buttonLeftType;
+
+    /** @var string|null Legacy alias for {@see $footerRightTitle}. */
     public $buttonRightTitle;
+
+    /** @var string|array|null Legacy alias for {@see $footerRightUrl}. */
     public $buttonRightLink;
+
+    /** @var string|null Legacy alias for {@see $footerRightType}. */
     public $buttonRightType;
 
     /**
      * Box intentionally skips Card's output-buffer initialization because the
-     * legacy widget API is widget()-only. Rendering itself is delegated to Card.
+     * legacy widget API is widget()-only. Rendering itself delegates to Card.
      */
     public function init()
     {
@@ -75,6 +109,9 @@ class Box extends Card
         $this->footerRightType = self::normalizeButtonType($this->footerRightType, 'secondary');
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function run()
     {
         $bodyHtml = $this->resolveLegacyBody();
@@ -85,14 +122,18 @@ class Box extends Card
         $html .= $this->renderFooter();
 
         $card = Html::tag('div', $html, $this->options);
-
         if ($this->wrapperClass !== null && $this->wrapperClass !== '') {
-            return Html::tag('div', $card, ['class' => self::sanitizeClass($this->wrapperClass, '')]);
+            return Html::tag('div', $card, ['class' => self::sanitizeClass($this->wrapperClass)]);
         }
 
         return $card;
     }
 
+    /**
+     * Resolves legacy body modes into encoded/trusted HTML.
+     *
+     * @return string
+     */
     protected function resolveLegacyBody(): string
     {
         if ($this->body !== null && $this->body !== '') {
@@ -113,6 +154,13 @@ class Box extends Card
         return Html::tag('p', Html::encode(Yii::t('app', 'No content.')), ['class' => 'card-text text-muted']);
     }
 
+    /**
+     * Renders the package-local GridView used by the historical Box API.
+     *
+     * @param mixed $dataProvider Grid data provider.
+     * @param array $columns Grid column configuration.
+     * @return string
+     */
     protected function renderGrid($dataProvider, array $columns)
     {
         return GridView::widget([
@@ -125,6 +173,11 @@ class Box extends Card
         ]);
     }
 
+    /**
+     * Renders legacy left/right footer action buttons.
+     *
+     * @return string
+     */
     protected function renderFooter()
     {
         $hasLeft = $this->footerLeftTitle !== null && $this->footerLeftTitle !== '' && $this->footerLeftUrl !== null;
@@ -149,20 +202,24 @@ class Box extends Card
         return Html::tag('div', $left . $right, ['class' => 'card-footer']);
     }
 
+    /**
+     * Normalizes a footer URL using the package-wide URL policy.
+     *
+     * @param mixed $url String URL or Yii route array.
+     * @return string
+     */
     protected function normalizeUrl($url)
     {
-        if (is_array($url)) {
-            return Url::to($url);
-        }
-
-        $url = (string) $url;
-        if (preg_match('#^\s*(?:javascript|data|vbscript):#i', $url)) {
-            return '#';
-        }
-
-        return $url;
+        return SafeHtml::linkUrl($url, '#');
     }
 
+    /**
+     * Normalizes a Bootstrap button contextual type.
+     *
+     * @param mixed $type Candidate type.
+     * @param string $default Fallback type.
+     * @return string
+     */
     protected static function normalizeButtonType($type, $default)
     {
         $type = strtolower(str_replace('btn-', '', trim((string) $type)));
