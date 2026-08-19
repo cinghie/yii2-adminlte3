@@ -39,7 +39,13 @@ class SmallBox extends Widget
     /** @var string Font Awesome icon class list. */
     public $icon = 'fas fa-shopping-cart';
 
-    /** @var string|array|null Optional footer link target. */
+    /** @var string|array|null Optional footer URL or Yii route array. */
+    public $url;
+
+    /**
+     * @var string|array|null Legacy footer link target.
+     * @deprecated Use {@see $url}. The canonical `url` name is shared by link widgets.
+     */
     public $link;
 
     /** @var string Footer link label. */
@@ -53,6 +59,7 @@ class SmallBox extends Widget
         $wrapperClass = SafeHtml::cssClass($this->wrapperClass, 'col-md-3 col-sm-6 col-12');
         $bgClass = SafeHtml::cssClass($this->bgClass, self::COLOR_INFO);
         $iconClass = SafeHtml::iconClass($this->icon, 'fas fa-shopping-cart');
+        $url = $this->url !== null && $this->url !== '' ? $this->url : $this->link;
 
         $inner = Html::tag(
             'div',
@@ -62,13 +69,13 @@ class SmallBox extends Widget
         $icon = Html::tag('div', Html::tag('i', '', ['class' => $iconClass]), ['class' => 'icon']);
         $content = [$inner, $icon];
 
-        if ($this->link !== null && $this->link !== '') {
+        if ($url !== null && $url !== '') {
             $footerContent = Html::encode($this->footerText)
                 . ' '
                 . Html::tag('i', '', ['class' => 'fas fa-arrow-circle-right']);
             $content[] = Html::a(
                 $footerContent,
-                SafeHtml::linkUrl($this->link, '#'),
+                SafeHtml::linkUrl($url, '#'),
                 ['class' => 'small-box-footer']
             );
         }
