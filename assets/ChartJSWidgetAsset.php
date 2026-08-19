@@ -25,5 +25,6 @@ class ChartJSWidgetAsset extends AssetBundle
 
     public $depends = [
         AdminLTEChartJSMinifyAsset::class,
+        AdminLTEThemeAsset::class,
     ];
 }
