@@ -45,8 +45,6 @@ jobs:
     name: prefer-lowest (PHP 8.1)
     runs-on: ubuntu-latest
     continue-on-error: true
-    env:
-      COMPOSER_MAX_PARALLEL_PROCESSES: 1
 
     steps:
       - uses: actions/checkout@v4
@@ -65,7 +63,10 @@ jobs:
         run: composer config repositories.asset-packagist composer https://asset-packagist.org
 
       - name: Resolve lowest declared dependencies
-        run: composer update --prefer-lowest --prefer-stable --no-interaction --prefer-dist --no-progress
+        run: composer update --prefer-lowest --prefer-stable --no-install --no-interaction --no-progress
+
+      - name: Install lowest dependency set
+        run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: PHP syntax check
         run: find . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
