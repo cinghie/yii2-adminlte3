@@ -2,16 +2,21 @@
 
 namespace cinghie\adminlte3\widgets;
 
+use cinghie\adminlte3\widgets\support\SafeHtml;
 use yii\bootstrap4\Widget;
 use yii\helpers\Html;
-use yii\helpers\Url;
 
+/**
+ * Renders an AdminLTE 3 small statistic box.
+ */
 class SmallBox extends Widget
 {
     public const COLOR_INFO = 'bg-info';
     public const COLOR_SUCCESS = 'bg-success';
     public const COLOR_WARNING = 'bg-warning';
     public const COLOR_DANGER = 'bg-danger';
+
+    /** @var array<string,string> Legacy color aliases kept for compatibility. */
     public const COLORS = [
         'info' => self::COLOR_INFO,
         'success' => self::COLOR_SUCCESS,
@@ -19,46 +24,35 @@ class SmallBox extends Widget
         'danger' => self::COLOR_DANGER,
     ];
 
+    /** @var string Wrapper grid classes. */
     public $wrapperClass = 'col-md-3 col-sm-6 col-12';
+
+    /** @var string Background utility class applied to the box. */
     public $bgClass = self::COLOR_INFO;
+
+    /** @var string Main numeric/text value. */
     public $title = '0';
+
+    /** @var string Secondary descriptive text. */
     public $subtitle = '';
+
+    /** @var string Font Awesome icon class list. */
     public $icon = 'fas fa-shopping-cart';
+
+    /** @var string|array|null Optional footer link target. */
     public $link;
+
+    /** @var string Footer link label. */
     public $footerText = 'More info';
 
-    protected static function sanitizeClass($value, $default = '')
-    {
-        if ($value === null || $value === '') {
-            return $default;
-        }
-        $sanitized = preg_replace('/[^A-Za-z0-9_\- ]/', '', (string) $value);
-        return $sanitized !== '' ? $sanitized : $default;
-    }
-
-    protected static function safeLinkUrl($url)
-    {
-        if ($url === null || $url === '') {
-            return '';
-        }
-        $href = is_array($url) ? Url::to($url) : (string) $url;
-        if ($href === '' || $href === '#') {
-            return $href;
-        }
-        if (preg_match('#^\s*(?:javascript|data|vbscript):#i', $href)) {
-            return '#';
-        }
-        if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $href) && !preg_match('#^https?://#i', $href)) {
-            return '#';
-        }
-        return $href;
-    }
-
+    /**
+     * {@inheritdoc}
+     */
     public function run()
     {
-        $wrapperClass = self::sanitizeClass($this->wrapperClass, 'col-md-3 col-sm-6 col-12');
-        $bgClass = self::sanitizeClass($this->bgClass, 'bg-info');
-        $iconClass = self::sanitizeClass($this->icon, 'fas fa-shopping-cart');
+        $wrapperClass = SafeHtml::cssClass($this->wrapperClass, 'col-md-3 col-sm-6 col-12');
+        $bgClass = SafeHtml::cssClass($this->bgClass, self::COLOR_INFO);
+        $iconClass = SafeHtml::iconClass($this->icon, 'fas fa-shopping-cart');
 
         $inner = Html::tag(
             'div',
@@ -69,13 +63,18 @@ class SmallBox extends Widget
         $content = [$inner, $icon];
 
         if ($this->link !== null && $this->link !== '') {
-            $footerContent = Html::encode($this->footerText) . ' ' . Html::tag('i', '', ['class' => 'fas fa-arrow-circle-right']);
-            $content[] = Html::a($footerContent, self::safeLinkUrl($this->link) ?: '#', [
-                'class' => 'small-box-footer',
-            ]);
+            $footerContent = Html::encode($this->footerText)
+                . ' '
+                . Html::tag('i', '', ['class' => 'fas fa-arrow-circle-right']);
+            $content[] = Html::a(
+                $footerContent,
+                SafeHtml::linkUrl($this->link, '#'),
+                ['class' => 'small-box-footer']
+            );
         }
 
         $smallBox = Html::tag('div', implode("\n", $content), ['class' => 'small-box ' . $bgClass]);
+
         return Html::tag('div', $smallBox, ['class' => $wrapperClass]);
     }
 }
