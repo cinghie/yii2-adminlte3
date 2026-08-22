@@ -14,6 +14,44 @@
         }
     }
 
+    function normalizeVersionOptions(options) {
+        var version = typeof FullCalendar.version === 'string' ? FullCalendar.version : '';
+        var legacy = version.indexOf('4.') === 0;
+
+        if (legacy) {
+            if (!options.header && options.headerToolbar) {
+                options.header = options.headerToolbar;
+            }
+            if (!options.defaultView && options.initialView) {
+                options.defaultView = options.initialView;
+            }
+            if (!options.defaultDate && options.initialDate) {
+                options.defaultDate = options.initialDate;
+            }
+
+            delete options.headerToolbar;
+            delete options.initialView;
+            delete options.initialDate;
+            return options;
+        }
+
+        if (!options.headerToolbar && options.header) {
+            options.headerToolbar = options.header;
+        }
+        if (!options.initialView && options.defaultView) {
+            options.initialView = options.defaultView;
+        }
+        if (!options.initialDate && options.defaultDate) {
+            options.initialDate = options.defaultDate;
+        }
+
+        delete options.header;
+        delete options.defaultView;
+        delete options.defaultDate;
+
+        return options;
+    }
+
     function applyLegacyDefaults(options) {
         var version = typeof FullCalendar.version === 'string' ? FullCalendar.version : '';
         if (version.indexOf('4.') !== 0) {
@@ -40,6 +78,7 @@
         }
 
         var options = parseJsonAttribute(element, 'data-cinghie-calendar-options', {});
+        options = normalizeVersionOptions(options);
         options = applyLegacyDefaults(options);
         options.events = parseJsonAttribute(element, 'data-cinghie-calendar-events', []);
 
