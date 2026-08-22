@@ -36,6 +36,10 @@ class AdminLTECalendarMinifyAsset extends AssetBundle
         parent::init();
 
         $root = rtrim(Yii::getAlias($this->sourcePath), '/\\') . DIRECTORY_SEPARATOR;
+        if (is_file($root . 'plugins/fullcalendar/locales-all.min.js')) {
+            $this->js[] = 'plugins/fullcalendar/locales-all.min.js';
+        }
+
         if (!is_file($root . 'plugins/fullcalendar-daygrid/main.min.css')) {
             return;
         }
@@ -55,5 +59,8 @@ class AdminLTECalendarMinifyAsset extends AssetBundle
             'plugins/fullcalendar-timegrid/main.min.js',
             'plugins/fullcalendar-bootstrap/main.min.js',
         ];
+        if (is_file($root . 'plugins/fullcalendar/locales-all.min.js')) {
+            $this->js[] = 'plugins/fullcalendar/locales-all.min.js';
+        }
     }
 }
