@@ -36,6 +36,10 @@ class AdminLTECalendarAsset extends AssetBundle
         parent::init();
 
         $root = rtrim(Yii::getAlias($this->sourcePath), '/\\') . DIRECTORY_SEPARATOR;
+        if (is_file($root . 'plugins/fullcalendar/locales-all.js')) {
+            $this->js[] = 'plugins/fullcalendar/locales-all.js';
+        }
+
         if (!is_file($root . 'plugins/fullcalendar-daygrid/main.css')) {
             return;
         }
@@ -55,5 +59,8 @@ class AdminLTECalendarAsset extends AssetBundle
             'plugins/fullcalendar-timegrid/main.js',
             'plugins/fullcalendar-bootstrap/main.js',
         ];
+        if (is_file($root . 'plugins/fullcalendar/locales-all.js')) {
+            $this->js[] = 'plugins/fullcalendar/locales-all.js';
+        }
     }
 }
