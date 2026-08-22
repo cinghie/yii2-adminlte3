@@ -14,6 +14,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-08-22
+
+### Fixed
+
+- Calendar widget initialization now normalizes FullCalendar option names by detected major version before constructing the browser calendar: FullCalendar 4 receives `header` / `defaultView` / `defaultDate`, while newer generations receive `headerToolbar` / `initialView` / `initialDate`.
+- Compatibility aliases are removed after translation so legacy and modern option names are not forwarded together and do not produce unsupported-option warnings or version-dependent toolbar behavior.
+
+### Tests
+
+- Added `CalendarVersionCompatibilityTest` to guard both translation directions, removal of incompatible aliases, and normalization-before-legacy-default ordering.
+
 ## 2026-08-19
 
 ### Added
