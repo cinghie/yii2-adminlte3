@@ -4,17 +4,19 @@ namespace cinghie\adminlte3\widgets;
 
 use cinghie\adminlte3\AdminLTEDateTimeAsset;
 use cinghie\adminlte3\AdminLTEDateTimeMinifyAsset;
+use cinghie\adminlte3\assets\DateTimePickerWidgetAsset;
+use cinghie\adminlte3\widgets\support\SafeHtml;
 use yii\helpers\Html;
 use yii\helpers\Json;
-use yii\web\View;
 use yii\widgets\InputWidget;
 
 /**
  * Bootstrap 4 / AdminLTE 3 DateTimePicker backed by bundled Tempus Dominus.
  *
  * The widget reuses an already registered source/minified date-time bundle when
- * the host layout owns AdminLTE assets, then binds both the prepended icon and
- * input focus explicitly to the plugin `show()` command.
+ * the host layout owns AdminLTE assets. Package-owned behavior and presentation
+ * live in an external widget asset; instance configuration is passed as encoded
+ * JSON data so rendering does not require per-instance inline JavaScript/CSS.
  */
 class DateTimePicker extends InputWidget
 {
@@ -41,6 +43,7 @@ class DateTimePicker extends InputWidget
             $assetClass = YII_DEBUG ? AdminLTEDateTimeAsset::class : AdminLTEDateTimeMinifyAsset::class;
             $assetClass::register($view);
         }
+        DateTimePickerWidgetAsset::register($view);
 
         $inputId = $this->options['id'] ?? Html::getInputId($this->model, $this->attribute);
         $wrapperId = $inputId . '-datetimepicker';
@@ -55,9 +58,10 @@ class DateTimePicker extends InputWidget
             ? Html::activeTextInput($this->model, $this->attribute, $options)
             : Html::textInput($this->name, $this->value, $options);
 
+        $icon = SafeHtml::iconClass($this->icon, 'far fa-calendar-alt');
         $addon = Html::tag(
             'div',
-            Html::tag('div', Html::tag('i', '', ['class' => $this->icon]), ['class' => 'input-group-text']),
+            Html::tag('div', Html::tag('i', '', ['class' => $icon]), ['class' => 'input-group-text']),
             [
                 'class' => 'input-group-prepend',
                 'data-target' => '#' . $wrapperId,
@@ -68,12 +72,6 @@ class DateTimePicker extends InputWidget
                 'aria-label' => $this->toggleLabel,
             ]
         );
-
-        $html = Html::tag('div', $addon . $input, [
-            'class' => 'input-group date cinghie-adminlte3-datetimepicker',
-            'id' => $wrapperId,
-            'data-target-input' => 'nearest',
-        ]);
 
         $defaults = [
             'format' => $this->format,
@@ -91,51 +89,13 @@ class DateTimePicker extends InputWidget
             ],
         ];
         $pluginOptions = array_replace_recursive($defaults, $this->pluginOptions);
-        $selector = Json::encode('#' . $wrapperId);
-        $config = Json::encode($pluginOptions);
 
-        $view->registerCss('.bootstrap-datetimepicker-widget{z-index:1080!important}');
-        $script = <<<JS
-(function ($) {
-    var selector = {$selector};
-    var config = {$config};
-
-    function initCinghieDateTimePicker() {
-        var picker = $(selector);
-        if (!picker.length || typeof $.fn.datetimepicker !== 'function') {
-            return false;
-        }
-        if (!picker.data('cinghie-datetimepicker-ready')) {
-            picker.datetimepicker(config);
-            picker.data('cinghie-datetimepicker-ready', true);
-        }
-
-        picker.find('[data-cinghie-datetime-toggle]')
-            .off('.cinghieDateTimePicker')
-            .on('click.cinghieDateTimePicker keydown.cinghieDateTimePicker', function (event) {
-                if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') {
-                    return;
-                }
-                event.preventDefault();
-                picker.datetimepicker('show');
-            });
-
-        picker.find('.datetimepicker-input')
-            .off('focus.cinghieDateTimePicker')
-            .on('focus.cinghieDateTimePicker', function () {
-                picker.datetimepicker('show');
-            });
-        return true;
-    }
-
-    if (!initCinghieDateTimePicker()) {
-        window.setTimeout(initCinghieDateTimePicker, 0);
-        $(window).one('load.cinghieDateTimePicker', initCinghieDateTimePicker);
-    }
-})(jQuery);
-JS;
-        $view->registerJs($script, View::POS_READY, 'cinghie-adminlte3-datetimepicker-' . $wrapperId);
-
-        return $html;
+        return Html::tag('div', $addon . $input, [
+            'class' => 'input-group date cinghie-adminlte3-datetimepicker',
+            'id' => $wrapperId,
+            'data-target-input' => 'nearest',
+            'data-cinghie-datetimepicker' => '1',
+            'data-cinghie-datetime-options' => Json::htmlEncode($pluginOptions),
+        ]);
     }
 }
