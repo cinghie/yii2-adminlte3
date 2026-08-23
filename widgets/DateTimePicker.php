@@ -42,7 +42,8 @@ class DateTimePicker extends InputWidget
         }
         DateTimePickerWidgetAsset::register($view);
 
-        $inputId = $this->options['id'] ?? Html::getInputId($this->model, $this->attribute);
+        $inputId = $this->options['id']
+            ?? ($this->hasModel() ? Html::getInputId($this->model, $this->attribute) : $this->getId());
         $wrapperId = $inputId . '-datetimepicker';
 
         $options = $this->options;
