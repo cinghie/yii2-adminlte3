@@ -1,6 +1,8 @@
 (function () {
     'use strict';
 
+    var globalHandlersRegistered = false;
+
     function parseJsonAttribute(element, name, fallback) {
         var value = element.getAttribute(name);
         if (!value) {
@@ -77,25 +79,34 @@
         });
     }
 
-    function observeCalendarSize(element) {
-        if (typeof ResizeObserver === 'function') {
-            var observer = new ResizeObserver(function () {
-                updateCalendarSize(element);
-            });
-            observer.observe(element.parentElement || element);
-            element.cinghieCalendarResizeObserver = observer;
+    function updateAllCalendars() {
+        var calendars = document.querySelectorAll('[data-cinghie-calendar-initialized="1"]');
+        for (var i = 0; i < calendars.length; i += 1) {
+            updateCalendarSize(calendars[i]);
+        }
+    }
+
+    function registerGlobalResizeHandlers() {
+        if (globalHandlersRegistered) {
+            return;
         }
 
-        window.addEventListener('resize', function () {
-            updateCalendarSize(element);
-        });
+        window.addEventListener('resize', updateAllCalendars);
+        document.addEventListener('collapsed.lte.pushmenu', updateAllCalendars);
+        document.addEventListener('shown.lte.pushmenu', updateAllCalendars);
+        globalHandlersRegistered = true;
+    }
 
-        document.addEventListener('collapsed.lte.pushmenu', function () {
+    function observeCalendarSize(element) {
+        if (typeof ResizeObserver !== 'function') {
+            return;
+        }
+
+        var observer = new ResizeObserver(function () {
             updateCalendarSize(element);
         });
-        document.addEventListener('shown.lte.pushmenu', function () {
-            updateCalendarSize(element);
-        });
+        observer.observe(element.parentElement || element);
+        element.cinghieCalendarResizeObserver = observer;
     }
 
     function initializeCalendar(element) {
@@ -121,6 +132,8 @@
     }
 
     function initializeAll() {
+        registerGlobalResizeHandlers();
+
         var calendars = document.querySelectorAll('[data-cinghie-calendar]');
         for (var i = 0; i < calendars.length; i += 1) {
             initializeCalendar(calendars[i]);
