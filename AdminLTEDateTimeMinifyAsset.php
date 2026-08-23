@@ -2,7 +2,7 @@
 
 namespace cinghie\adminlte3;
 
-use yii\bootstrap4\BootstrapAsset;
+use yii\bootstrap4\BootstrapPluginAsset;
 use yii\web\AssetBundle;
 use yii\web\YiiAsset;
 
@@ -25,6 +25,6 @@ class AdminLTEDateTimeMinifyAsset extends AssetBundle
 
     public $depends = [
         YiiAsset::class,
-        BootstrapAsset::class,
+        BootstrapPluginAsset::class,
     ];
 }

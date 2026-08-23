@@ -3,6 +3,7 @@
 namespace cinghie\adminlte3\widgets;
 
 use cinghie\adminlte3\AdminLTEDateTimeAsset;
+use cinghie\adminlte3\AdminLTEDateTimeMinifyAsset;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\widgets\InputWidget;
@@ -27,7 +28,8 @@ class DateTimePicker extends InputWidget
     public function run()
     {
         $view = $this->getView();
-        AdminLTEDateTimeAsset::register($view);
+        $assetClass = YII_DEBUG ? AdminLTEDateTimeAsset::class : AdminLTEDateTimeMinifyAsset::class;
+        $assetClass::register($view);
 
         $inputId = $this->options['id'] ?? Html::getInputId($this->model, $this->attribute);
         $wrapperId = $inputId . '-datetimepicker';
