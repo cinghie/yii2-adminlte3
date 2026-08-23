@@ -35,8 +35,10 @@ class DateTimePicker extends InputWidget
     public function run()
     {
         $view = $this->getView();
-        if (!isset($view->assetBundles[AdminLTEDateTimeAsset::class])
-            && !isset($view->assetBundles[AdminLTEDateTimeMinifyAsset::class])) {
+        if (
+            !isset($view->assetBundles[AdminLTEDateTimeAsset::class])
+            && !isset($view->assetBundles[AdminLTEDateTimeMinifyAsset::class])
+        ) {
             $assetClass = $this->useMinifiedAssets()
                 ? AdminLTEDateTimeMinifyAsset::class
                 : AdminLTEDateTimeAsset::class;
