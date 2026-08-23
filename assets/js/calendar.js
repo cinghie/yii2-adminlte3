@@ -68,6 +68,36 @@
         return options;
     }
 
+    function updateCalendarSize(element) {
+        if (!element || !element.cinghieCalendar || typeof element.cinghieCalendar.updateSize !== 'function') {
+            return;
+        }
+        window.requestAnimationFrame(function () {
+            element.cinghieCalendar.updateSize();
+        });
+    }
+
+    function observeCalendarSize(element) {
+        if (typeof ResizeObserver === 'function') {
+            var observer = new ResizeObserver(function () {
+                updateCalendarSize(element);
+            });
+            observer.observe(element.parentElement || element);
+            element.cinghieCalendarResizeObserver = observer;
+        }
+
+        window.addEventListener('resize', function () {
+            updateCalendarSize(element);
+        });
+
+        document.addEventListener('collapsed.lte.pushmenu', function () {
+            updateCalendarSize(element);
+        });
+        document.addEventListener('shown.lte.pushmenu', function () {
+            updateCalendarSize(element);
+        });
+    }
+
     function initializeCalendar(element) {
         if (element.getAttribute('data-cinghie-calendar-initialized') === '1') {
             return;
@@ -86,6 +116,8 @@
         calendar.render();
         element.cinghieCalendar = calendar;
         element.setAttribute('data-cinghie-calendar-initialized', '1');
+        observeCalendarSize(element);
+        updateCalendarSize(element);
     }
 
     function initializeAll() {
