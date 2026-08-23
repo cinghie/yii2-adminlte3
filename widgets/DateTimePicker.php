@@ -37,7 +37,9 @@ class DateTimePicker extends InputWidget
         $view = $this->getView();
         if (!isset($view->assetBundles[AdminLTEDateTimeAsset::class])
             && !isset($view->assetBundles[AdminLTEDateTimeMinifyAsset::class])) {
-            $assetClass = YII_DEBUG ? AdminLTEDateTimeAsset::class : AdminLTEDateTimeMinifyAsset::class;
+            $assetClass = $this->useMinifiedAssets()
+                ? AdminLTEDateTimeMinifyAsset::class
+                : AdminLTEDateTimeAsset::class;
             $assetClass::register($view);
         }
         DateTimePickerWidgetAsset::register($view);
@@ -95,5 +97,16 @@ class DateTimePicker extends InputWidget
             'data-cinghie-datetimepicker' => '1',
             'data-cinghie-datetime-options' => Json::encode($pluginOptions),
         ]);
+    }
+
+    /**
+     * Returns whether the minified date-time asset variant should be used.
+     *
+     * Kept behind a method so static analysis does not fold the CI bootstrap's
+     * fixed YII_DEBUG value into an always-true/false branch in run().
+     */
+    protected function useMinifiedAssets(): bool
+    {
+        return !YII_DEBUG;
     }
 }
