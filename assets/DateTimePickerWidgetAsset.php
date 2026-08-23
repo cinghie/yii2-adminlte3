@@ -9,7 +9,7 @@ use yii\web\AssetBundle;
  */
 class DateTimePickerWidgetAsset extends AssetBundle
 {
-    public $sourcePath = '@cinghie/adminlte3/assets';
+    public $sourcePath = __DIR__;
 
     public $css = [
         'css/datetimepicker.css',
@@ -20,4 +20,11 @@ class DateTimePickerWidgetAsset extends AssetBundle
     ];
 
     public $appendTimestamp = true;
+
+    public $publishOptions = [
+        'only' => [
+            'css/datetimepicker.css',
+            'js/datetimepicker.js',
+        ],
+    ];
 }
