@@ -2,15 +2,19 @@
 
 namespace cinghie\adminlte3\widgets;
 
+use cinghie\adminlte3\assets\ColorPickerWidgetAsset;
+use cinghie\adminlte3\widgets\support\SafeHtml;
 use yii\helpers\Html;
-use yii\helpers\Json;
 use yii\widgets\InputWidget;
 
 /**
  * Bootstrap 4/AdminLTE 3 color input with HEX text, preview and deferred palette.
  *
  * The submitted value is the text input. Suggested colors and the unrestricted
- * native color input remain hidden until the preview button is activated.
+ * native color input remain hidden until the preview button is activated. The
+ * widget keeps package-owned CSS/JavaScript in an external asset and uses native
+ * color inputs for visual chips/previews so arbitrary palette values do not need
+ * dynamic inline style attributes.
  */
 class ColorPicker extends InputWidget
 {
@@ -19,12 +23,19 @@ class ColorPicker extends InputWidget
         '#39cccc', '#01ff70', '#ffdc00', '#ff851b', '#dd4b39', '#b10dc9', '#111111', '#7f8c8d',
     ];
 
+    /** @var string[] Suggested colors. Only six-digit HEX values are rendered. */
     public $palette = self::DEFAULT_PALETTE;
+
+    /** @var string Font Awesome icon classes rendered before the text input. */
     public $iconClass = 'fas fa-paint-brush';
+
+    /** @var string Accessible/user-facing label for the picker controls. */
     public $label = 'Color';
 
     public function run()
     {
+        ColorPickerWidgetAsset::register($this->getView());
+
         $id = $this->options['id'] ?? ($this->hasModel() ? Html::getInputId($this->model, $this->attribute) : $this->getId());
         $textOptions = $this->options;
         $textOptions['id'] = $id;
@@ -45,24 +56,58 @@ class ColorPicker extends InputWidget
             }
             $normalized = strtolower((string) $color);
             $selected = $normalized === $nativeValue;
-            $swatches .= Html::button('', [
-                'type' => 'button', 'class' => 'cinghie-color-swatch' . ($selected ? ' is-selected' : ''),
-                'title' => $normalized, 'aria-label' => $normalized, 'aria-pressed' => $selected ? 'true' : 'false',
-                'data-color' => $normalized, 'style' => 'background-color:' . $normalized . ';',
+            $chip = Html::input('color', null, $normalized, [
+                'class' => 'cinghie-color-swatch-chip',
+                'disabled' => true,
+                'tabindex' => '-1',
+                'aria-hidden' => 'true',
+            ]);
+            $swatches .= Html::button($chip, [
+                'type' => 'button',
+                'class' => 'cinghie-color-swatch' . ($selected ? ' is-selected' : ''),
+                'title' => $normalized,
+                'aria-label' => $normalized,
+                'aria-pressed' => $selected ? 'true' : 'false',
+                'data-color' => $normalized,
             ]);
         }
 
-        $html = Html::beginTag('div', ['class' => 'cinghie-color-picker', 'data-color-picker' => $id]);
+        $html = Html::beginTag('div', [
+            'class' => 'cinghie-color-picker',
+            'data-color-picker' => $id,
+            'data-cinghie-color-picker' => '1',
+        ]);
         $html .= Html::beginTag('div', ['class' => 'cinghie-color-row']);
-        if (is_string($this->iconClass) && trim($this->iconClass) !== '') {
-            $html .= Html::tag('span', Html::tag('i', '', ['class' => trim($this->iconClass)]), ['class' => 'cinghie-color-addon', 'aria-hidden' => 'true']);
+        $iconClass = SafeHtml::iconClass($this->iconClass, 'fas fa-paint-brush');
+        if ($iconClass !== '') {
+            $html .= Html::tag(
+                'span',
+                Html::tag('i', '', ['class' => $iconClass]),
+                ['class' => 'cinghie-color-addon', 'aria-hidden' => 'true']
+            );
         }
         $html .= $this->hasModel()
             ? Html::activeTextInput($this->model, $this->attribute, $textOptions)
             : Html::textInput($this->name, $this->value, $textOptions);
+
+        $preview = Html::input('color', null, $nativeValue, [
+            'class' => 'cinghie-color-preview',
+            'disabled' => true,
+            'tabindex' => '-1',
+            'aria-hidden' => 'true',
+        ]);
         $html .= Html::button(
-            Html::tag('span', '', ['class' => 'cinghie-color-preview', 'style' => 'background-color:' . $nativeValue . ';', 'aria-hidden' => 'true']) . Html::tag('span', '▾', ['class' => 'cinghie-color-chevron', 'aria-hidden' => 'true']),
-            ['id' => $toggleId, 'type' => 'button', 'class' => 'btn btn-default cinghie-color-toggle', 'title' => $this->label, 'aria-label' => $this->label, 'aria-haspopup' => 'true', 'aria-expanded' => 'false', 'aria-controls' => $paletteId]
+            $preview . Html::tag('span', '▾', ['class' => 'cinghie-color-chevron', 'aria-hidden' => 'true']),
+            [
+                'id' => $toggleId,
+                'type' => 'button',
+                'class' => 'btn btn-default cinghie-color-toggle',
+                'title' => $this->label,
+                'aria-label' => $this->label,
+                'aria-haspopup' => 'true',
+                'aria-expanded' => 'false',
+                'aria-controls' => $paletteId,
+            ]
         );
         $html .= Html::endTag('div');
         $html .= Html::beginTag('div', ['id' => $paletteId, 'class' => 'cinghie-color-popover', 'hidden' => true]);
@@ -70,19 +115,13 @@ class ColorPicker extends InputWidget
         $html .= Html::tag('div', $swatches, ['class' => 'cinghie-color-palette']);
         $html .= Html::beginTag('label', ['class' => 'cinghie-color-custom']);
         $html .= Html::tag('span', Html::encode($this->label));
-        $html .= Html::input('color', null, $nativeValue, ['id' => $pickerId, 'class' => 'cinghie-color-native', 'aria-label' => $this->label]);
+        $html .= Html::input('color', null, $nativeValue, [
+            'id' => $pickerId,
+            'class' => 'cinghie-color-native',
+            'aria-label' => $this->label,
+        ]);
         $html .= Html::endTag('label') . Html::endTag('div') . Html::endTag('div');
 
-        $this->getView()->registerCss(<<<CSS
-.cinghie-color-picker{position:relative;display:block;width:100%;min-width:0}.cinghie-color-row{display:flex;align-items:stretch;width:100%;min-width:0}.cinghie-color-addon{display:flex;align-items:center;justify-content:center;flex:0 0 46px;width:46px;padding:6px 12px;color:#555;background:#eee;border:1px solid #ccc;border-right:0;border-radius:4px 0 0 4px}.cinghie-color-row .cinghie-color-value{flex:1 1 auto;width:1%;min-width:0;border-radius:0}.cinghie-color-row .cinghie-color-value:first-child{border-top-left-radius:4px;border-bottom-left-radius:4px}.cinghie-color-toggle{display:flex;align-items:center;justify-content:center;gap:6px;flex:0 0 58px;width:58px;min-width:58px;padding:4px 7px;border-top-left-radius:0;border-bottom-left-radius:0}.cinghie-color-preview{display:block;width:24px;height:20px;border:1px solid rgba(0,0,0,.2);border-radius:3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}.cinghie-color-chevron{font-size:11px;line-height:1;color:#777}.cinghie-color-popover{position:absolute;right:0;z-index:1060;width:236px;max-width:calc(100vw - 24px);margin-top:6px;padding:10px;background:#fff;border:1px solid #d2d6de;border-radius:4px;box-shadow:0 6px 18px rgba(0,0,0,.16)}.cinghie-color-popover[hidden]{display:none!important}.cinghie-color-popover-title{margin:0 0 8px;font-size:12px;font-weight:600;color:#555}.cinghie-color-palette{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.cinghie-color-swatch{width:100%;height:34px;padding:0;border:2px solid transparent;border-radius:4px;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.16)}.cinghie-color-swatch:hover,.cinghie-color-swatch:focus{outline:0;border-color:#8aa4b8}.cinghie-color-swatch.is-selected{border-color:#3c8dbc;box-shadow:0 0 0 1px #fff,0 0 0 3px #3c8dbc}.cinghie-color-custom{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 0;padding-top:9px;border-top:1px solid #eee;font-size:12px;font-weight:400;color:#666;cursor:pointer}.cinghie-color-native{display:block;width:44px;height:30px;padding:1px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer}@media(max-width:991px){.cinghie-color-popover{left:0;right:auto;width:min(260px,calc(100vw - 32px));max-width:calc(100vw - 32px)}}
-CSS
-        );
-
-        $idJson = Json::encode($id); $pickerJson = Json::encode($pickerId); $toggleJson = Json::encode($toggleId); $paletteJson = Json::encode($paletteId);
-        $this->getView()->registerJs(<<<JS
-(function(){var input=document.getElementById({$idJson}),nativePicker=document.getElementById({$pickerJson}),toggle=document.getElementById({$toggleJson}),palette=document.getElementById({$paletteJson});if(!input||!nativePicker||!toggle||!palette)return;var root=input.closest('[data-color-picker]'),preview=toggle.querySelector('.cinghie-color-preview');function normalize(v){v=String(v||'').trim();if(/^#[0-9a-f]{6}$/i.test(v))return v.toLowerCase();if(/^#[0-9a-f]{3}$/i.test(v))return('#'+v.slice(1).split('').map(function(c){return c+c}).join('')).toLowerCase();return null}function open(v){palette.hidden=!v;toggle.setAttribute('aria-expanded',v?'true':'false')}function sync(v,change){var n=normalize(v);if(!n)return;input.value=n;nativePicker.value=n;if(preview)preview.style.backgroundColor=n;palette.querySelectorAll('.cinghie-color-swatch').forEach(function(s){var selected=s.getAttribute('data-color')===n;s.classList.toggle('is-selected',selected);s.setAttribute('aria-pressed',selected?'true':'false')});if(change)input.dispatchEvent(new Event('change',{bubbles:true}))}toggle.addEventListener('click',function(){open(palette.hidden)});nativePicker.addEventListener('input',function(){sync(nativePicker.value,true)});nativePicker.addEventListener('change',function(){open(false);toggle.focus()});input.addEventListener('change',function(){var n=normalize(input.value);if(n)sync(n,false)});if(root)root.addEventListener('click',function(e){var b=e.target.closest('[data-color]');if(!b)return;sync(b.getAttribute('data-color'),true);open(false);toggle.focus()});document.addEventListener('click',function(e){if(!palette.hidden&&root&&!root.contains(e.target))open(false)});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!palette.hidden){open(false);toggle.focus()}})})();
-JS
-        );
         return $html;
     }
 }
