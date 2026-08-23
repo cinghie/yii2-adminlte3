@@ -35,11 +35,8 @@ class DateTimePicker extends InputWidget
     public function run()
     {
         $view = $this->getView();
-        if (isset($view->assetBundles[AdminLTEDateTimeAsset::class])) {
-            $assetClass = AdminLTEDateTimeAsset::class;
-        } elseif (isset($view->assetBundles[AdminLTEDateTimeMinifyAsset::class])) {
-            $assetClass = AdminLTEDateTimeMinifyAsset::class;
-        } else {
+        if (!isset($view->assetBundles[AdminLTEDateTimeAsset::class])
+            && !isset($view->assetBundles[AdminLTEDateTimeMinifyAsset::class])) {
             $assetClass = YII_DEBUG ? AdminLTEDateTimeAsset::class : AdminLTEDateTimeMinifyAsset::class;
             $assetClass::register($view);
         }
@@ -95,7 +92,7 @@ class DateTimePicker extends InputWidget
             'id' => $wrapperId,
             'data-target-input' => 'nearest',
             'data-cinghie-datetimepicker' => '1',
-            'data-cinghie-datetime-options' => Json::htmlEncode($pluginOptions),
+            'data-cinghie-datetime-options' => Json::encode($pluginOptions),
         ]);
     }
 }
