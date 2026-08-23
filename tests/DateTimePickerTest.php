@@ -14,6 +14,7 @@ class DateTimePickerTest extends TestCase
         $this->assertStringContainsString("'class' => 'input-group-prepend'", $src);
         $this->assertStringContainsString("'data-toggle' => 'datetimepicker'", $src);
         $this->assertStringContainsString("'data-target-input' => 'nearest'", $src);
+        $this->assertStringContainsString("Json::encode('#' . \$wrapperId)", $src);
         $this->assertStringContainsString('datetimepicker({$config})', $src);
     }
 }
