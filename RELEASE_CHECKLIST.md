@@ -26,16 +26,18 @@ Use this checklist for every tagged release of `cinghie/yii2-adminlte3`. A major
 - [ ] Run `composer analyse` (PHPStan).
 - [ ] Run `composer cs` (PHP_CodeSniffer / PSR-12).
 - [ ] Confirm required GitHub Actions workflows are green on the exact release commit.
-- [ ] Inspect the non-blocking `prefer-lowest` result and document any meaningful change in its status.
+- [ ] Confirm the PHP 8.1 `prefer-lowest` job resolves, installs from source, verifies the critical autoload surface, lints, and passes the full PHPUnit suite.
 
 ## 4. Assets and browser-facing behaviour
 
 - [ ] Verify core and compatibility aggregate dependency graphs.
 - [ ] Verify source/minified asset parity and declared vendor-file existence.
 - [ ] Confirm optional plugin bundles remain isolated from unrelated pages.
+- [ ] Confirm package-owned widget AssetBundles publish from package-local paths and only publish their intended files.
 - [ ] Confirm Bootstrap/jQuery/plugin ordering has not changed unexpectedly.
-- [ ] Smoke-render representative public widgets, including complex/navigation/security-sensitive widgets.
+- [ ] Smoke-render representative public widgets, including complex/navigation/security-sensitive widgets and newly added reusable input widgets.
 - [ ] For browser-facing changes, verify AdminLTE visual fidelity, responsive behaviour, accessibility attributes, CSP expectations, and relevant browser/plugin integration.
+- [ ] For DatePicker/DateTimePicker changes, exercise at least one real Bootstrap 4/AdminLTE3 Tempus Dominus open/select/clear interaction before release.
 
 ## 5. Release candidate smoke install
 
