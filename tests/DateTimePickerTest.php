@@ -2,35 +2,29 @@
 
 namespace cinghie\adminlte3\tests;
 
-use Yii;
 use cinghie\adminlte3\AdminLTEDateTimeAsset;
 use cinghie\adminlte3\AdminLTEDateTimeMinifyAsset;
+use cinghie\adminlte3\assets\DateTimePickerWidgetAsset;
 use cinghie\adminlte3\widgets\DateTimePicker;
 use PHPUnit\Framework\TestCase;
+use Yii;
 use yii\base\DynamicModel;
 use yii\bootstrap4\BootstrapPluginAsset;
 
 class DateTimePickerTest extends TestCase
 {
-    public function testWidgetUsesBundledTempusDominusWithPrependedIcon(): void
+    public function testWidgetUsesBundledTempusDominusWithExternalInitializer(): void
     {
         $src = file_get_contents(dirname(__DIR__) . '/widgets/DateTimePicker.php');
 
         $this->assertStringContainsString('AdminLTEDateTimeAsset::class', $src);
         $this->assertStringContainsString('AdminLTEDateTimeMinifyAsset::class', $src);
-        $this->assertStringContainsString('isset($view->assetBundles[AdminLTEDateTimeAsset::class])', $src);
-        $this->assertStringContainsString('isset($view->assetBundles[AdminLTEDateTimeMinifyAsset::class])', $src);
-        $this->assertStringContainsString('YII_DEBUG ?', $src);
-        $this->assertStringContainsString("'class' => 'input-group-prepend'", $src);
-        $this->assertStringContainsString("'data-toggle' => 'datetimepicker'", $src);
-        $this->assertStringContainsString("'data-cinghie-datetime-toggle' => '1'", $src);
-        $this->assertStringContainsString("'data-target-input' => 'nearest'", $src);
-        $this->assertStringContainsString("'allowInputToggle' => true", $src);
-        $this->assertStringContainsString("picker.datetimepicker('show')", $src);
-        $this->assertStringContainsString("focus.cinghieDateTimePicker", $src);
-        $this->assertStringContainsString("Json::encode('#' . \$wrapperId)", $src);
-        $this->assertStringContainsString('bootstrap-datetimepicker-widget{z-index:1080!important}', $src);
-        $this->assertStringContainsString("public \$toggleLabel = 'Open date and time picker'", $src);
+        $this->assertStringContainsString('DateTimePickerWidgetAsset::register($view)', $src);
+        $this->assertStringContainsString("'data-cinghie-datetimepicker' => '1'", $src);
+        $this->assertStringContainsString('Json::htmlEncode($pluginOptions)', $src);
+        $this->assertStringContainsString('SafeHtml::iconClass', $src);
+        $this->assertStringNotContainsString('registerJs(', $src);
+        $this->assertStringNotContainsString('registerCss(', $src);
     }
 
     public function testDateTimeAssetsLoadBootstrapJavascriptBeforeTempusDominus(): void
@@ -43,7 +37,7 @@ class DateTimePickerTest extends TestCase
         }
     }
 
-    public function testRenderedWidgetRegistersAssetAndExplicitInitializer(): void
+    public function testRenderedWidgetRegistersAssetsAndEncodedOptionsWithoutInlineCode(): void
     {
         $view = Yii::$app->getView();
         $originalAssetBundles = $view->assetBundles;
@@ -59,31 +53,25 @@ class DateTimePickerTest extends TestCase
             $html = DateTimePicker::widget([
                 'model' => $model,
                 'attribute' => 'starts_at',
-                'icon' => 'far fa-calendar-alt',
+                'icon' => 'far fa-calendar-alt" onclick="bad',
                 'toggleLabel' => 'Open schedule picker',
                 'pluginOptions' => ['useCurrent' => false],
             ]);
 
             $this->assertStringContainsString('input-group-prepend', $html);
-            $this->assertStringContainsString('data-toggle="datetimepicker"', $html);
-            $this->assertStringContainsString('data-cinghie-datetime-toggle="1"', $html);
-            $this->assertStringContainsString('datetimepicker-input', $html);
-            $this->assertStringContainsString('far fa-calendar-alt', $html);
+            $this->assertStringContainsString('data-cinghie-datetimepicker="1"', $html);
+            $this->assertStringContainsString('data-cinghie-datetime-options=', $html);
+            $this->assertStringContainsString('useCurrent', html_entity_decode($html, ENT_QUOTES | ENT_HTML5));
             $this->assertStringContainsString('aria-label="Open schedule picker"', $html);
+            $this->assertStringNotContainsString('onclick=', $html);
+            $this->assertStringNotContainsString('<script', $html);
+            $this->assertStringNotContainsString('<style', $html);
 
             $expectedAsset = YII_DEBUG ? AdminLTEDateTimeAsset::class : AdminLTEDateTimeMinifyAsset::class;
             $this->assertArrayHasKey($expectedAsset, $view->assetBundles);
-
-            $js = json_encode($view->js);
-            $this->assertStringContainsString('.datetimepicker(', $js);
-            $this->assertStringContainsString("datetimepicker('show')", $js);
-            $this->assertStringContainsString('allowInputToggle', $js);
-            $this->assertStringContainsString('useCurrent', $js);
-            $this->assertStringContainsString('cinghie-datetimepicker-ready', $js);
-
-            $css = json_encode($view->css);
-            $this->assertStringContainsString('bootstrap-datetimepicker-widget', $css);
-            $this->assertStringContainsString('z-index:1080', $css);
+            $this->assertArrayHasKey(DateTimePickerWidgetAsset::class, $view->assetBundles);
+            $this->assertSame([], $view->js);
+            $this->assertSame([], $view->css);
         } finally {
             $view->assetBundles = $originalAssetBundles;
             $view->js = $originalJs;
@@ -91,17 +79,29 @@ class DateTimePickerTest extends TestCase
         }
     }
 
+    public function testWidgetInitializerIsExternalAndShared(): void
+    {
+        $asset = new DateTimePickerWidgetAsset();
+        $script = file_get_contents(dirname(__DIR__) . '/assets/js/datetimepicker.js');
+        $css = file_get_contents(dirname(__DIR__) . '/assets/css/datetimepicker.css');
+
+        $this->assertContains('js/datetimepicker.js', $asset->js);
+        $this->assertContains('css/datetimepicker.css', $asset->css);
+        $this->assertTrue($asset->appendTimestamp);
+        $this->assertIsString($script);
+        $this->assertStringContainsString('[data-cinghie-datetimepicker]', $script);
+        $this->assertStringContainsString("datetimepicker('show')", $script);
+        $this->assertIsString($css);
+        $this->assertStringContainsString('.bootstrap-datetimepicker-widget', $css);
+    }
+
     public function testWidgetReusesAlreadyRegisteredSourceAssetInsteadOfAddingMinifiedVariant(): void
     {
         $view = Yii::$app->getView();
         $originalAssetBundles = $view->assetBundles;
-        $originalJs = $view->js;
-        $originalCss = $view->css;
 
         try {
             $view->assetBundles = [];
-            $view->js = [];
-            $view->css = [];
             AdminLTEDateTimeAsset::register($view);
 
             $model = new DynamicModel(['starts_at' => null]);
@@ -109,10 +109,9 @@ class DateTimePickerTest extends TestCase
 
             $this->assertArrayHasKey(AdminLTEDateTimeAsset::class, $view->assetBundles);
             $this->assertArrayNotHasKey(AdminLTEDateTimeMinifyAsset::class, $view->assetBundles);
+            $this->assertArrayHasKey(DateTimePickerWidgetAsset::class, $view->assetBundles);
         } finally {
             $view->assetBundles = $originalAssetBundles;
-            $view->js = $originalJs;
-            $view->css = $originalCss;
         }
     }
 }
