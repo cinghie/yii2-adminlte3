@@ -14,6 +14,27 @@
         return null;
     }
 
+    function paintCanvas(canvas, value) {
+        var normalized = normalize(value);
+        if (!canvas || !normalized || typeof canvas.getContext !== 'function') {
+            return;
+        }
+        var context = canvas.getContext('2d');
+        if (!context) {
+            return;
+        }
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = normalized;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        canvas.setAttribute('data-color', normalized);
+    }
+
+    function paintRoot(root) {
+        root.querySelectorAll('canvas[data-color]').forEach(function (canvas) {
+            paintCanvas(canvas, canvas.getAttribute('data-color'));
+        });
+    }
+
     function setOpen(root, value) {
         var palette = root.querySelector('.cinghie-color-popover');
         var toggle = root.querySelector('.cinghie-color-toggle');
@@ -39,7 +60,7 @@
 
         input.value = normalized;
         nativePicker.value = normalized;
-        preview.value = normalized;
+        paintCanvas(preview, normalized);
         root.querySelectorAll('.cinghie-color-swatch').forEach(function (swatch) {
             var selected = swatch.getAttribute('data-color') === normalized;
             swatch.classList.toggle('is-selected', selected);
@@ -94,6 +115,7 @@
             return;
         }
 
+        paintRoot(root);
         toggle.addEventListener('click', function () {
             setOpen(root, palette.hidden);
         });
