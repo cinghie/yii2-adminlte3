@@ -103,17 +103,21 @@ $form->field($model, 'date')->widget(DatePicker::class);
 $form->field($model, 'starts_at')->widget(DateTimePicker::class);
 ```
 
-`ColorPicker` keeps the submitted value as HEX text and opens its suggested palette only on demand. `DatePicker` and `DateTimePicker` use the package Tempus Dominus stack, keep the calendar trigger on the left, reuse an already registered source/minified date-time asset when available, and expose `format`, icon and plugin options for host applications. See [`docs/example_inputwidgets.md`](docs/example_inputwidgets.md).
+`ColorPicker` keeps the submitted value as HEX text and opens its suggested palette only on demand. Palette entries are limited to six-digit HEX colors and its icon classes are normalized through the shared safety policy. Visual chips/previews use native color inputs instead of generated inline color styles.
+
+`DatePicker` and `DateTimePicker` use the package Tempus Dominus stack, keep the calendar trigger on the left, reuse an already registered source/minified date-time asset when available, and expose `format`, icon and JSON-safe plugin options for host applications. Their per-instance configuration is stored in data attributes and consumed by a shared external initializer rather than generating inline JavaScript for every field.
+
+Both input families keep stable presentation/behavior in package-owned cacheable AssetBundles (`ColorPickerWidgetAsset` and `DateTimePickerWidgetAsset`). See [`docs/example_inputwidgets.md`](docs/example_inputwidgets.md).
 
 ## Security and CSP
 
 Widget values that become CSS classes, icons, links, external URLs, or email links are treated as trust boundaries. Package widgets normalize or validate these values before rendering them. User-controlled text should remain encoded unless a widget explicitly documents a trusted/purified HTML mode.
 
-Package-owned behavior avoids inline JavaScript where practical. For example, Invoice printing is bound by the package asset through a data attribute instead of an inline `onclick`, and static widget presentation is kept in cacheable CSS. `InfoBox` progress widths are represented by package-owned 0–100 CSS classes instead of inline `style` attributes, so package-owned InfoBox markup does not require `style-src-attr 'unsafe-inline'` for dynamic progress values.
+Package-owned behavior avoids inline JavaScript where practical. For example, Invoice printing is bound by the package asset through a data attribute instead of an inline `onclick`, static widget presentation is kept in cacheable CSS, and the reusable ColorPicker/DateTimePicker widgets now initialize from external package assets instead of per-instance inline code. `InfoBox` progress widths are represented by package-owned 0–100 CSS classes instead of inline `style` attributes, so package-owned InfoBox markup does not require `style-src-attr 'unsafe-inline'` for dynamic progress values.
 
-Calendar and ChartJS keep event, dataset, and configuration values as JSON data and initialize their browser plugins from package-owned external scripts. Their server-side APIs intentionally do not accept executable JavaScript callbacks; application-specific callback logic should live in application-owned JavaScript. Error404/Error500 encode public text and Error500 deliberately exposes no exception, stack trace, path, or debug context by default.
+Calendar and ChartJS keep event, dataset, and configuration values as JSON data and initialize their browser plugins from package-owned external scripts. Their server-side APIs intentionally do not accept executable JavaScript callbacks; application-specific callback logic should live in application-owned JavaScript. The reusable DateTimePicker follows the same pattern for Tempus Dominus configuration. Error404/Error500 encode public text and Error500 deliberately exposes no exception, stack trace, path, or debug context by default.
 
-A full strict-CSP deployment still needs to account for AdminLTE, Kartik, Bootstrap plugins, and application code outside this package. Applications targeting strict CSP should validate the complete page under their actual policy.
+A full strict-CSP deployment still needs to account for AdminLTE, Kartik, Bootstrap plugins, Tempus Dominus, FullCalendar, Chart.js, and application code outside this package. Applications targeting strict CSP should validate the complete page under their actual policy.
 
 See [`docs/CODING_STYLE.md`](docs/CODING_STYLE.md) for the package coding, PHPDoc, security-boundary, and CSP conventions.
 
@@ -151,7 +155,7 @@ composer quality
 
 `composer analyse` runs PHPStan at level 5 over the supported package surface. `composer cs` runs PHP_CodeSniffer with the project PSR-12 ruleset. GitHub Actions runs both checks in a dedicated blocking quality job on PHP 8.3.
 
-The package also carries regression tests for rendering security, shared URL/class normalization, strict-CSP-compatible package markup, formatter isolation, asset dependency/order/source-minified parity, package translation ownership, canonical-vs-legacy widget option semantics, and public widget smoke coverage. Complex widget markup is additionally checked through DOM/XPath structural assertions for classes, links, `rel`, `target`, `data-method`, ARIA attributes, and encoded text. Calendar/ChartJS/Error404/Error500 add dedicated smoke, JSON round-trip, security/disclosure, accessibility, and optional-asset isolation checks. Reusable input widgets have rendered model-bound and standalone coverage, and DateTimePicker keeps rendered asset/initializer regression coverage. Source-level guards cover public class PHPDoc, Yii/PSR import hygiene, and obsolete package/license/version metadata.
+The package also carries regression tests for rendering security, shared URL/class normalization, strict-CSP-compatible package markup, formatter isolation, asset dependency/order/source-minified parity, package translation ownership, canonical-vs-legacy widget option semantics, and public widget smoke coverage. Complex widget markup is additionally checked through DOM/XPath structural assertions for classes, links, `rel`, `target`, `data-method`, ARIA attributes, and encoded text. Calendar/ChartJS/Error404/Error500 add dedicated smoke, JSON round-trip, security/disclosure, accessibility, and optional-asset isolation checks. Reusable input widgets have model-bound/standalone rendering, palette/format validation, icon-hardening, external-asset, and no-inline-code regression coverage. Calendar compatibility tests also guard FullCalendar option translation and ensure global resize/sidebar listeners are registered only once. Source-level guards cover public class PHPDoc, Yii/PSR import hygiene, and obsolete package/license/version metadata.
 
 ## Contributing
 
