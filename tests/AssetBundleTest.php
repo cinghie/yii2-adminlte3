@@ -21,6 +21,8 @@ use cinghie\adminlte3\AdminLTEMinifyAsset;
 use cinghie\adminlte3\assets\AdminLTEThemeAsset;
 use cinghie\adminlte3\assets\CalendarWidgetAsset;
 use cinghie\adminlte3\assets\ChartJSWidgetAsset;
+use cinghie\adminlte3\assets\ColorPickerWidgetAsset;
+use cinghie\adminlte3\assets\DateTimePickerWidgetAsset;
 use cinghie\fontawesome\FontAwesomeAsset;
 use cinghie\fontawesome\FontAwesomeMinifyAsset;
 use PHPUnit\Framework\TestCase;
@@ -97,6 +99,23 @@ final class AssetBundleTest extends TestCase
         self::assertIsString($chartCss);
         self::assertStringContainsString('height: 250px;', $chartCss);
         self::assertStringContainsString('max-width: 100%;', $chartCss);
+    }
+
+    public function testReusableInputWidgetAssetsAreExternalAndCacheable(): void
+    {
+        $color = new ColorPickerWidgetAsset();
+        $dateTime = new DateTimePickerWidgetAsset();
+
+        self::assertSame(['css/colorpicker.css'], $color->css);
+        self::assertSame(['js/colorpicker.js'], $color->js);
+        self::assertTrue($color->appendTimestamp);
+        self::assertSame(['css/datetimepicker.css'], $dateTime->css);
+        self::assertSame(['js/datetimepicker.js'], $dateTime->js);
+        self::assertTrue($dateTime->appendTimestamp);
+
+        foreach (array_merge($color->css, $color->js, $dateTime->css, $dateTime->js) as $file) {
+            self::assertFileExists(dirname(__DIR__) . '/assets/' . $file);
+        }
     }
 
     public function testAggregateKeepsHistoricalPluginOrderAndCoreIsSmaller(): void
