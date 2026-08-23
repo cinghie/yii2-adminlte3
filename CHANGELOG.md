@@ -22,7 +22,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Added reusable `ColorPicker` and `DatePicker` widgets so feature modules can delegate Bootstrap 4/AdminLTE3 input rendering to this package instead of carrying their own UI implementations.
 - Added `ColorPickerWidgetAsset` and `DateTimePickerWidgetAsset` with cacheable package CSS/JavaScript for shared input-widget presentation and initialization.
 - Added `docs/example_inputwidgets.md` and README examples for `ColorPicker`, `DatePicker`, and `DateTimePicker`.
-- Added rendered-widget regression coverage for model-bound/standalone ColorPicker behavior, DatePicker format overrides, Tempus Dominus asset registration, icon hardening, external initializer assets, no-inline-code rendering, and Calendar global-listener deduplication.
+- Added rendered-widget regression coverage for model-bound/standalone input behavior, DatePicker format overrides, Tempus Dominus asset registration, icon hardening, external initializer assets, no-inline-code rendering, ColorPicker canvas rendering/shared handlers, and Calendar global-listener deduplication.
 
 ### Changed
 
@@ -30,7 +30,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - `DateTimePicker` reuses an already registered source/minified date-time bundle and otherwise chooses the variant matching `YII_DEBUG`, avoiding duplicate Tempus Dominus registrations in aggregate/minified host stacks.
 - `DateTimePicker` now serializes JSON-safe plugin options into `data-cinghie-datetime-options`; a shared external initializer binds focus/trigger behavior for all instances instead of registering per-widget inline JavaScript.
 - Stable DateTimePicker z-index presentation moved from `View::registerCss()` to `assets/css/datetimepicker.css`.
-- `ColorPicker` moved its stable CSS and behavior into external package assets. Suggested-color swatches and the preview use non-submitting native color inputs instead of generated inline `background-color` style attributes.
+- `ColorPicker` moved stable CSS and behavior into external package assets. Suggested-color swatches and the compact preview are non-interactive canvas elements painted by the shared initializer from validated HEX data; only the unrestricted custom selector remains a native `input[type=color]`.
+- `ColorPicker` global outside-click/Escape handling is registered once for all instances rather than once per rendered widget.
 - `ColorPicker::$iconClass` and `DateTimePicker::$icon` now pass through the shared `SafeHtml::iconClass()` policy before rendering.
 - `ColorPicker::$palette`, `$iconClass`, and `$label` now have explicit public PHPDoc contracts; invalid palette values continue to be ignored unless they are six-digit HEX colors.
 - `DatePicker::$format` remains a configurable public default (`YYYY-MM-DD`) instead of being overwritten during `init()`.
@@ -42,7 +43,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 - Fixed a silent Bootstrap 4 DateTimePicker failure where Tempus Dominus markup rendered correctly but the required Bootstrap JavaScript dependency was not guaranteed by the date-time asset graph.
 - Fixed a potential double-encoding bug in DateTimePicker configuration by following the same `Json::encode()` + Yii HTML-attribute escaping pattern used by Calendar.
+- Fixed standalone `DateTimePicker` rendering so `name`/`value` usage derives an id without calling `Html::getInputId()` on a null model.
 - Fixed newly introduced input-widget asset source paths to use package-local `__DIR__` publication rather than relying on an application alias; publication is limited to each widget asset's own CSS/JS files.
+- Fixed ColorPicker preview/swatch markup so it does not nest an interactive color input inside a button; canvas is used for visual-only color surfaces instead.
 - Fixed FullCalendar source/minified parity after locale support was added only to the minified bundle.
 
 ### Security and CSP
@@ -50,15 +53,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Reusable input widgets no longer emit package-owned `<script>`, `<style>`, event-handler attributes, or dynamic inline color styles in their rendered markup.
 - Date/time and color icon classes use the same central CSS/icon-class normalization policy as the rest of the hardened widget surface.
 - DateTimePicker executable callbacks remain outside the PHP configuration contract; `pluginOptions` is treated as JSON-safe data and browser-specific callback logic belongs in application-owned JavaScript.
+- ColorPicker canvas colors are painted by external package JavaScript only from validated HEX `data-color` values, preserving arbitrary valid palette colors without inline style attributes.
 
 ### Tests
 
-- `DateTimePickerTest` validates source/minified dependency graphs, real widget rendering, JSON data attributes, safe icon rendering, selected plugin/widget assets, external initializer behavior, and absence of per-instance inline JS/CSS registration.
-- `ColorPickerTest` validates model-bound and standalone rendering, six-digit HEX palette filtering, external asset registration, safe icon rendering, native color preview/swatches, and absence of inline style/script output.
-- `CspCompatibilityTest` now guards `ColorPicker` and `DateTimePicker` against avoidable inline code regressions.
-- `AssetBundleTest` verifies the new reusable input widget assets are cacheable, package-local, and backed by real published files.
-- `CalendarVersionCompatibilityTest` now also guards the single global resize/sidebar-listener strategy.
-- `DocumentationTest` requires README/CHANGELOG/UPDATE and the reusable input guide to describe the external widget assets and current CSP contract while preserving earlier roadmap/history sections.
+- `DateTimePickerTest` validates source/minified dependency graphs, model-bound and standalone widget rendering, JSON data attributes, safe icon rendering, selected plugin/widget assets, external initializer behavior, and absence of per-instance inline JS/CSS registration.
+- `ColorPickerTest` validates model-bound and standalone rendering, six-digit HEX palette filtering, external asset registration, safe icon rendering, canvas preview/swatches, a single real native color control, shared document handlers, and absence of inline style/script output.
+- `CspCompatibilityTest` guards `ColorPicker` and `DateTimePicker` against avoidable inline code regressions.
+- `AssetBundleTest` verifies the reusable input widget assets are cacheable, package-local, narrowly published, and backed by real files.
+- `CalendarVersionCompatibilityTest` guards both FullCalendar option compatibility and the single global resize/sidebar-listener strategy.
+- `DocumentationTest` requires README/CHANGELOG/UPDATE and the reusable input guide to describe external widget assets and the current CSP contract while preserving earlier roadmap/history sections.
 
 ## 2026-08-22
 
