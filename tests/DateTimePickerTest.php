@@ -79,6 +79,18 @@ class DateTimePickerTest extends TestCase
         }
     }
 
+    public function testStandaloneWidgetUsesItsOwnIdWithoutModel(): void
+    {
+        $html = DateTimePicker::widget([
+            'name' => 'starts_at',
+            'value' => '2026-08-23 20:00:00',
+        ]);
+
+        $this->assertStringContainsString('name="starts_at"', $html);
+        $this->assertStringContainsString('value="2026-08-23 20:00:00"', $html);
+        $this->assertStringContainsString('data-cinghie-datetimepicker="1"', $html);
+    }
+
     public function testWidgetInitializerIsExternalAndShared(): void
     {
         $asset = new DateTimePickerWidgetAsset();
