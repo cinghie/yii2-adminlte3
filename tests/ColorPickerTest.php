@@ -19,6 +19,7 @@ class ColorPickerTest extends TestCase
         self::assertStringContainsString('SafeHtml::iconClass', $src);
         self::assertStringContainsString('DEFAULT_PALETTE', $src);
         self::assertStringContainsString("'data-cinghie-color-picker' => '1'", $src);
+        self::assertStringContainsString("Html::tag('canvas'", $src);
         self::assertStringNotContainsString('registerJs(', $src);
         self::assertStringNotContainsString('registerCss(', $src);
         self::assertStringNotContainsString("'style' =>", $src);
@@ -47,6 +48,7 @@ class ColorPickerTest extends TestCase
             self::assertStringContainsString('name="DynamicModel[color]"', $html);
             self::assertStringContainsString('value="#3c8dbc"', $html);
             self::assertStringContainsString('cinghie-color-popover', $html);
+            self::assertStringContainsString('<canvas', $html);
             self::assertStringContainsString('cinghie-color-swatch-chip', $html);
             self::assertStringContainsString('cinghie-color-preview', $html);
             self::assertStringContainsString('Theme color', $html);
@@ -54,6 +56,7 @@ class ColorPickerTest extends TestCase
             self::assertStringNotContainsString('onclick=', $html);
             self::assertStringNotContainsString('<script', $html);
             self::assertStringNotContainsString('<style', $html);
+            self::assertSame(1, substr_count($html, 'type="color"'));
             self::assertArrayHasKey(ColorPickerWidgetAsset::class, $view->assetBundles);
             self::assertSame([], $view->js);
             self::assertSame([], $view->css);
@@ -84,7 +87,7 @@ class ColorPickerTest extends TestCase
         self::assertStringNotContainsString('data-color="#123"', $html);
     }
 
-    public function testColorPickerInitializerAndStylesAreExternal(): void
+    public function testColorPickerInitializerAndStylesAreExternalAndShared(): void
     {
         $asset = new ColorPickerWidgetAsset();
         $script = file_get_contents(dirname(__DIR__) . '/assets/js/colorpicker.js');
@@ -95,7 +98,11 @@ class ColorPickerTest extends TestCase
         self::assertTrue($asset->appendTimestamp);
         self::assertIsString($script);
         self::assertStringContainsString('[data-cinghie-color-picker]', $script);
-        self::assertStringContainsString('data-color', $script);
+        self::assertStringContainsString('function paintCanvas', $script);
+        self::assertStringContainsString("getContext('2d')", $script);
+        self::assertStringContainsString('var globalHandlersRegistered = false;', $script);
+        self::assertSame(1, substr_count($script, "document.addEventListener('click'"));
+        self::assertSame(1, substr_count($script, "document.addEventListener('keydown'"));
         self::assertIsString($css);
         self::assertStringContainsString('.cinghie-color-popover', $css);
     }
