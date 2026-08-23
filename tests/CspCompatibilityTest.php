@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace cinghie\adminlte3\tests;
 
+use cinghie\adminlte3\widgets\ColorPicker;
+use cinghie\adminlte3\widgets\DateTimePicker;
 use cinghie\adminlte3\widgets\InfoBox;
 use cinghie\adminlte3\widgets\Invoice;
 use cinghie\adminlte3\widgets\MailboxRead;
@@ -67,6 +69,19 @@ final class CspCompatibilityTest extends TestCase
         self::assertStringContainsString('aria-valuenow="100"', $above);
         self::assertStringNotContainsString('style=', $below);
         self::assertStringNotContainsString('style=', $above);
+    }
+
+    public function testReusableInputWidgetsDoNotEmitPackageOwnedInlineCode(): void
+    {
+        $color = ColorPicker::widget(['name' => 'color', 'value' => '#3c8dbc']);
+        $dateTime = DateTimePicker::widget(['name' => 'starts_at', 'value' => '2026-08-23 19:30:00']);
+
+        foreach ([$color, $dateTime] as $html) {
+            self::assertStringNotContainsString('<script', $html);
+            self::assertStringNotContainsString('<style', $html);
+            self::assertStringNotContainsString('onclick=', $html);
+            self::assertStringNotContainsString('style=', $html);
+        }
     }
 
     public function testActiveSidebarUsesMenuClassInsteadOfInlineDisplayStyle(): void
