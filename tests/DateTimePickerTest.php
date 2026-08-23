@@ -21,7 +21,7 @@ class DateTimePickerTest extends TestCase
         $this->assertStringContainsString('AdminLTEDateTimeMinifyAsset::class', $src);
         $this->assertStringContainsString('DateTimePickerWidgetAsset::register($view)', $src);
         $this->assertStringContainsString("'data-cinghie-datetimepicker' => '1'", $src);
-        $this->assertStringContainsString('Json::htmlEncode($pluginOptions)', $src);
+        $this->assertStringContainsString('Json::encode($pluginOptions)', $src);
         $this->assertStringContainsString('SafeHtml::iconClass', $src);
         $this->assertStringNotContainsString('registerJs(', $src);
         $this->assertStringNotContainsString('registerCss(', $src);
