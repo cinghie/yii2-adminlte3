@@ -58,7 +58,6 @@ class ColorPicker extends InputWidget
             $selected = $normalized === $nativeValue;
             $chip = Html::input('color', null, $normalized, [
                 'class' => 'cinghie-color-swatch-chip',
-                'disabled' => true,
                 'tabindex' => '-1',
                 'aria-hidden' => 'true',
             ]);
@@ -92,7 +91,6 @@ class ColorPicker extends InputWidget
 
         $preview = Html::input('color', null, $nativeValue, [
             'class' => 'cinghie-color-preview',
-            'disabled' => true,
             'tabindex' => '-1',
             'aria-hidden' => 'true',
         ]);
