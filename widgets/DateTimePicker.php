@@ -24,6 +24,9 @@ class DateTimePicker extends InputWidget
     /** @var string Font Awesome icon class rendered before the input. */
     public $icon = 'far fa-calendar-alt';
 
+    /** @var string Accessible label for the prepended picker trigger. */
+    public $toggleLabel = 'Open date and time picker';
+
     /** @var array Tempus Dominus plugin options. */
     public $pluginOptions = [];
 
@@ -62,7 +65,7 @@ class DateTimePicker extends InputWidget
                 'data-cinghie-datetime-toggle' => '1',
                 'role' => 'button',
                 'tabindex' => '0',
-                'aria-label' => 'Open date and time picker',
+                'aria-label' => $this->toggleLabel,
             ]
         );
 

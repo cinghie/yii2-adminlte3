@@ -30,6 +30,7 @@ class DateTimePickerTest extends TestCase
         $this->assertStringContainsString("focus.cinghieDateTimePicker", $src);
         $this->assertStringContainsString("Json::encode('#' . \$wrapperId)", $src);
         $this->assertStringContainsString('bootstrap-datetimepicker-widget{z-index:1080!important}', $src);
+        $this->assertStringContainsString("public \$toggleLabel = 'Open date and time picker'", $src);
     }
 
     public function testDateTimeAssetsLoadBootstrapJavascriptBeforeTempusDominus(): void
@@ -59,6 +60,7 @@ class DateTimePickerTest extends TestCase
                 'model' => $model,
                 'attribute' => 'starts_at',
                 'icon' => 'far fa-calendar-alt',
+                'toggleLabel' => 'Open schedule picker',
                 'pluginOptions' => ['useCurrent' => false],
             ]);
 
@@ -67,6 +69,7 @@ class DateTimePickerTest extends TestCase
             $this->assertStringContainsString('data-cinghie-datetime-toggle="1"', $html);
             $this->assertStringContainsString('datetimepicker-input', $html);
             $this->assertStringContainsString('far fa-calendar-alt', $html);
+            $this->assertStringContainsString('aria-label="Open schedule picker"', $html);
 
             $expectedAsset = YII_DEBUG ? AdminLTEDateTimeAsset::class : AdminLTEDateTimeMinifyAsset::class;
             $this->assertArrayHasKey($expectedAsset, $view->assetBundles);

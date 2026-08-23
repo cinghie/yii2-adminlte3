@@ -89,6 +89,22 @@ The package intentionally does not set global `defer`, preload hints, or a diffe
 
 Applications that deliberately move a complete dependency chain earlier in the document may opt in to script attributes through Yii asset configuration, for example by extending or configuring the relevant bundles and setting `jsOptions`. Apply the policy consistently to jQuery, Bootstrap, AdminLTE, and any dependent plugins, then verify those plugins in the target browsers. Preload decisions should remain application-level and measurement-driven because published asset URLs and critical resources vary by deployment.
 
+## Reusable input widgets
+
+Bootstrap 4/AdminLTE 3 applications can reuse the package-owned input widgets directly:
+
+```php
+use cinghie\adminlte3\widgets\ColorPicker;
+use cinghie\adminlte3\widgets\DatePicker;
+use cinghie\adminlte3\widgets\DateTimePicker;
+
+$form->field($model, 'color')->widget(ColorPicker::class);
+$form->field($model, 'date')->widget(DatePicker::class);
+$form->field($model, 'starts_at')->widget(DateTimePicker::class);
+```
+
+`ColorPicker` keeps the submitted value as HEX text and opens its suggested palette only on demand. `DatePicker` and `DateTimePicker` use the package Tempus Dominus stack, keep the calendar trigger on the left, reuse an already registered source/minified date-time asset when available, and expose `format`, icon and plugin options for host applications. See [`docs/example_inputwidgets.md`](docs/example_inputwidgets.md).
+
 ## Security and CSP
 
 Widget values that become CSS classes, icons, links, external URLs, or email links are treated as trust boundaries. Package widgets normalize or validate these values before rendering them. User-controlled text should remain encoded unless a widget explicitly documents a trusted/purified HTML mode.
@@ -135,7 +151,7 @@ composer quality
 
 `composer analyse` runs PHPStan at level 5 over the supported package surface. `composer cs` runs PHP_CodeSniffer with the project PSR-12 ruleset. GitHub Actions runs both checks in a dedicated blocking quality job on PHP 8.3.
 
-The package also carries regression tests for rendering security, shared URL/class normalization, strict-CSP-compatible package markup, formatter isolation, asset dependency/order/source-minified parity, package translation ownership, canonical-vs-legacy widget option semantics, and public widget smoke coverage. Complex widget markup is additionally checked through DOM/XPath structural assertions for classes, links, `rel`, `target`, `data-method`, ARIA attributes, and encoded text. Calendar/ChartJS/Error404/Error500 add dedicated smoke, JSON round-trip, security/disclosure, accessibility, and optional-asset isolation checks. Source-level guards cover public class PHPDoc, Yii/PSR import hygiene, and obsolete package/license/version metadata.
+The package also carries regression tests for rendering security, shared URL/class normalization, strict-CSP-compatible package markup, formatter isolation, asset dependency/order/source-minified parity, package translation ownership, canonical-vs-legacy widget option semantics, and public widget smoke coverage. Complex widget markup is additionally checked through DOM/XPath structural assertions for classes, links, `rel`, `target`, `data-method`, ARIA attributes, and encoded text. Calendar/ChartJS/Error404/Error500 add dedicated smoke, JSON round-trip, security/disclosure, accessibility, and optional-asset isolation checks. Reusable input widgets have rendered model-bound and standalone coverage, and DateTimePicker keeps rendered asset/initializer regression coverage. Source-level guards cover public class PHPDoc, Yii/PSR import hygiene, and obsolete package/license/version metadata.
 
 ## Contributing
 
@@ -151,8 +167,11 @@ Contributor-facing PHPDoc, Yii security, CSP, and PSR-12 conventions are documen
 | [Calendar](docs/example_calendar.md)            | Optional FullCalendar integration                    |
 | [Card](docs/example_card.md)                    | Card (header, tools, body, footer; begin/end)        |
 | [ChartJS](docs/example_chartjs.md)              | Optional Chart.js canvas integration                 |
+| [ColorPicker](docs/example_inputwidgets.md)     | Deferred HEX color picker                            |
 | [Content Header](docs/example_contentheader.md) | Page title and breadcrumbs                           |
 | [DataColumn](docs/example_datacolumn.md)        | GridView column class (sorting header)               |
+| [DatePicker](docs/example_inputwidgets.md)      | Tempus Dominus date-only input                       |
+| [DateTimePicker](docs/example_inputwidgets.md)  | Tempus Dominus date/time input                       |
 | [DetailView](docs/example_detailview.md)        | Kartik DetailView styled as AdminLTE 3 card          |
 | [Error404](docs/example_error404.md)            | Safe AdminLTE 404 page                               |
 | [Error500](docs/example_error500.md)            | Safe AdminLTE 500 page                               |

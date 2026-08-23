@@ -19,12 +19,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 
 - Added a Bootstrap 4/AdminLTE3 `DateTimePicker` widget backed by the Tempus Dominus copy already shipped with AdminLTE 3, with the calendar icon prepended on the left of the input.
-- Added rendered-widget regression coverage that verifies the actual HTML, asset registration and generated Tempus Dominus initializer in the headless Yii application.
+- Added reusable `ColorPicker` and `DatePicker` widgets so feature modules can delegate Bootstrap 4/AdminLTE3 input rendering to this package instead of carrying their own UI implementations.
+- Added `docs/example_inputwidgets.md` and README examples for `ColorPicker`, `DatePicker`, and `DateTimePicker`.
+- Added rendered-widget regression coverage that verifies actual HTML, model-bound/standalone ColorPicker behavior, configurable DatePicker formats, asset registration and generated Tempus Dominus initialization.
 
 ### Changed
 
 - `AdminLTEDateTimeAsset` and `AdminLTEDateTimeMinifyAsset` now depend on Yii Bootstrap 4 `BootstrapPluginAsset`, ensuring Bootstrap JavaScript is registered before Tempus Dominus instead of depending only on Bootstrap CSS.
 - The DateTimePicker chooses source/minified date-time assets consistently with `YII_DEBUG`, avoiding duplicate Tempus Dominus registrations in aggregate/minified host stacks.
+- `DatePicker::$format` is now a configurable public default (`YYYY-MM-DD`) instead of being overwritten during `init()`.
+- `DateTimePicker::$toggleLabel` exposes the prepended trigger accessibility label without coupling the widget to a feature-module translation category.
 
 ### Fixed
 
@@ -32,7 +36,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Tests
 
-- `DateTimePickerTest` now validates both source/minified dependency graphs and smoke-renders the widget to assert its prepended icon, registered date-time asset and `.datetimepicker(...)` initializer.
+- `DateTimePickerTest` validates both source/minified dependency graphs, smoke-renders the widget, asserts the configurable trigger label and checks the prepended icon, registered date-time asset and `.datetimepicker(...)` initializer.
+- `ColorPickerTest` renders model-bound and standalone color inputs and verifies DatePicker format override behavior.
+- `DocumentationTest` guards the reusable input-widget README/guide links while preserving roadmap/history documentation.
 
 ## 2026-08-22
 

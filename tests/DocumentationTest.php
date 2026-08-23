@@ -23,16 +23,12 @@ final class DocumentationTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider publicWidgetProvider
-     */
+    /** @dataProvider publicWidgetProvider */
     public function testPublicWidgetHasClassDocumentation(string $class): void
     {
         self::assertTrue(class_exists($class), $class . ' must autoload.');
-
         $reflection = new ReflectionClass($class);
         $doc = $reflection->getDocComment();
-
         self::assertIsString($doc, $class . ' must have a class-level PHPDoc block.');
         self::assertNotSame('', trim((string) $doc), $class . ' PHPDoc must not be empty.');
     }
@@ -43,28 +39,31 @@ final class DocumentationTest extends TestCase
         $update = file_get_contents($root . '/UPDATE.md');
         $changelog = file_get_contents($root . '/CHANGELOG.md');
 
-        foreach ([
-            '2026-08-23',
-            'DateTimePicker',
-            'BootstrapPluginAsset',
-            'Tempus Dominus',
-            'rendered-widget',
-        ] as $expected) {
+        foreach (['2026-08-23', 'DateTimePicker', 'BootstrapPluginAsset', 'Tempus Dominus', 'rendered-widget'] as $expected) {
             self::assertStringContainsString($expected, $update, $expected);
             self::assertStringContainsString($expected, $changelog, $expected);
         }
 
-        foreach ([
-            'Possible future expansions',
-            'History / operations',
-            '2026-08-19',
-            'Visual regression / browser smoke testing',
-        ] as $expected) {
+        foreach (['Possible future expansions', 'History / operations', '2026-08-19', 'Visual regression / browser smoke testing'] as $expected) {
             self::assertStringContainsString($expected, $update, $expected);
         }
 
         self::assertStringContainsString('## 2026-08-22', $changelog);
         self::assertStringContainsString('## 2026-08-19', $changelog);
         self::assertStringContainsString('## 2026-07-30', $changelog);
+    }
+
+    public function testReusableInputWidgetsAreLinkedAndExplained(): void
+    {
+        $root = dirname(__DIR__);
+        $readme = file_get_contents($root . '/README.md');
+        $guide = file_get_contents($root . '/docs/example_inputwidgets.md');
+
+        foreach (['Reusable input widgets', 'ColorPicker', 'DatePicker', 'DateTimePicker', 'docs/example_inputwidgets.md'] as $expected) {
+            self::assertStringContainsString($expected, $readme, $expected);
+        }
+        foreach (['ColorPicker', 'DatePicker', 'DateTimePicker', 'Tempus Dominus'] as $expected) {
+            self::assertStringContainsString($expected, $guide, $expected);
+        }
     }
 }
