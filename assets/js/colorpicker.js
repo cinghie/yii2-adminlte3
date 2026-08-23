@@ -1,6 +1,8 @@
 (function () {
     'use strict';
 
+    var globalHandlersRegistered = false;
+
     function normalize(value) {
         var v = String(value || '').trim();
         if (/^#[0-9a-f]{6}$/i.test(v)) {
@@ -12,6 +14,73 @@
         return null;
     }
 
+    function setOpen(root, value) {
+        var palette = root.querySelector('.cinghie-color-popover');
+        var toggle = root.querySelector('.cinghie-color-toggle');
+        if (!palette || !toggle) {
+            return;
+        }
+        palette.hidden = !value;
+        toggle.setAttribute('aria-expanded', value ? 'true' : 'false');
+    }
+
+    function sync(root, value, fireChange) {
+        var normalized = normalize(value);
+        if (!normalized) {
+            return;
+        }
+
+        var input = root.querySelector('.cinghie-color-value');
+        var nativePicker = root.querySelector('.cinghie-color-native');
+        var preview = root.querySelector('.cinghie-color-preview');
+        if (!input || !nativePicker || !preview) {
+            return;
+        }
+
+        input.value = normalized;
+        nativePicker.value = normalized;
+        preview.value = normalized;
+        root.querySelectorAll('.cinghie-color-swatch').forEach(function (swatch) {
+            var selected = swatch.getAttribute('data-color') === normalized;
+            swatch.classList.toggle('is-selected', selected);
+            swatch.setAttribute('aria-pressed', selected ? 'true' : 'false');
+        });
+        if (fireChange) {
+            input.dispatchEvent(new Event('change', {bubbles: true}));
+        }
+    }
+
+    function registerGlobalHandlers() {
+        if (globalHandlersRegistered) {
+            return;
+        }
+
+        document.addEventListener('click', function (event) {
+            document.querySelectorAll('[data-cinghie-color-initialized="1"]').forEach(function (root) {
+                var palette = root.querySelector('.cinghie-color-popover');
+                if (palette && !palette.hidden && !root.contains(event.target)) {
+                    setOpen(root, false);
+                }
+            });
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key !== 'Escape') {
+                return;
+            }
+            document.querySelectorAll('[data-cinghie-color-initialized="1"]').forEach(function (root) {
+                var palette = root.querySelector('.cinghie-color-popover');
+                var toggle = root.querySelector('.cinghie-color-toggle');
+                if (palette && !palette.hidden) {
+                    setOpen(root, false);
+                    if (toggle) {
+                        toggle.focus();
+                    }
+                }
+            });
+        });
+        globalHandlersRegistered = true;
+    }
+
     function initialize(root) {
         if (root.getAttribute('data-cinghie-color-initialized') === '1') {
             return;
@@ -21,73 +90,38 @@
         var nativePicker = root.querySelector('.cinghie-color-native');
         var toggle = root.querySelector('.cinghie-color-toggle');
         var palette = root.querySelector('.cinghie-color-popover');
-        var preview = root.querySelector('.cinghie-color-preview');
-        if (!input || !nativePicker || !toggle || !palette || !preview) {
+        if (!input || !nativePicker || !toggle || !palette) {
             return;
         }
 
-        function open(value) {
-            palette.hidden = !value;
-            toggle.setAttribute('aria-expanded', value ? 'true' : 'false');
-        }
-
-        function sync(value, fireChange) {
-            var normalized = normalize(value);
-            if (!normalized) {
-                return;
-            }
-
-            input.value = normalized;
-            nativePicker.value = normalized;
-            preview.value = normalized;
-            root.querySelectorAll('.cinghie-color-swatch').forEach(function (swatch) {
-                var selected = swatch.getAttribute('data-color') === normalized;
-                swatch.classList.toggle('is-selected', selected);
-                swatch.setAttribute('aria-pressed', selected ? 'true' : 'false');
-            });
-            if (fireChange) {
-                input.dispatchEvent(new Event('change', {bubbles: true}));
-            }
-        }
-
         toggle.addEventListener('click', function () {
-            open(palette.hidden);
+            setOpen(root, palette.hidden);
         });
         nativePicker.addEventListener('input', function () {
-            sync(nativePicker.value, true);
+            sync(root, nativePicker.value, true);
         });
         nativePicker.addEventListener('change', function () {
-            open(false);
+            setOpen(root, false);
             toggle.focus();
         });
         input.addEventListener('change', function () {
-            sync(input.value, false);
+            sync(root, input.value, false);
         });
         root.addEventListener('click', function (event) {
             var swatch = event.target.closest('[data-color]');
             if (!swatch || !root.contains(swatch)) {
                 return;
             }
-            sync(swatch.getAttribute('data-color'), true);
-            open(false);
+            sync(root, swatch.getAttribute('data-color'), true);
+            setOpen(root, false);
             toggle.focus();
-        });
-        document.addEventListener('click', function (event) {
-            if (!palette.hidden && !root.contains(event.target)) {
-                open(false);
-            }
-        });
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && !palette.hidden) {
-                open(false);
-                toggle.focus();
-            }
         });
 
         root.setAttribute('data-cinghie-color-initialized', '1');
     }
 
     function initializeAll() {
+        registerGlobalHandlers();
         document.querySelectorAll('[data-cinghie-color-picker]').forEach(initialize);
     }
 
