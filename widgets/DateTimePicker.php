@@ -102,11 +102,14 @@ class DateTimePicker extends InputWidget
     /**
      * Returns whether the minified date-time asset variant should be used.
      *
-     * Kept behind a method so static analysis does not fold the CI bootstrap's
-     * fixed YII_DEBUG value into an always-true/false branch in run().
+     * Reading the constant through the runtime constant table preserves Yii's
+     * debug/source behaviour while avoiding static-analysis constant folding in
+     * CI, where YII_DEBUG is intentionally fixed by the bootstrap.
      */
     protected function useMinifiedAssets(): bool
     {
-        return !YII_DEBUG;
+        $constants = get_defined_constants();
+
+        return !(bool) ($constants['YII_DEBUG'] ?? false);
     }
 }
