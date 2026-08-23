@@ -12,9 +12,9 @@ use yii\widgets\InputWidget;
  *
  * The submitted value is the text input. Suggested colors and the unrestricted
  * native color input remain hidden until the preview button is activated. The
- * widget keeps package-owned CSS/JavaScript in an external asset and uses native
- * color inputs for visual chips/previews so arbitrary palette values do not need
- * dynamic inline style attributes.
+ * widget keeps package-owned CSS/JavaScript in an external asset and uses
+ * non-interactive canvases for visual chips/previews so arbitrary valid palette
+ * values do not need dynamic inline style attributes.
  */
 class ColorPicker extends InputWidget
 {
@@ -56,9 +56,11 @@ class ColorPicker extends InputWidget
             }
             $normalized = strtolower((string) $color);
             $selected = $normalized === $nativeValue;
-            $chip = Html::input('color', null, $normalized, [
+            $chip = Html::tag('canvas', '', [
                 'class' => 'cinghie-color-swatch-chip',
-                'tabindex' => '-1',
+                'width' => 80,
+                'height' => 30,
+                'data-color' => $normalized,
                 'aria-hidden' => 'true',
             ]);
             $swatches .= Html::button($chip, [
@@ -89,9 +91,11 @@ class ColorPicker extends InputWidget
             ? Html::activeTextInput($this->model, $this->attribute, $textOptions)
             : Html::textInput($this->name, $this->value, $textOptions);
 
-        $preview = Html::input('color', null, $nativeValue, [
+        $preview = Html::tag('canvas', '', [
             'class' => 'cinghie-color-preview',
-            'tabindex' => '-1',
+            'width' => 24,
+            'height' => 20,
+            'data-color' => $nativeValue,
             'aria-hidden' => 'true',
         ]);
         $html .= Html::button(
