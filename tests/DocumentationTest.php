@@ -33,13 +33,23 @@ final class DocumentationTest extends TestCase
         self::assertNotSame('', trim((string) $doc), $class . ' PHPDoc must not be empty.');
     }
 
-    public function testDateTimePickerHardeningIsDocumentedWithoutDroppingRoadmapHistory(): void
+    public function testRecentHardeningIsDocumentedWithoutDroppingRoadmapHistory(): void
     {
         $root = dirname(__DIR__);
         $update = file_get_contents($root . '/UPDATE.md');
         $changelog = file_get_contents($root . '/CHANGELOG.md');
 
-        foreach (['2026-08-23', 'DateTimePicker', 'BootstrapPluginAsset', 'Tempus Dominus', 'rendered-widget'] as $expected) {
+        foreach ([
+            '2026-08-23',
+            'DateTimePicker',
+            'ColorPicker',
+            'DateTimePickerWidgetAsset',
+            'ColorPickerWidgetAsset',
+            'BootstrapPluginAsset',
+            'Tempus Dominus',
+            'CSP',
+            'FullCalendar',
+        ] as $expected) {
             self::assertStringContainsString($expected, $update, $expected);
             self::assertStringContainsString($expected, $changelog, $expected);
         }
@@ -53,7 +63,7 @@ final class DocumentationTest extends TestCase
         self::assertStringContainsString('## 2026-07-30', $changelog);
     }
 
-    public function testReusableInputWidgetsAreLinkedAndExplained(): void
+    public function testReusableInputWidgetsAreLinkedAndExplainExternalAssets(): void
     {
         $root = dirname(__DIR__);
         $readme = file_get_contents($root . '/README.md');
@@ -62,7 +72,16 @@ final class DocumentationTest extends TestCase
         foreach (['Reusable input widgets', 'ColorPicker', 'DatePicker', 'DateTimePicker', 'docs/example_inputwidgets.md'] as $expected) {
             self::assertStringContainsString($expected, $readme, $expected);
         }
-        foreach (['ColorPicker', 'DatePicker', 'DateTimePicker', 'Tempus Dominus'] as $expected) {
+        foreach ([
+            'ColorPicker',
+            'DatePicker',
+            'DateTimePicker',
+            'Tempus Dominus',
+            'ColorPickerWidgetAsset',
+            'DateTimePickerWidgetAsset',
+            'data-cinghie-datetime-options',
+            'inline',
+        ] as $expected) {
             self::assertStringContainsString($expected, $guide, $expected);
         }
     }
