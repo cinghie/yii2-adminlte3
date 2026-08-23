@@ -20,25 +20,45 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 - Added a Bootstrap 4/AdminLTE3 `DateTimePicker` widget backed by the Tempus Dominus copy already shipped with AdminLTE 3, with the calendar icon prepended on the left of the input.
 - Added reusable `ColorPicker` and `DatePicker` widgets so feature modules can delegate Bootstrap 4/AdminLTE3 input rendering to this package instead of carrying their own UI implementations.
+- Added `ColorPickerWidgetAsset` and `DateTimePickerWidgetAsset` with cacheable package CSS/JavaScript for shared input-widget presentation and initialization.
 - Added `docs/example_inputwidgets.md` and README examples for `ColorPicker`, `DatePicker`, and `DateTimePicker`.
-- Added rendered-widget regression coverage that verifies actual HTML, model-bound/standalone ColorPicker behavior, configurable DatePicker formats, asset registration and generated Tempus Dominus initialization.
+- Added rendered-widget regression coverage for model-bound/standalone ColorPicker behavior, DatePicker format overrides, Tempus Dominus asset registration, icon hardening, external initializer assets, no-inline-code rendering, and Calendar global-listener deduplication.
 
 ### Changed
 
 - `AdminLTEDateTimeAsset` and `AdminLTEDateTimeMinifyAsset` now depend on Yii Bootstrap 4 `BootstrapPluginAsset`, ensuring Bootstrap JavaScript is registered before Tempus Dominus instead of depending only on Bootstrap CSS.
-- The DateTimePicker chooses source/minified date-time assets consistently with `YII_DEBUG`, avoiding duplicate Tempus Dominus registrations in aggregate/minified host stacks.
-- `DatePicker::$format` is now a configurable public default (`YYYY-MM-DD`) instead of being overwritten during `init()`.
+- `DateTimePicker` reuses an already registered source/minified date-time bundle and otherwise chooses the variant matching `YII_DEBUG`, avoiding duplicate Tempus Dominus registrations in aggregate/minified host stacks.
+- `DateTimePicker` now serializes JSON-safe plugin options into `data-cinghie-datetime-options`; a shared external initializer binds focus/trigger behavior for all instances instead of registering per-widget inline JavaScript.
+- Stable DateTimePicker z-index presentation moved from `View::registerCss()` to `assets/css/datetimepicker.css`.
+- `ColorPicker` moved its stable CSS and behavior into external package assets. Suggested-color swatches and the preview use non-submitting native color inputs instead of generated inline `background-color` style attributes.
+- `ColorPicker::$iconClass` and `DateTimePicker::$icon` now pass through the shared `SafeHtml::iconClass()` policy before rendering.
+- `ColorPicker::$palette`, `$iconClass`, and `$label` now have explicit public PHPDoc contracts; invalid palette values continue to be ignored unless they are six-digit HEX colors.
+- `DatePicker::$format` remains a configurable public default (`YYYY-MM-DD`) instead of being overwritten during `init()`.
 - `DateTimePicker::$toggleLabel` exposes the prepended trigger accessibility label without coupling the widget to a feature-module translation category.
+- Calendar resize/sidebar handling now registers one global listener set for all initialized calendars; individual calendars retain only their optional `ResizeObserver`.
+- FullCalendar source/minified bundles load corresponding locale files when available, preserving semantic parity between debug and minified asset variants.
 
 ### Fixed
 
 - Fixed a silent Bootstrap 4 DateTimePicker failure where Tempus Dominus markup rendered correctly but the required Bootstrap JavaScript dependency was not guaranteed by the date-time asset graph.
+- Fixed a potential double-encoding bug in DateTimePicker configuration by following the same `Json::encode()` + Yii HTML-attribute escaping pattern used by Calendar.
+- Fixed newly introduced input-widget asset source paths to use package-local `__DIR__` publication rather than relying on an application alias; publication is limited to each widget asset's own CSS/JS files.
+- Fixed FullCalendar source/minified parity after locale support was added only to the minified bundle.
+
+### Security and CSP
+
+- Reusable input widgets no longer emit package-owned `<script>`, `<style>`, event-handler attributes, or dynamic inline color styles in their rendered markup.
+- Date/time and color icon classes use the same central CSS/icon-class normalization policy as the rest of the hardened widget surface.
+- DateTimePicker executable callbacks remain outside the PHP configuration contract; `pluginOptions` is treated as JSON-safe data and browser-specific callback logic belongs in application-owned JavaScript.
 
 ### Tests
 
-- `DateTimePickerTest` validates both source/minified dependency graphs, smoke-renders the widget, asserts the configurable trigger label and checks the prepended icon, registered date-time asset and `.datetimepicker(...)` initializer.
-- `ColorPickerTest` renders model-bound and standalone color inputs and verifies DatePicker format override behavior.
-- `DocumentationTest` guards the reusable input-widget README/guide links while preserving roadmap/history documentation.
+- `DateTimePickerTest` validates source/minified dependency graphs, real widget rendering, JSON data attributes, safe icon rendering, selected plugin/widget assets, external initializer behavior, and absence of per-instance inline JS/CSS registration.
+- `ColorPickerTest` validates model-bound and standalone rendering, six-digit HEX palette filtering, external asset registration, safe icon rendering, native color preview/swatches, and absence of inline style/script output.
+- `CspCompatibilityTest` now guards `ColorPicker` and `DateTimePicker` against avoidable inline code regressions.
+- `AssetBundleTest` verifies the new reusable input widget assets are cacheable, package-local, and backed by real published files.
+- `CalendarVersionCompatibilityTest` now also guards the single global resize/sidebar-listener strategy.
+- `DocumentationTest` requires README/CHANGELOG/UPDATE and the reusable input guide to describe the external widget assets and current CSP contract while preserving earlier roadmap/history sections.
 
 ## 2026-08-22
 
