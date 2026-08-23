@@ -61,8 +61,8 @@ class DateTimePicker extends InputWidget
         ]);
 
         $pluginOptions = array_merge(['format' => $this->format], $this->pluginOptions);
-        $selector = Json::htmlEncode('#' . $wrapperId);
-        $config = Json::htmlEncode($pluginOptions);
+        $selector = Json::encode('#' . $wrapperId);
+        $config = Json::encode($pluginOptions);
         $view->registerJs("jQuery({$selector}).datetimepicker({$config});");
 
         return $html;
