@@ -36,4 +36,35 @@ final class DocumentationTest extends TestCase
         self::assertIsString($doc, $class . ' must have a class-level PHPDoc block.');
         self::assertNotSame('', trim((string) $doc), $class . ' PHPDoc must not be empty.');
     }
+
+    public function testDateTimePickerHardeningIsDocumentedWithoutDroppingRoadmapHistory(): void
+    {
+        $root = dirname(__DIR__);
+        $update = file_get_contents($root . '/UPDATE.md');
+        $changelog = file_get_contents($root . '/CHANGELOG.md');
+
+        foreach ([
+            '2026-08-23',
+            'DateTimePicker',
+            'BootstrapPluginAsset',
+            'Tempus Dominus',
+            'rendered-widget',
+        ] as $expected) {
+            self::assertStringContainsString($expected, $update, $expected);
+            self::assertStringContainsString($expected, $changelog, $expected);
+        }
+
+        foreach ([
+            'Possible future expansions',
+            'History / operations',
+            '2026-08-19',
+            'Visual regression / browser smoke testing',
+        ] as $expected) {
+            self::assertStringContainsString($expected, $update, $expected);
+        }
+
+        self::assertStringContainsString('## 2026-08-22', $changelog);
+        self::assertStringContainsString('## 2026-08-19', $changelog);
+        self::assertStringContainsString('## 2026-07-30', $changelog);
+    }
 }

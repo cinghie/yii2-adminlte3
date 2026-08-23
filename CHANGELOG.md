@@ -14,6 +14,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-08-23
+
+### Added
+
+- Added a Bootstrap 4/AdminLTE3 `DateTimePicker` widget backed by the Tempus Dominus copy already shipped with AdminLTE 3, with the calendar icon prepended on the left of the input.
+- Added rendered-widget regression coverage that verifies the actual HTML, asset registration and generated Tempus Dominus initializer in the headless Yii application.
+
+### Changed
+
+- `AdminLTEDateTimeAsset` and `AdminLTEDateTimeMinifyAsset` now depend on Yii Bootstrap 4 `BootstrapPluginAsset`, ensuring Bootstrap JavaScript is registered before Tempus Dominus instead of depending only on Bootstrap CSS.
+- The DateTimePicker chooses source/minified date-time assets consistently with `YII_DEBUG`, avoiding duplicate Tempus Dominus registrations in aggregate/minified host stacks.
+
+### Fixed
+
+- Fixed a silent Bootstrap 4 DateTimePicker failure where Tempus Dominus markup rendered correctly but the required Bootstrap JavaScript dependency was not guaranteed by the date-time asset graph.
+
+### Tests
+
+- `DateTimePickerTest` now validates both source/minified dependency graphs and smoke-renders the widget to assert its prepended icon, registered date-time asset and `.datetimepicker(...)` initializer.
+
 ## 2026-08-22
 
 ### Fixed

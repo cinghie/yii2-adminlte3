@@ -18,7 +18,7 @@ Urgency: **Critical** · **High** · **Medium** · **Low**.
 
 ## Priority list
 
-No open priority item is currently promoted above the detailed roadmap notes below.
+No open priority item is currently promoted above the detailed roadmap notes below. The 2026-08-23 Tempus Dominus fix still requires the normal CI matrix and a real Bootstrap 4 host interaction smoke before the next release.
 
 ---
 
@@ -34,7 +34,7 @@ No open priority item is currently promoted above the detailed roadmap notes bel
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| — | No known open correctness item from the widget-option/translation/additional-widget normalization pass | Shared `icon`, `url`, and `options` semantics now have canonical names with backward-compatible aliases; package-owned UI strings use the package translation category; Calendar and ChartJS keep browser-plugin responsibilities out of PHP rendering. | Keep aliases covered until a major release, make canonical properties win when both names are configured, and keep browser-library callbacks/application logic outside bounded server-side widget serializers. |
+| — | No known open correctness item from the widget-option/translation/additional-widget normalization pass | Shared `icon`, `url`, and `options` semantics now have canonical names with backward-compatible aliases; package-owned UI strings use the package translation category; Calendar, ChartJS and DateTimePicker keep browser-plugin responsibilities out of unrelated host views. | Keep aliases covered until a major release, make canonical properties win when both names are configured, keep browser-library callbacks/application logic outside bounded server-side widget serializers, and preserve explicit dependency ordering for optional plugins. |
 
 ---
 
@@ -42,7 +42,7 @@ No open priority item is currently promoted above the detailed roadmap notes bel
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| — | No known open medium-or-higher performance issue from the 2026-08-19 pass | Duplicate Bootstrap JS and redundant asset dependencies were removed, stable widget CSS moved to cacheable assets, Box reuses Card rendering, and optional AdminLTE plugin families including FullCalendar and Chart.js load only when requested. | Keep bundle-size, dependency-order, source/minified parity, optional-plugin isolation, and declared-file checks mandatory when asset definitions change. |
+| — | No known open medium-or-higher performance issue from the 2026-08-19 pass | Duplicate Bootstrap JS and redundant asset dependencies were removed, stable widget CSS moved to cacheable assets, Box reuses Card rendering, and optional AdminLTE plugin families including FullCalendar and Chart.js load only when requested. DateTimePicker selects one source/minified Tempus Dominus bundle according to `YII_DEBUG`. | Keep bundle-size, dependency-order, source/minified parity, optional-plugin isolation, and declared-file checks mandatory when asset definitions change. |
 
 ---
 
@@ -50,7 +50,8 @@ No open priority item is currently promoted above the detailed roadmap notes bel
 
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
-| — | No known open QA item from the current package-level hardening pass | Runtime coverage spans PHP 8.1–8.5, complex markup has DOM/XPath structural assertions, additional widgets have smoke/security/asset-isolation tests, static quality gates are blocking, and the PHP 8.1 prefer-lowest job now installs and executes the minimum declared dependency set successfully. | Keep the normal runtime, quality, asset, and lowest-dependency gates mandatory; preserve cross-version AdminLTE asset checks when dependencies change. |
+| **Low** | Real browser smoke for Tempus Dominus | PHPUnit now renders the DateTimePicker, asserts its asset registration and generated initializer, but a headless PHP test cannot prove third-party popup interaction in a real browser. | Keep the rendered-widget test blocking and include one Bootstrap 4/AdminLTE3 DateTimePicker open/select/clear smoke in release validation or the representative host application. |
+| — | No other known QA item from the current package-level hardening pass | Runtime coverage spans PHP 8.1–8.5, complex markup has DOM/XPath structural assertions, additional widgets have smoke/security/asset-isolation tests, static quality gates are blocking, and the PHP 8.1 prefer-lowest job now installs and executes the minimum declared dependency set successfully. | Keep the normal runtime, quality, asset, and lowest-dependency gates mandatory; preserve cross-version AdminLTE asset checks when dependencies change. |
 
 ---
 
@@ -59,6 +60,25 @@ No open priority item is currently promoted above the detailed roadmap notes bel
 | Urgency | Item | Why | Recommended action |
 |---------|------|-----|--------------------|
 | — | No known open release-hygiene documentation item | Stable installation guidance, public SemVer/deprecation policy, and the release checklist are now documented for the 1.0.0 line. | Keep `README.md`, `CHANGELOG.md`, `UPDATE.md`, `docs/VERSIONING.md`, and `RELEASE_CHECKLIST.md` synchronized when public compatibility or release procedures change. |
+
+---
+
+## Processed — 2026-08-23 Bootstrap 4 DateTimePicker hardening
+
+### Correctness & assets
+
+| Item | Result |
+|------|--------|
+| Tempus Dominus date-time bundle depended only on Bootstrap CSS | Both source and minified date-time bundles now depend on `yii\bootstrap4\BootstrapPluginAsset`, guaranteeing the Yii-managed Bootstrap JavaScript layer before Tempus Dominus. |
+| Host pages could mix source/minified DateTimePicker assets | The public `DateTimePicker` selects `AdminLTEDateTimeAsset` in debug mode and `AdminLTEDateTimeMinifyAsset` otherwise, matching the host's normal asset mode and avoiding duplicate plugin registration. |
+| Events needed a Bootstrap 4 date/time input without the Kartik/AdminLTE plugin-name collision | Added the package-owned Tempus Dominus `DateTimePicker` with a prepended Font Awesome calendar icon and bounded PHP configuration surface. |
+
+### Tests
+
+| Item | Result |
+|------|--------|
+| DateTimePicker coverage was source-string-only | `DateTimePickerTest` now also instantiates a real Yii `DynamicModel`, renders the widget, verifies the prepended markup, checks that the selected date-time AssetBundle is registered, and asserts that the `.datetimepicker(...)` initializer includes supplied plugin options. |
+| Source/minified dependency parity | Tests instantiate both date-time bundles and assert `BootstrapPluginAsset` plus Moment → Tempus Dominus ordering. |
 
 ---
 
@@ -199,8 +219,8 @@ These are **not current defects**. They are public-package evolution ideas that 
 
 ### 6. Visual regression / browser smoke testing
 
-- Add a small fixture application rendering representative widgets and layouts, including Calendar, ChartJS, and error pages.
-- Run browser smoke tests for collapse/dropdown/sidebar/calendar/chart behaviours and major responsive breakpoints.
+- Add a small fixture application rendering representative widgets and layouts, including Calendar, ChartJS, DateTimePicker and error pages.
+- Run browser smoke tests for collapse/dropdown/sidebar/calendar/chart/date-time-picker behaviours and major responsive breakpoints.
 - If visual snapshots are introduced, keep them intentionally small to avoid high-maintenance pixel noise.
 
 ### 7. Theme customization contract
@@ -217,6 +237,14 @@ These are **not current defects**. They are public-package evolution ideas that 
 ---
 
 ## History / operations
+
+### 2026-08-23
+
+- Added the public Bootstrap 4/AdminLTE3 Tempus Dominus `DateTimePicker` with a prepended icon for host modules that need a package-native date/time control.
+- Corrected both date-time asset bundles to require `BootstrapPluginAsset`, ensuring Bootstrap JavaScript is loaded before Tempus Dominus without reintroducing AdminLTE's duplicate Bootstrap bundle.
+- Made DateTimePicker source/minified registration follow `YII_DEBUG` so a host page gets one coherent plugin family.
+- Expanded `DateTimePickerTest` from source contracts to a rendered-widget smoke that checks markup, the actual registered date-time AssetBundle and generated initializer/plugin options.
+- A real browser/host smoke remains recommended before release because PHPUnit cannot exercise third-party popup interaction.
 
 ### 2026-08-19
 
