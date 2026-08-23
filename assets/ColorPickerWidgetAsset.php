@@ -9,7 +9,7 @@ use yii\web\AssetBundle;
  */
 class ColorPickerWidgetAsset extends AssetBundle
 {
-    public $sourcePath = '@cinghie/adminlte3/assets';
+    public $sourcePath = __DIR__;
 
     public $css = [
         'css/colorpicker.css',
@@ -20,4 +20,11 @@ class ColorPickerWidgetAsset extends AssetBundle
     ];
 
     public $appendTimestamp = true;
+
+    public $publishOptions = [
+        'only' => [
+            'css/colorpicker.css',
+            'js/colorpicker.js',
+        ],
+    ];
 }
