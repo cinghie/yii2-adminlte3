@@ -18,12 +18,18 @@ class DateTimePickerTest extends TestCase
 
         $this->assertStringContainsString('AdminLTEDateTimeAsset::class', $src);
         $this->assertStringContainsString('AdminLTEDateTimeMinifyAsset::class', $src);
+        $this->assertStringContainsString('isset($view->assetBundles[AdminLTEDateTimeAsset::class])', $src);
+        $this->assertStringContainsString('isset($view->assetBundles[AdminLTEDateTimeMinifyAsset::class])', $src);
         $this->assertStringContainsString('YII_DEBUG ?', $src);
         $this->assertStringContainsString("'class' => 'input-group-prepend'", $src);
         $this->assertStringContainsString("'data-toggle' => 'datetimepicker'", $src);
+        $this->assertStringContainsString("'data-cinghie-datetime-toggle' => '1'", $src);
         $this->assertStringContainsString("'data-target-input' => 'nearest'", $src);
+        $this->assertStringContainsString("'allowInputToggle' => true", $src);
+        $this->assertStringContainsString("picker.datetimepicker('show')", $src);
+        $this->assertStringContainsString("focus.cinghieDateTimePicker", $src);
         $this->assertStringContainsString("Json::encode('#' . \$wrapperId)", $src);
-        $this->assertStringContainsString('datetimepicker({$config})', $src);
+        $this->assertStringContainsString('bootstrap-datetimepicker-widget{z-index:1080!important}', $src);
     }
 
     public function testDateTimeAssetsLoadBootstrapJavascriptBeforeTempusDominus(): void
@@ -36,15 +42,17 @@ class DateTimePickerTest extends TestCase
         }
     }
 
-    public function testRenderedWidgetRegistersAssetAndInitializer(): void
+    public function testRenderedWidgetRegistersAssetAndExplicitInitializer(): void
     {
         $view = Yii::$app->getView();
         $originalAssetBundles = $view->assetBundles;
         $originalJs = $view->js;
+        $originalCss = $view->css;
 
         try {
             $view->assetBundles = [];
             $view->js = [];
+            $view->css = [];
 
             $model = new DynamicModel(['starts_at' => '2026-08-23 19:30:00']);
             $html = DateTimePicker::widget([
@@ -56,16 +64,52 @@ class DateTimePickerTest extends TestCase
 
             $this->assertStringContainsString('input-group-prepend', $html);
             $this->assertStringContainsString('data-toggle="datetimepicker"', $html);
+            $this->assertStringContainsString('data-cinghie-datetime-toggle="1"', $html);
             $this->assertStringContainsString('datetimepicker-input', $html);
             $this->assertStringContainsString('far fa-calendar-alt', $html);
 
             $expectedAsset = YII_DEBUG ? AdminLTEDateTimeAsset::class : AdminLTEDateTimeMinifyAsset::class;
             $this->assertArrayHasKey($expectedAsset, $view->assetBundles);
-            $this->assertStringContainsString('.datetimepicker(', json_encode($view->js));
-            $this->assertStringContainsString('useCurrent', json_encode($view->js));
+
+            $js = json_encode($view->js);
+            $this->assertStringContainsString('.datetimepicker(', $js);
+            $this->assertStringContainsString("datetimepicker('show')", $js);
+            $this->assertStringContainsString('allowInputToggle', $js);
+            $this->assertStringContainsString('useCurrent', $js);
+            $this->assertStringContainsString('cinghie-datetimepicker-ready', $js);
+
+            $css = json_encode($view->css);
+            $this->assertStringContainsString('bootstrap-datetimepicker-widget', $css);
+            $this->assertStringContainsString('z-index:1080', $css);
         } finally {
             $view->assetBundles = $originalAssetBundles;
             $view->js = $originalJs;
+            $view->css = $originalCss;
+        }
+    }
+
+    public function testWidgetReusesAlreadyRegisteredSourceAssetInsteadOfAddingMinifiedVariant(): void
+    {
+        $view = Yii::$app->getView();
+        $originalAssetBundles = $view->assetBundles;
+        $originalJs = $view->js;
+        $originalCss = $view->css;
+
+        try {
+            $view->assetBundles = [];
+            $view->js = [];
+            $view->css = [];
+            AdminLTEDateTimeAsset::register($view);
+
+            $model = new DynamicModel(['starts_at' => null]);
+            DateTimePicker::widget(['model' => $model, 'attribute' => 'starts_at']);
+
+            $this->assertArrayHasKey(AdminLTEDateTimeAsset::class, $view->assetBundles);
+            $this->assertArrayNotHasKey(AdminLTEDateTimeMinifyAsset::class, $view->assetBundles);
+        } finally {
+            $view->assetBundles = $originalAssetBundles;
+            $view->js = $originalJs;
+            $view->css = $originalCss;
         }
     }
 }
