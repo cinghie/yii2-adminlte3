@@ -20,10 +20,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 - Invoice widget accepts bank metadata (`invoiceBankName`, `invoiceBankIban`, `invoiceBankSwift`, `invoiceBankAbi`, `invoiceBankCab`) and renders encoded lines in the payment meta block.
 - Documented Invoice **display contract** (`docs/example_invoice.md`) plus generic `invoiceMeta` rows (`label` / `value` / optional safe `href`). Named `invoiceAccount` is rendered when set.
+- Italian `adminlte3` message catalog (`messages/it`, `messages/it-IT`).
 
 ### Changed
 
 - Invoice layout uses AdminLTE 3 spacing (`p-3 mb-3`, block meta/address lines, bank well in the totals column only, `btn-secondary` print). Empty sent/paid dates are omitted from meta.
+- Invoice header date uses AdminLTE `small.float-right`; line items follow left/center/right alignment; created/sent/paid dates remain in the meta column.
 - Invoice guide no longer describes feature-module wiring; hosts map their own models onto the contract.
 
 ## 2026-08-23

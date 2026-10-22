@@ -150,24 +150,21 @@ class Invoice extends Widget
      */
     protected function renderTitleRow()
     {
-        $brand = Html::tag(
-            'span',
-            $this->renderLogo() . Html::encode((string) $this->companyName),
-            ['class' => 'invoice-brand']
-        );
-
         $date = '';
         if ($this->isFilled($this->invoiceDate)) {
             $date = Html::tag(
                 'small',
                 Html::encode(Translation::t('Date') . ': ' . $this->invoiceDate),
-                ['class' => 'invoice-date']
+                ['class' => 'float-right']
             );
         }
 
         return '<div class="row"><div class="col-12">'
-            . Html::tag('h4', $brand . $date, ['class' => 'invoice-header'])
-            . '</div></div>';
+            . '<h4>'
+            . $this->renderLogo()
+            . Html::encode((string) $this->companyName)
+            . $date
+            . '</h4></div></div>';
     }
 
     /**
@@ -192,7 +189,7 @@ class Invoice extends Widget
 
         $url = $this->normalizeCompanyLogoUrl($logo);
 
-        return $url === null ? '<i class="fas fa-globe"></i> ' : Html::img($url, ['alt' => '']);
+        return $url === null ? '<i class="fas fa-globe"></i> ' : Html::img($url, ['alt' => '']) . ' ';
     }
 
     /**
@@ -593,10 +590,10 @@ class Invoice extends Widget
         $html = '<div class="row"><div class="col-12 table-responsive invoice-items"><table class="table table-striped">'
             . '<thead><tr>'
             . '<th class="text-center">' . Html::encode(Translation::t('Nr.')) . '</th>'
-            . '<th class="text-center">' . Html::encode(Translation::t('Name')) . '</th>'
-            . '<th class="text-center">' . Html::encode(Translation::t('Description')) . '</th>'
+            . '<th>' . Html::encode(Translation::t('Name')) . '</th>'
+            . '<th>' . Html::encode(Translation::t('Description')) . '</th>'
             . '<th class="text-center">' . Html::encode(Translation::t('Quantity')) . '</th>'
-            . '<th class="text-center">' . Html::encode(Translation::t('Partial price')) . '</th>'
+            . '<th class="text-right">' . Html::encode(Translation::t('Partial price')) . '</th>'
             . '</tr></thead><tbody>';
 
         $items = is_array($this->invoiceItems) ? $this->invoiceItems : [];
@@ -611,10 +608,10 @@ class Invoice extends Widget
                 $row = static::normalizeItem($item);
                 $html .= '<tr>'
                     . '<td class="text-center">' . Html::encode($row['nr']) . '</td>'
-                    . '<td class="text-center">' . Html::encode($row['name']) . '</td>'
-                    . '<td class="text-center">' . $this->formatItemDescription($row['description']) . '</td>'
+                    . '<td>' . Html::encode($row['name']) . '</td>'
+                    . '<td>' . $this->formatItemDescription($row['description']) . '</td>'
                     . '<td class="text-center">' . Html::encode($row['qty']) . '</td>'
-                    . '<td class="text-center">' . Html::encode($row['partial']) . '</td>'
+                    . '<td class="text-right">' . Html::encode($row['partial']) . '</td>'
                     . '</tr>';
             }
         }
@@ -703,8 +700,8 @@ class Invoice extends Widget
     {
         $left = '';
         if ($this->shouldShowBankInfo()) {
-            $left .= '<p class="lead">' . Html::encode(Translation::t('Bank')) . '</p>'
-                . '<div class="invoice-bank">'
+            $left .= '<p class="lead">' . Html::encode(Translation::t('Payment Methods')) . '</p>'
+                . '<div class="invoice-bank text-muted well well-sm shadow-none mt-2">'
                 . implode('', $this->renderBankInfoLines())
                 . '</div>';
         }
@@ -726,6 +723,7 @@ class Invoice extends Widget
         }
 
         $rows = '';
+        $firstAmount = true;
         foreach ([
             [$this->invoiceSubtotal, Html::encode(Translation::t('Subtotal'))],
             [$this->invoiceTax, $taxLabel],
@@ -733,7 +731,10 @@ class Invoice extends Widget
             [$this->invoiceTotal, Html::encode(Translation::t('Total'))],
         ] as $row) {
             if ($this->isFilled($row[0])) {
-                $rows .= '<tr><th>' . $row[1] . ':</th><td>' . Html::encode($row[0]) . '</td></tr>';
+                $thClass = $firstAmount ? ' class="w-50"' : '';
+                $firstAmount = false;
+                $rows .= '<tr><th' . $thClass . '>' . $row[1] . ':</th>'
+                    . '<td class="text-right">' . Html::encode($row[0]) . '</td></tr>';
             }
         }
 

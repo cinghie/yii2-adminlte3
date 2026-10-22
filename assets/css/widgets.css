@@ -167,34 +167,24 @@
   border: 1px solid #dee2e6;
 }
 
-.cinghie-invoice .invoice-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  margin: 0 0 1.5rem;
-  padding: 0 0 0.85rem;
+.cinghie-invoice > .row:first-child h4 {
+  overflow: hidden;
+  margin: 0 0 1.25rem;
+  padding: 0 0 0.75rem;
   border-bottom: 1px solid #dee2e6;
-  font-size: 1.5rem;
   font-weight: 400;
   line-height: 1.4;
 }
 
-.cinghie-invoice .invoice-header .invoice-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.cinghie-invoice .invoice-header .invoice-brand img {
+.cinghie-invoice > .row:first-child h4 img {
   max-height: 40px;
   width: auto;
+  margin-right: 0.35rem;
+  vertical-align: middle;
 }
 
-.cinghie-invoice .invoice-header .invoice-date {
-  margin-left: auto;
-  font-size: 0.95rem;
+.cinghie-invoice > .row:first-child h4 .float-right {
+  font-size: 1rem;
   font-weight: 400;
   color: #6c757d;
   white-space: nowrap;
@@ -257,11 +247,6 @@
 .cinghie-invoice .invoice-items .table,
 .cinghie-invoice .invoice-totals .table {
   margin-bottom: 0;
-}
-
-.cinghie-invoice .invoice-items .table th,
-.cinghie-invoice .invoice-items .table td {
-  text-align: center;
 }
 
 .cinghie-invoice .table th,

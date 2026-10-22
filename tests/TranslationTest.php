@@ -89,6 +89,20 @@ final class TranslationTest extends TestCase
         );
     }
 
+    public function testItalianCatalogMirrorsEnglishKeys(): void
+    {
+        $root = dirname(__DIR__) . '/messages';
+        $en = require $root . '/en-US/adminlte3.php';
+        $it = require $root . '/it/adminlte3.php';
+        $itIt = require $root . '/it-IT/adminlte3.php';
+
+        self::assertSame(array_keys($en), array_keys($it));
+        self::assertSame($it, $itIt);
+        self::assertSame('Data', $it['Date']);
+        self::assertSame('Data creazione', $it['Invoice created']);
+        self::assertSame('Stampa', $it['Print']);
+    }
+
     public function testTimelineLegacyDomainTranslationIsExplicitlyIsolated(): void
     {
         $source = file_get_contents(dirname(__DIR__) . '/widgets/Timeline.php');

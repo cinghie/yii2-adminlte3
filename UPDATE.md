@@ -69,7 +69,8 @@ No open priority item is currently promoted above the detailed roadmap notes bel
 |------|--------|
 | Invoice widget rejected host bank keys | **Processed** — public `invoiceBank*` properties; encoded meta lines; InvoiceSecurityTest coverage. |
 | Invoice contract + extra channel | **Processed** — `docs/example_invoice.md` names the display contract; `invoiceMeta` for leftover host lines; `invoiceAccount` rendered; no feature-module references in the guide. |
-| Invoice AdminLTE 3 spacing | **Processed** — `p-3 mb-3`, block meta/address, bank well in totals only (not duplicated in meta), `btn-secondary` print, omit empty sent/paid dates. |
+| Invoice AdminLTE 3 spacing | **Processed** — `p-3 mb-3`, header `small.float-right` date, created/sent/paid dates in meta, Payment Methods bank well in totals only, left/center/right item columns, `btn-secondary` print. |
+| Italian widget catalog | **Processed** — `messages/it/adminlte3.php` (and `it-IT` alias) covers package-owned Invoice/UI strings. |
 
 ---
 

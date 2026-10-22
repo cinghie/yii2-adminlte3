@@ -123,6 +123,19 @@ final class InvoiceSecurityTest extends HtmlDomTestCase
         self::assertStringContainsString('mb-3', $html);
     }
 
+    public function testHeaderDateUsesAdminLteFloatRight(): void
+    {
+        $html = Invoice::widget([
+            'companyName' => 'Acme Inc.',
+            'invoiceDate' => '2026-10-16',
+            'showActions' => false,
+        ]);
+
+        self::assertMatchesRegularExpression('/<small class="float-right">/', $html);
+        self::assertStringContainsString('Date: 2026-10-16', $html);
+        self::assertStringContainsString('Invoice created', $html);
+    }
+
     public function testInvoiceAccountAndMetaAreEncoded(): void
     {
         $html = Invoice::widget([
