@@ -63,6 +63,15 @@ No open priority item is currently promoted above the detailed roadmap notes bel
 
 ---
 
+## Processed — 2026-10-22 Invoice bank fields
+
+| Item | Result |
+|------|--------|
+| Invoice widget rejected host bank keys | **Processed** — public `invoiceBank*` properties; encoded meta lines; InvoiceSecurityTest coverage. |
+| Invoice contract + extra channel | **Processed** — `docs/example_invoice.md` names the display contract; `invoiceMeta` for leftover host lines; `invoiceAccount` rendered; no feature-module references in the guide. |
+
+---
+
 ## Processed — 2026-08-23 Bootstrap 4 reusable input widgets and DateTimePicker hardening
 
 ### Security, correctness & assets

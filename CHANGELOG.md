@@ -14,6 +14,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-22
+
+### Added
+
+- Invoice widget accepts bank metadata (`invoiceBankName`, `invoiceBankIban`, `invoiceBankSwift`, `invoiceBankAbi`, `invoiceBankCab`) and renders encoded lines in the payment meta block.
+- Documented Invoice **display contract** (`docs/example_invoice.md`) plus generic `invoiceMeta` rows (`label` / `value` / optional safe `href`). Named `invoiceAccount` is rendered when set.
+
+### Changed
+
+- Invoice guide no longer describes feature-module wiring; hosts map their own models onto the contract.
+
 ## 2026-08-23
 
 ### Added

@@ -63,6 +63,23 @@ final class DocumentationTest extends TestCase
         self::assertStringContainsString('## 2026-07-30', $changelog);
     }
 
+    public function testInvoiceContractIsDocumentedWithoutFeatureModules(): void
+    {
+        $root = dirname(__DIR__);
+        $guide = file_get_contents($root . '/docs/example_invoice.md');
+        $readme = file_get_contents($root . '/README.md');
+
+        self::assertIsString($guide);
+        self::assertStringContainsString('docs/example_invoice.md', $readme);
+        self::assertStringContainsString('display contract', $guide);
+        self::assertStringContainsString('invoiceMeta', $guide);
+        self::assertStringContainsString('invoiceBankIban', $guide);
+        self::assertStringContainsString('invoiceAccount', $guide);
+        self::assertStringNotContainsString('yii2-crm', $guide);
+        self::assertStringNotContainsString('gogocrm', strtolower($guide));
+        self::assertStringNotContainsString('cinghie\\crm', $guide);
+    }
+
     public function testReusableInputWidgetsAreLinkedAndExplainExternalAssets(): void
     {
         $root = dirname(__DIR__);

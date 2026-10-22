@@ -10,13 +10,28 @@ use yii\helpers\Html;
 /**
  * Renders an AdminLTE 3 / Bootstrap 4 invoice layout.
  *
+ * Public properties are the Invoice **display contract**: host applications map
+ * their own models onto these string/array keys. This widget has no dependency
+ * on feature modules. Unknown Yii widget keys still raise UnknownPropertyException;
+ * extra display rows belong in {@see $invoiceMeta}.
+ *
  * All visible values are encoded unless a method explicitly creates trusted
  * package markup. URLs are normalized before being emitted. The built-in print
  * action uses a data attribute handled by the package asset JavaScript instead
  * of an inline event handler, which improves Content Security Policy support.
+ *
+ * @see docs/example_invoice.md
  */
 class Invoice extends Widget
 {
+    /** @var int Maximum extra meta rows accepted from {@see $invoiceMeta}. */
+    public const META_MAX_ROWS = 30;
+
+    /** @var int Maximum encoded extra-meta label length. */
+    public const META_MAX_LABEL = 80;
+
+    /** @var int Maximum encoded extra-meta value length. */
+    public const META_MAX_VALUE = 500;
     /** @var string Company display name. */
     public $companyName = '';
 
@@ -73,6 +88,24 @@ class Invoice extends Widget
     public $invoiceNotes = '';
     public $invoicePaymentMethod = '';
     public $invoicePaymentMethodCode = '';
+
+    public $invoiceBankName = '';
+    public $invoiceBankIban = '';
+    public $invoiceBankSwift = '';
+    public $invoiceBankAbi = '';
+    public $invoiceBankCab = '';
+
+    /**
+     * Extra meta lines after the named contract fields.
+     *
+     * Each row is `['label' => string, 'value' => string, 'href' => ?string]`.
+     * Numeric `[label, value]` pairs are also accepted. Labels and values are
+     * HTML-encoded. Optional `href` is rendered only when it is a valid HTTP(S)
+     * or mailto target. Empty rows are skipped; at most {@see META_MAX_ROWS} apply.
+     *
+     * @var array<int, array<string|int, mixed>>
+     */
+    public $invoiceMeta = [];
 
     /** @var bool Whether print/PDF actions should be rendered. */
     public $showActions = true;
@@ -377,6 +410,7 @@ class Invoice extends Widget
         foreach ([
             'invoiceType' => 'Type',
             'invoiceOrderID' => 'Order ID',
+            'invoiceAccount' => 'Account',
             'invoicePaymentDue' => 'Payment Due',
         ] as $property => $label) {
             if ($this->isFilled($this->{$property})) {
@@ -401,7 +435,116 @@ class Invoice extends Widget
                 . Html::encode($method);
         }
 
+        foreach ($this->renderBankInfoLines() as $bankLine) {
+            $lines[] = $bankLine;
+        }
+
+        foreach ($this->renderInvoiceMetaLines() as $metaLine) {
+            $lines[] = $metaLine;
+        }
+
         return implode('<br>', $lines);
+    }
+
+    /**
+     * Bank details under payment method when at least one bank field is set.
+     *
+     * @return string[] HTML lines (already encoded)
+     */
+    protected function renderBankInfoLines(): array
+    {
+        if (!$this->shouldShowBankInfo()) {
+            return [];
+        }
+
+        $lines = [];
+        foreach ([
+            'invoiceBankName' => 'Bank',
+            'invoiceBankIban' => 'IBAN',
+            'invoiceBankSwift' => 'SWIFT/BIC',
+            'invoiceBankAbi' => 'ABI',
+            'invoiceBankCab' => 'CAB',
+        ] as $property => $label) {
+            if ($this->isFilled($this->{$property})) {
+                $lines[] = '<b>' . Html::encode(Translation::t($label)) . ':</b> '
+                    . Html::encode((string) $this->{$property});
+            }
+        }
+
+        return $lines;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function shouldShowBankInfo(): bool
+    {
+        return $this->isFilled($this->invoiceBankName)
+            || $this->isFilled($this->invoiceBankIban)
+            || $this->isFilled($this->invoiceBankSwift)
+            || $this->isFilled($this->invoiceBankAbi)
+            || $this->isFilled($this->invoiceBankCab);
+    }
+
+    /**
+     * Extra host-supplied meta rows ({@see $invoiceMeta}).
+     *
+     * @return string[] HTML lines (already encoded)
+     */
+    protected function renderInvoiceMetaLines(): array
+    {
+        $lines = [];
+        foreach ($this->normalizeInvoiceMeta() as $row) {
+            $lines[] = $this->extraLine($row['label'], $row['value'], $row['href']);
+        }
+
+        return $lines;
+    }
+
+    /**
+     * @return array<int, array{label: string, value: string, href: string|null}>
+     */
+    protected function normalizeInvoiceMeta(): array
+    {
+        if (!is_array($this->invoiceMeta)) {
+            return [];
+        }
+
+        $rows = [];
+        foreach ($this->invoiceMeta as $row) {
+            if (count($rows) >= self::META_MAX_ROWS) {
+                break;
+            }
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $label = trim((string) ($row['label'] ?? $row[0] ?? ''));
+            $value = trim((string) ($row['value'] ?? $row[1] ?? ''));
+            if ($label === '' || $value === '') {
+                continue;
+            }
+
+            $label = mb_substr($label, 0, self::META_MAX_LABEL);
+            $value = mb_substr($value, 0, self::META_MAX_VALUE);
+
+            $href = null;
+            $rawHref = $row['href'] ?? null;
+            if (is_string($rawHref) && $rawHref !== '') {
+                $href = SafeHtml::httpUrl($rawHref);
+                if ($href === null) {
+                    $href = SafeHtml::emailHref($rawHref);
+                }
+            }
+
+            $rows[] = [
+                'label' => $label,
+                'value' => $value,
+                'href' => $href,
+            ];
+        }
+
+        return $rows;
     }
 
     /**

@@ -99,4 +99,45 @@ final class InvoiceSecurityTest extends HtmlDomTestCase
         self::assertContains('noreferrer', $rel);
         self::assertSame('_blank', $link->getAttribute('target'));
     }
+
+    public function testBankFieldsRenderEncodedInMeta(): void
+    {
+        $html = Invoice::widget([
+            'invoicePaymentMethod' => 'Bonifico',
+            'invoicePaymentMethodCode' => 'MP05',
+            'invoiceBankName' => '<Bank>',
+            'invoiceBankIban' => 'IT60X0542811101000000123456',
+            'invoiceBankSwift' => 'BPMOIT22XXX',
+            'showActions' => false,
+        ]);
+
+        self::assertStringContainsString('&lt;Bank&gt;', $html);
+        self::assertStringNotContainsString('<Bank>', $html);
+        self::assertStringContainsString('IT60X0542811101000000123456', $html);
+        self::assertStringContainsString('BPMOIT22XXX', $html);
+        self::assertStringContainsString('Bonifico', $html);
+    }
+
+    public function testInvoiceAccountAndMetaAreEncoded(): void
+    {
+        $html = Invoice::widget([
+            'invoiceAccount' => '<Acme>',
+            'invoiceMeta' => [
+                ['label' => '<CIG>', 'value' => '<Z1>', 'href' => 'javascript:alert(1)'],
+                ['label' => 'CUP', 'value' => 'CUP-9', 'href' => 'https://example.com/cup'],
+                ['Skip empty', ''],
+            ],
+            'showActions' => false,
+        ]);
+
+        self::assertStringContainsString('&lt;Acme&gt;', $html);
+        self::assertStringContainsString('&lt;CIG&gt;', $html);
+        self::assertStringContainsString('&lt;Z1&gt;', $html);
+        self::assertStringNotContainsString('<Acme>', $html);
+        self::assertStringNotContainsString('<CIG>', $html);
+        self::assertSame(0, $this->xpath($html)->query("//*[@id='test-root']//a[starts-with(@href, 'javascript:')]")->length);
+        self::assertStringContainsString('CUP-9', $html);
+        $link = $this->one($this->xpath($html), "//*[@id='test-root']//a[@href='https://example.com/cup']");
+        self::assertSame('_blank', $link->getAttribute('target'));
+    }
 }

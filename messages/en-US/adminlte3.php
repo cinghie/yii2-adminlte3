@@ -1,7 +1,11 @@
 <?php
 
 return [
+    'ABI' => 'ABI',
+    'Account' => 'Account',
     'Amount Due' => 'Amount Due',
+    'Bank' => 'Bank',
+    'CAB' => 'CAB',
     'Card' => 'Card',
     'Collapse' => 'Collapse',
     'Dashboard' => 'Dashboard',
@@ -12,6 +16,7 @@ return [
     'From' => 'From',
     'Generate PDF' => 'Generate PDF',
     'Home' => 'Home',
+    'IBAN' => 'IBAN',
     'Invoice' => 'Invoice',
     'Invoice created' => 'Invoice created',
     'Invoice paid' => 'Invoice paid',
@@ -38,6 +43,7 @@ return [
     'Search' => 'Search',
     'Shipping' => 'Shipping',
     'Subtotal' => 'Subtotal',
+    'SWIFT/BIC' => 'SWIFT/BIC',
     'Tax' => 'Tax',
     'Tax Code' => 'Tax Code',
     'To' => 'To',
