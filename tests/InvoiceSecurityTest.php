@@ -116,6 +116,11 @@ final class InvoiceSecurityTest extends HtmlDomTestCase
         self::assertStringContainsString('IT60X0542811101000000123456', $html);
         self::assertStringContainsString('BPMOIT22XXX', $html);
         self::assertStringContainsString('Bonifico', $html);
+        self::assertStringContainsString('invoice-bank', $html);
+        self::assertSame(1, substr_count($html, 'invoice-bank'));
+        self::assertSame(1, substr_count($html, 'IT60X0542811101000000123456'));
+        self::assertStringContainsString('p-3', $html);
+        self::assertStringContainsString('mb-3', $html);
     }
 
     public function testInvoiceAccountAndMetaAreEncoded(): void

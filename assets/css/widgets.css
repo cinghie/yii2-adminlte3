@@ -165,8 +165,6 @@
   position: relative;
   background-color: #fff;
   border: 1px solid #dee2e6;
-  margin-bottom: 1rem;
-  padding: 1.75rem;
 }
 
 .cinghie-invoice .invoice-header {
@@ -218,14 +216,42 @@
   color: #6c757d;
 }
 
+.cinghie-invoice .invoice-col > strong {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
 .cinghie-invoice address {
   margin-bottom: 0;
   font-style: normal;
   line-height: 1.65;
 }
 
+.cinghie-invoice address > strong,
+.cinghie-invoice address > .invoice-extra {
+  display: block;
+}
+
 .cinghie-invoice .invoice-extra {
+  margin-top: 0.2rem;
   color: #495057;
+}
+
+.cinghie-invoice .invoice-summary {
+  margin-bottom: 1.5rem;
+}
+
+.cinghie-invoice .invoice-bank {
+  margin-bottom: 0.75rem;
+  padding: 0.85rem 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.25rem;
+  line-height: 1.65;
+}
+
+.cinghie-invoice .invoice-bank .invoice-extra:first-child {
+  margin-top: 0;
 }
 
 .cinghie-invoice .invoice-items .table,

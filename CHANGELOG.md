@@ -23,6 +23,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
+- Invoice layout uses AdminLTE 3 spacing (`p-3 mb-3`, block meta/address lines, bank well in the totals column only, `btn-secondary` print). Empty sent/paid dates are omitted from meta.
 - Invoice guide no longer describes feature-module wiring; hosts map their own models onto the contract.
 
 ## 2026-08-23

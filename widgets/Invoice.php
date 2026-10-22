@@ -131,7 +131,7 @@ class Invoice extends Widget
      */
     protected function renderInvoice()
     {
-        $html = Html::beginTag('div', ['class' => 'invoice cinghie-invoice']);
+        $html = Html::beginTag('div', ['class' => 'invoice p-3 mb-3 cinghie-invoice']);
         $html .= $this->renderTitleRow();
         $html .= $this->renderInfoRow();
         $html .= $this->renderItemsTable();
@@ -270,7 +270,7 @@ class Invoice extends Widget
      */
     protected function isFilled($value): bool
     {
-        return $value !== null && $value !== '';
+        return $value !== null && trim((string) $value) !== '';
     }
 
     /**
@@ -293,7 +293,7 @@ class Invoice extends Widget
             $content .= Html::encode($value);
         }
 
-        return '<span class="invoice-extra">' . $content . '</span>';
+        return '<div class="invoice-extra">' . $content . '</div>';
     }
 
     /**
@@ -354,7 +354,7 @@ class Invoice extends Widget
             if ($this->isFilled($value)) {
                 $parts[] = $field === 'name'
                     ? '<strong>' . Html::encode($value) . '</strong>'
-                    : Html::encode($value);
+                    : '<div class="invoice-extra">' . Html::encode($value) . '</div>';
             }
         }
 
@@ -391,7 +391,7 @@ class Invoice extends Widget
             );
         }
 
-        return implode('<br>', $parts);
+        return implode('', $parts);
     }
 
     /**
@@ -403,8 +403,7 @@ class Invoice extends Widget
     {
         $lines = [];
         if ($this->isFilled($this->invoiceNumber)) {
-            $lines[] = '<b>' . Html::encode(Translation::t('Invoice') . ' #' . $this->invoiceNumber) . '</b>';
-            $lines[] = '';
+            $lines[] = '<strong>' . Html::encode(Translation::t('Invoice') . ' #' . $this->invoiceNumber) . '</strong>';
         }
 
         foreach ([
@@ -414,36 +413,33 @@ class Invoice extends Widget
             'invoicePaymentDue' => 'Payment Due',
         ] as $property => $label) {
             if ($this->isFilled($this->{$property})) {
-                $lines[] = '<b>' . Html::encode(Translation::t($label)) . ':</b> '
-                    . Html::encode($this->{$property});
+                $lines[] = $this->extraLine(Translation::t($label), (string) $this->{$property});
             }
         }
 
-        $lines[] = '<b>' . Html::encode(Translation::t('Invoice created')) . ':</b> '
-            . Html::encode((string) $this->invoiceDate);
-        $lines[] = '<b>' . Html::encode(Translation::t('Invoice sent')) . ':</b> '
-            . Html::encode((string) $this->invoiceSent);
-        $lines[] = '<b>' . Html::encode(Translation::t('Invoice paid')) . ':</b> '
-            . Html::encode((string) $this->invoicePaid);
+        foreach ([
+            'invoiceDate' => 'Invoice created',
+            'invoiceSent' => 'Invoice sent',
+            'invoicePaid' => 'Invoice paid',
+        ] as $property => $label) {
+            if ($this->isFilled($this->{$property})) {
+                $lines[] = $this->extraLine(Translation::t($label), (string) $this->{$property});
+            }
+        }
 
         if ($this->isFilled($this->invoicePaymentMethod) || $this->isFilled($this->invoicePaymentMethodCode)) {
             $method = (string) $this->invoicePaymentMethod;
             if ($this->isFilled($this->invoicePaymentMethodCode)) {
                 $method .= ($method !== '' ? ' ' : '') . '(' . $this->invoicePaymentMethodCode . ')';
             }
-            $lines[] = '<b>' . Html::encode(Translation::t('Payment Method')) . ':</b> '
-                . Html::encode($method);
-        }
-
-        foreach ($this->renderBankInfoLines() as $bankLine) {
-            $lines[] = $bankLine;
+            $lines[] = $this->extraLine(Translation::t('Payment Method'), $method);
         }
 
         foreach ($this->renderInvoiceMetaLines() as $metaLine) {
             $lines[] = $metaLine;
         }
 
-        return implode('<br>', $lines);
+        return implode('', $lines);
     }
 
     /**
@@ -466,8 +462,7 @@ class Invoice extends Widget
             'invoiceBankCab' => 'CAB',
         ] as $property => $label) {
             if ($this->isFilled($this->{$property})) {
-                $lines[] = '<b>' . Html::encode(Translation::t($label)) . ':</b> '
-                    . Html::encode((string) $this->{$property});
+                $lines[] = $this->extraLine(Translation::t($label), (string) $this->{$property});
             }
         }
 
@@ -707,9 +702,11 @@ class Invoice extends Widget
     protected function renderTotalsRow()
     {
         $left = '';
-        if ($this->isFilled($this->invoicePaymentMethod)) {
-            $left .= '<p class="lead">' . Html::encode(Translation::t('Payment Methods')) . ':</p>'
-                . '<p>' . Html::encode($this->invoicePaymentMethod) . '</p>';
+        if ($this->shouldShowBankInfo()) {
+            $left .= '<p class="lead">' . Html::encode(Translation::t('Bank')) . '</p>'
+                . '<div class="invoice-bank">'
+                . implode('', $this->renderBankInfoLines())
+                . '</div>';
         }
         if ($this->isFilled($this->invoiceNotes)) {
             $left .= '<p class="text-muted invoice-notes">'
@@ -773,7 +770,7 @@ class Invoice extends Widget
      */
     protected function renderActionsRow()
     {
-        $printOptions = ['class' => 'btn btn-default'];
+        $printOptions = ['class' => 'btn btn-secondary'];
         if (!$this->isFilled($this->printUrl)) {
             $printUrl = '#';
             $printOptions['data-cinghie-action'] = 'print';
